@@ -104,8 +104,8 @@ npm run dev
 
 ### Environment Variables Required
 ```env
-DATABASE_URL="mongodb://localhost:27017/student-management"
-NEXTAUTH_URL="http://localhost:3000"
+DATABASE_URL="mongodb://..."
+NEXTAUTH_URL="https://..."
 NEXTAUTH_SECRET="your-secret-key"
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
@@ -218,39 +218,6 @@ erDiagram
 - 🔄 API response caching
 - 🔄 Bundle analysis and optimization
 
-## 🧪 Testing Strategy
-
-### Recommended Testing Stack
-- **Unit Tests**: Jest + React Testing Library
-- **E2E Tests**: Playwright or Cypress
-- **API Tests**: Supertest
-- **Database Tests**: Prisma test utilities
-
-## 🚀 Deployment Options
-
-### Recommended
-1. **Vercel** (easiest)
-2. **Railway** (good for full-stack)
-3. **Netlify** (alternative)
-
-### Database Options
-1. **MongoDB Atlas** (cloud MongoDB)
-2. **PlanetScale** (MySQL alternative)
-3. **Supabase** (PostgreSQL)
-
-## 📞 Support & Maintenance
-
-### Documentation
-- ✅ Comprehensive README
-- ✅ API documentation
-- ✅ Setup scripts
-- ✅ Code comments
-
-### Monitoring
-- 🔄 Error tracking (Sentry)
-- 🔄 Performance monitoring
-- 🔄 User analytics
-- 🔄 Database monitoring
 
 ---
 
