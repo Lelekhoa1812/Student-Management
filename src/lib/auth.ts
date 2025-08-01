@@ -15,14 +15,16 @@ export const authOptions: NextAuthOptions = {
     session: async ({ session, user }) => {
       if (session?.user && user) {
         session.user.id = user.id
-        session.user.role = user.role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        session.user.role = (user as any).role
       }
       return session
     },
     jwt: async ({ user, token }) => {
       if (user) {
         token.uid = user.id
-        token.role = user.role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        token.role = (user as any).role
       }
       return token
     },
