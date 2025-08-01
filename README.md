@@ -54,10 +54,10 @@ Tạo file `.env.local` và thêm các biến môi trường:
 
 ```env
 # Database
-DATABASE_URL="mongodb://localhost:27017/student-management"
+DATABASE_URL="mongodb://..."
 
 # NextAuth
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="https://..."
 NEXTAUTH_SECRET="your-secret-key-here"
 
 # Google OAuth (từ Google Cloud Console)
