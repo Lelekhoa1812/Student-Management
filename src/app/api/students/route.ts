@@ -1,14 +1,40 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import bcrypt from "bcryptjs"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, dob, address, phoneNumber, school, platformKnown, note } = body
+    const {
+      name,
+      gmail,
+      password,
+      dob,
+      address,
+      phoneNumber,
+      school,
+      platformKnown,
+      note
+    } = body
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 12)
+
+    // Create both User and Student records
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email: gmail,
+        password: hashedPassword,
+        role: "user", // Default to student role
+      },
+    })
 
     const student = await prisma.student.create({
       data: {
         name,
+        gmail,
+        password: hashedPassword,
         dob: new Date(dob),
         address,
         phoneNumber,
@@ -18,11 +44,16 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(student, { status: 201 })
+    return NextResponse.json({ 
+      success: true, 
+      message: "Tạo tài khoản thành công",
+      user: { id: user.id, name: user.name, email: user.email },
+      student: { id: student.id, name: student.name }
+    })
   } catch (error) {
     console.error("Error creating student:", error)
     return NextResponse.json(
-      { error: "Có lỗi xảy ra khi tạo học viên" },
+      { error: "Có lỗi xảy ra khi tạo tài khoản" },
       { status: 500 }
     )
   }
@@ -31,15 +62,10 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const students = await prisma.student.findMany({
-      include: {
-        exams: true,
-        registrations: true,
-      },
       orderBy: {
         createdAt: "desc",
       },
     })
-
     return NextResponse.json(students)
   } catch (error) {
     console.error("Error fetching students:", error)

@@ -44,6 +44,7 @@ model User {
   emailVerified DateTime?
   image         String?
   role          String    @default("user") // "user" (student) or "staff"
+  password      String?   // For email/password authentication
   accounts      Account[]
   sessions      Session[]
 }
@@ -60,6 +61,8 @@ model VerificationToken {
 model Student {
   id             String         @id @default(auto()) @map("_id") @db.ObjectId
   name           String
+  gmail          String         @unique
+  password       String
   dob            DateTime
   address        String
   phoneNumber    String

@@ -7,8 +7,8 @@ import { QueryProvider } from "@/components/providers/query-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Hệ thống Quản lý Học viên MPA",
-  description: "Hệ thống quản lý học viên và đăng ký khóa học MPA",
+  title: "Hệ thống Quản lý Học viên",
+  description: "Hệ thống quản lý học viên và đăng ký khóa học",
 };
 
 export default function RootLayout({

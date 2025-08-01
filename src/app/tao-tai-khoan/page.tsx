@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { UserPlus, ArrowLeft } from "lucide-react"
+import { UserPlus, ArrowLeft, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 
 export default function StudentRegistrationPage() {
@@ -14,6 +14,9 @@ export default function StudentRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
+    gmail: "",
+    password: "",
+    confirmPassword: "",
     dob: "",
     address: "",
     phoneNumber: "",
@@ -26,17 +29,27 @@ export default function StudentRegistrationPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    // Validate password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      alert("Mật khẩu xác nhận không khớp")
+      setIsLoading(false)
+      return
+    }
+
+    // Remove confirmPassword from the data to be sent
+    const { confirmPassword, ...dataToSend } = formData
+
     try {
       const response = await fetch("/api/students", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (response.ok) {
-        router.push("/thong-tin-hoc-vien")
+        router.push("/dang-nhap")
       } else {
         throw new Error("Có lỗi xảy ra")
       }
@@ -94,6 +107,57 @@ export default function StudentRegistrationPage() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="gmail">Gmail *</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="gmail"
+                      name="gmail"
+                      type="email"
+                      required
+                      value={formData.gmail}
+                      onChange={handleChange}
+                      placeholder="Nhập địa chỉ Gmail"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Mật khẩu *</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Nhập mật khẩu"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Xác nhận mật khẩu *</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Nhập lại mật khẩu"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="dob">Ngày sinh *</Label>
                   <Input
                     id="dob"
@@ -106,7 +170,7 @@ export default function StudentRegistrationPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Số điện thoại ba mẹ *</Label>
+                  <Label htmlFor="phoneNumber">Số điện thoại (hoặc của ba mẹ) *</Label>
                   <Input
                     id="phoneNumber"
                     name="phoneNumber"
@@ -127,7 +191,20 @@ export default function StudentRegistrationPage() {
                     required
                     value={formData.school}
                     onChange={handleChange}
-                    placeholder="Nhập tên trường"
+                    placeholder="Nhập tên trường đang theo học"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="platformKnown">Biết qua platform *</Label>
+                  <Input
+                    id="platformKnown"
+                    name="platformKnown"
+                    type="text"
+                    required
+                    value={formData.platformKnown}
+                    onChange={handleChange}
+                    placeholder="Facebook, Google, Bạn bè, v.v."
                   />
                 </div>
               </div>
@@ -142,19 +219,6 @@ export default function StudentRegistrationPage() {
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Nhập địa chỉ"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="platformKnown">Biết qua platform *</Label>
-                <Input
-                  id="platformKnown"
-                  name="platformKnown"
-                  type="text"
-                  required
-                  value={formData.platformKnown}
-                  onChange={handleChange}
-                  placeholder="Facebook, Google, Bạn bè, v.v."
                 />
               </div>
 

@@ -11,6 +11,7 @@ async function main() {
   await prisma.exam.deleteMany()
   await prisma.student.deleteMany()
   await prisma.staff.deleteMany()
+  await prisma.user.deleteMany()
 
   // Create level thresholds
   const levelThresholds = [
@@ -27,27 +28,29 @@ async function main() {
     })
   }
 
-  console.log('✅ Level thresholds created')
-
-  // Create sample students
+  // Create sample students with new fields
   const students = [
     {
-      name: 'Nguyễn Văn An',
+      name: 'Nguyễn Văn A',
+      gmail: 'nguyenvana@gmail.com',
+      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
       dob: new Date('2010-05-15'),
       address: '123 Đường ABC, Quận 1, TP.HCM',
       phoneNumber: '0901234567',
-      school: 'THCS ABC',
+      school: 'Trường Tiểu học ABC',
       platformKnown: 'Facebook',
       note: 'Học viên mới',
     },
     {
-      name: 'Trần Thị Bình',
+      name: 'Trần Thị B',
+      gmail: 'tranthib@gmail.com',
+      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
       dob: new Date('2012-08-20'),
-      address: '456 Đường XYZ, Quận 3, TP.HCM',
+      address: '456 Đường XYZ, Quận 2, TP.HCM',
       phoneNumber: '0909876543',
-      school: 'THCS XYZ',
+      school: 'Trường Tiểu học XYZ',
       platformKnown: 'Google',
-      note: 'Có kinh nghiệm học tiếng Anh',
+      note: 'Học viên cũ',
     },
   ]
 
@@ -57,29 +60,53 @@ async function main() {
     })
   }
 
-  console.log('✅ Sample students created')
-
   // Create sample staff
-  const staff = [
+  const staffMembers = [
     {
-      name: 'Lê Văn Cường',
-      email: 'cuong@mpa.edu.vn',
+      name: 'Lê Văn C',
+      email: 'levanc@example.com',
       phoneNumber: '0901111111',
     },
     {
-      name: 'Phạm Thị Dung',
-      email: 'dung@mpa.edu.vn',
+      name: 'Phạm Thị D',
+      email: 'phamthid@example.com',
       phoneNumber: '0902222222',
     },
   ]
 
-  for (const staffMember of staff) {
+  for (const staff of staffMembers) {
     await prisma.staff.create({
-      data: staffMember,
+      data: staff,
     })
   }
 
-  console.log('✅ Sample staff created')
+  // Create sample users for authentication
+  const users = [
+    {
+      name: 'Nguyễn Văn A',
+      email: 'nguyenvana@gmail.com',
+      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
+      role: 'user',
+    },
+    {
+      name: 'Trần Thị B',
+      email: 'tranthib@gmail.com',
+      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
+      role: 'user',
+    },
+    {
+      name: 'Lê Văn C',
+      email: 'levanc@example.com',
+      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
+      role: 'staff',
+    },
+  ]
+
+  for (const user of users) {
+    await prisma.user.create({
+      data: user,
+    })
+  }
 
   // Create sample exams
   const createdStudents = await prisma.student.findMany()
@@ -103,15 +130,13 @@ async function main() {
     })
   }
 
-  console.log('✅ Sample exams created')
-
   // Create sample registrations
   if (createdStudents.length > 0) {
     await prisma.registration.create({
       data: {
         studentId: createdStudents[0].id,
         levelName: 'B2',
-        amountPaid: 5000000,
+        amountPaid: 2000000,
         paid: true,
       },
     })
@@ -120,15 +145,13 @@ async function main() {
       data: {
         studentId: createdStudents[1].id,
         levelName: 'A2',
-        amountPaid: 4000000,
+        amountPaid: 1500000,
         paid: false,
       },
     })
   }
 
-  console.log('✅ Sample registrations created')
-
-  console.log('🎉 Database seeding completed!')
+  console.log('✅ Database seeded successfully!')
 }
 
 main()
