@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { CompanyImage } from "@/components/ui/company-image"
+import { Navbar } from "@/components/ui/navbar"
 import { CreditCard, ArrowLeft, CheckCircle } from "lucide-react"
 import Link from "next/link"
 
@@ -85,10 +87,12 @@ export default function CourseRegistrationPage() {
 
   if (registrationSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-        <div className="container mx-auto px-4 max-w-md">
-          <Card className="border-green-200 bg-green-50">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <Card className="max-w-md mx-auto border-green-200 bg-green-50">
             <CardHeader className="text-center">
+              <CompanyImage position="top" />
               <div className="mx-auto mb-4">
                 <CheckCircle className="w-16 h-16 text-green-600" />
               </div>
@@ -107,29 +111,25 @@ export default function CourseRegistrationPage() {
               </Link>
             </CardContent>
           </Card>
+          <CompanyImage position="bottom" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <div className="mb-6">
-          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Quay lại trang chủ
-          </Link>
-        </div>
-
-        <Card>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4">
-              <CreditCard className="w-12 h-12 text-orange-600" />
+            {/* <CompanyImage position="top" /> */}
+            <div className="flex items-center justify-center mb-4">
+              <CreditCard className="w-8 h-8 text-blue-600 mr-2" />
+              <CardTitle className="text-2xl font-bold text-blue-600">
+                Đăng ký khóa học
+              </CardTitle>
             </div>
-            <CardTitle className="text-2xl font-bold text-orange-600">
-              Đăng ký khóa học
-            </CardTitle>
             <CardDescription>
               Chọn level và thanh toán học phí
             </CardDescription>
@@ -137,61 +137,55 @@ export default function CourseRegistrationPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="level">Chọn level *</Label>
+                <Label htmlFor="level">Chọn level</Label>
                 <select
                   id="level"
                   value={selectedLevel}
                   onChange={(e) => setSelectedLevel(e.target.value)}
-                  required
                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
                 >
                   <option value="">Chọn level</option>
                   {levelThresholds.map((threshold) => (
                     <option key={threshold.id} value={threshold.level}>
-                      {threshold.level} ({threshold.minScore}-{threshold.maxScore} điểm)
+                      {threshold.level}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="amountPaid">Học phí (VND) *</Label>
+                <Label htmlFor="amount">Học phí (VNĐ)</Label>
                 <Input
-                  id="amountPaid"
+                  id="amount"
                   type="number"
                   min="0"
                   step="1000"
-                  required
                   value={amountPaid}
                   onChange={(e) => setAmountPaid(e.target.value)}
                   placeholder="Nhập số tiền học phí"
+                  required
                 />
               </div>
 
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  id="isPaid"
+                  id="paid"
                   checked={isPaid}
                   onChange={(e) => setIsPaid(e.target.checked)}
                   className="rounded border-gray-300"
                 />
-                <Label htmlFor="isPaid">Đã thanh toán</Label>
+                <Label htmlFor="paid">Đã thanh toán</Label>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-6">
-                <Link href="/">
-                  <Button type="button" variant="outline">
-                    Hủy
-                  </Button>
-                </Link>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Đang đăng ký..." : "Đăng ký khóa học"}
-                </Button>
-              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Đang đăng ký..." : "Đăng ký khóa học"}
+              </Button>
             </form>
           </CardContent>
         </Card>
+        <CompanyImage position="bottom" />
       </div>
     </div>
   )

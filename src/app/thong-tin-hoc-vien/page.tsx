@@ -170,7 +170,7 @@ export default function StudentInfoPage() {
       <div className="container mx-auto px-4 max-w-4xl py-8">
         <Card>
           <CardHeader className="text-center">
-            <CompanyImage position="top" />
+            {/* <CompanyImage position="top" /> */}
             <div className="flex items-center justify-center mb-4">
               <User className="w-8 h-8 text-blue-600 mr-2" />
               <CardTitle className="text-2xl font-bold text-blue-600">

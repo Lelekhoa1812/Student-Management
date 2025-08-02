@@ -1,0 +1,425 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { CompanyImage } from "@/components/ui/company-image"
+import { Navbar } from "@/components/ui/navbar"
+import { Users, Edit, Save, X, Filter, Calendar } from "lucide-react"
+import React from "react"
+
+interface Student {
+  id: string
+  name: string
+  gmail: string
+  dob: string
+  address: string
+  phoneNumber: string
+  school: string
+  platformKnown: string
+  note?: string
+  createdAt: string
+  examResult?: {
+    score: number
+    levelEstimate: string
+    examDate: string
+  }
+}
+
+interface LevelThreshold {
+  id: string
+  level: string
+  minScore: number
+  maxScore: number
+}
+
+export default function StudentManagementPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [students, setStudents] = useState<Student[]>([])
+  const [levelThresholds, setLevelThresholds] = useState<LevelThreshold[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [editingStudent, setEditingStudent] = useState<string | null>(null)
+  const [editedData, setEditedData] = useState<Partial<Student>>({})
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Filter states
+  const [examStatusFilter, setExamStatusFilter] = useState("all")
+  const [levelFilter, setLevelFilter] = useState("all")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+
+  useEffect(() => {
+    if (status === "loading") return
+
+    if (!session) {
+      router.push("/dang-nhap")
+      return
+    }
+
+    if (session.user?.role !== "staff") {
+      router.push("/")
+      return
+    }
+
+    fetchData()
+  }, [session, status, router])
+
+  const fetchData = async () => {
+    try {
+      // Fetch students
+      const studentsResponse = await fetch("/api/students")
+      if (studentsResponse.ok) {
+        const studentsData = await studentsResponse.json()
+        
+        // Fetch exam results for each student
+        const studentsWithExams = await Promise.all(
+          studentsData.map(async (student: Student) => {
+            const examResponse = await fetch(`/api/exams?email=${student.gmail}`)
+            if (examResponse.ok) {
+              const exams = await examResponse.json()
+              return {
+                ...student,
+                examResult: exams.length > 0 ? exams[exams.length - 1] : null
+              }
+            }
+            return student
+          })
+        )
+        
+        setStudents(studentsWithExams)
+      }
+
+      // Fetch level thresholds
+      const thresholdsResponse = await fetch("/api/level-thresholds")
+      if (thresholdsResponse.ok) {
+        const thresholdsData = await thresholdsResponse.json()
+        setLevelThresholds(thresholdsData)
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleEdit = (studentId: string) => {
+    const student = students.find(s => s.id === studentId)
+    if (student) {
+      setEditingStudent(studentId)
+      setEditedData({
+        examResult: student.examResult ? {
+          score: student.examResult.score,
+          levelEstimate: student.examResult.levelEstimate,
+          examDate: student.examResult.examDate
+        } : {
+          score: 0,
+          levelEstimate: "",
+          examDate: new Date().toISOString().split('T')[0]
+        }
+      })
+    }
+  }
+
+  const handleCancel = () => {
+    setEditingStudent(null)
+    setEditedData({})
+  }
+
+  const handleSave = async (studentId: string) => {
+    setIsSaving(true)
+    try {
+      const student = students.find(s => s.id === studentId)
+      if (!student) return
+
+      // Update exam result
+      if (editedData.examResult) {
+        const examData = {
+          score: editedData.examResult.score,
+          levelEstimate: editedData.examResult.levelEstimate,
+          examDate: editedData.examResult.examDate,
+          studentEmail: student.gmail
+        }
+
+        const response = await fetch("/api/exams", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(examData),
+        })
+
+        if (response.ok) {
+          // Refresh data
+          await fetchData()
+          setEditingStudent(null)
+          setEditedData({})
+        }
+      }
+    } catch (error) {
+      console.error("Error updating exam result:", error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const getLevelFromScore = (score: number) => {
+    const threshold = levelThresholds.find(
+      t => score >= t.minScore && score <= t.maxScore
+    )
+    return threshold ? threshold.level : "Chưa xác định"
+  }
+
+  const getExamStatus = (student: Student) => {
+    if (!student.examResult) return "Chưa đăng ký thi"
+    if (student.examResult.score > 0) return "Đã đăng ký thi"
+    return "Chưa có điểm"
+  }
+
+  const getStatusColor = (student: Student) => {
+    const status = getExamStatus(student)
+    if (status === "Chưa đăng ký thi" || status === "Chưa có điểm") {
+      return "bg-red-50 border-red-200"
+    }
+    return "bg-green-50 border-green-200"
+  }
+
+  const filteredStudents = students.filter(student => {
+    const examStatus = getExamStatus(student)
+    const level = student.examResult?.levelEstimate || ""
+    const registrationDate = new Date(student.createdAt)
+    
+    // Exam status filter
+    if (examStatusFilter !== "all" && examStatus !== examStatusFilter) {
+      return false
+    }
+    
+    // Level filter
+    if (levelFilter !== "all" && level !== levelFilter) {
+      return false
+    }
+    
+    // Date range filter
+    if (startDate && registrationDate < new Date(startDate)) {
+      return false
+    }
+    if (endDate && registrationDate > new Date(endDate)) {
+      return false
+    }
+    
+    return true
+  })
+
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-700">Đang tải...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardHeader className="text-center">
+            {/* <CompanyImage position="top" /> */}
+            <div className="flex items-center justify-center mb-4">
+              <Users className="w-8 h-8 text-blue-600 mr-2" />
+              <CardTitle className="text-2xl font-bold text-blue-600">
+                Quản lý học viên
+              </CardTitle>
+            </div>
+            <CardDescription>
+              Xem và quản lý thông tin học viên
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Filters */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Filter className="w-5 h-5 text-gray-600" />
+                <h3 className="font-semibold">Bộ lọc</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label>Trạng thái thi</Label>
+                  <select
+                    value={examStatusFilter}
+                    onChange={(e) => setExamStatusFilter(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="all">Tất cả</option>
+                    <option value="Đã đăng ký thi">Đã đăng ký thi</option>
+                    <option value="Chưa đăng ký thi">Chưa đăng ký thi</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Level</Label>
+                  <select
+                    value={levelFilter}
+                    onChange={(e) => setLevelFilter(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="all">Tất cả</option>
+                    {levelThresholds.map((threshold) => (
+                      <option key={threshold.id} value={threshold.level}>
+                        {threshold.level}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label>Từ ngày</Label>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Đến ngày</Label>
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Students Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 p-2 text-left">Họ tên</th>
+                    <th className="border border-gray-300 p-2 text-left">Email</th>
+                    <th className="border border-gray-300 p-2 text-left">SĐT</th>
+                    <th className="border border-gray-300 p-2 text-left">Điểm thi</th>
+                    <th className="border border-gray-300 p-2 text-left">Ngày thi</th>
+                    <th className="border border-gray-300 p-2 text-left">Level</th>
+                    <th className="border border-gray-300 p-2 text-left">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStudents.map((student) => (
+                    <tr key={student.id} className={getStatusColor(student)}>
+                      <td className="border border-gray-300 p-2">{student.name}</td>
+                      <td className="border border-gray-300 p-2">{student.gmail}</td>
+                      <td className="border border-gray-300 p-2">{student.phoneNumber}</td>
+                      <td className="border border-gray-300 p-2">
+                        {editingStudent === student.id ? (
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={editedData.examResult?.score || 0}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              examResult: {
+                                ...editedData.examResult!,
+                                score: parseFloat(e.target.value) || 0
+                              }
+                            })}
+                            className="w-20"
+                          />
+                        ) : (
+                          student.examResult?.score || "Chưa có"
+                        )}
+                      </td>
+                      <td className="border border-gray-300 p-2">
+                        {editingStudent === student.id ? (
+                          <Input
+                            type="date"
+                            value={editedData.examResult?.examDate || ""}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              examResult: {
+                                ...editedData.examResult!,
+                                examDate: e.target.value
+                              }
+                            })}
+                            className="w-32"
+                          />
+                        ) : (
+                          student.examResult?.examDate 
+                            ? new Date(student.examResult.examDate).toLocaleDateString('vi-VN')
+                            : "Chưa có"
+                        )}
+                      </td>
+                      <td className="border border-gray-300 p-2">
+                        {editingStudent === student.id ? (
+                          <select
+                            value={editedData.examResult?.levelEstimate || ""}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              examResult: {
+                                ...editedData.examResult!,
+                                levelEstimate: e.target.value
+                              }
+                            })}
+                            className="w-24 p-1 border rounded"
+                          >
+                            <option value="">Chọn level</option>
+                            {levelThresholds.map((threshold) => (
+                              <option key={threshold.id} value={threshold.level}>
+                                {threshold.level}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          student.examResult?.levelEstimate || "Chưa có"
+                        )}
+                      </td>
+                      <td className="border border-gray-300 p-2">
+                        {editingStudent === student.id ? (
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleSave(student.id)}
+                              disabled={isSaving}
+                            >
+                              <Save className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleCancel}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => handleEdit(student.id)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 text-sm text-gray-600">
+              Tổng số học viên: {filteredStudents.length}
+            </div>
+          </CardContent>
+        </Card>
+        {/* <CompanyImage position="bottom" /> */}
+      </div>
+    </div>
+  )
+} 

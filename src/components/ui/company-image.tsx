@@ -19,11 +19,11 @@ export function CompanyImage({ className, position = "top" }: CompanyImageProps)
           <Image
             src="/company.JPG"
             alt="Company Information"
-            width={300}
-            height={200}
+            width={400}
+            height={250}
             className="relative rounded-lg shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl object-cover max-w-full h-auto"
             style={{
-              maxWidth: 'min(300px, 90vw)',
+              maxWidth: 'min(400px, 95vw)',
               height: 'auto'
             }}
           />

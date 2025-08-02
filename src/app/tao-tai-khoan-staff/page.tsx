@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { UserPlus, ArrowLeft } from "lucide-react"
+import { CompanyImage } from "@/components/ui/company-image"
+import { Navbar } from "@/components/ui/navbar"
+import { UserPlus, ArrowLeft, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 export default function StaffRegistrationPage() {
@@ -32,7 +34,7 @@ export default function StaffRegistrationPage() {
       })
 
       if (response.ok) {
-        alert("Tạo tài khoản staff thành công!")
+        alert("Tạo tài khoản staff thành công! Vui lòng chờ xác minh từ quản trị viên.")
         router.push("/")
       } else {
         throw new Error("Có lỗi xảy ra")
@@ -53,31 +55,36 @@ export default function StaffRegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <div className="mb-6">
-          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Quay lại trang chủ
-          </Link>
-        </div>
-
-        <Card>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* <Navbar /> */}
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
+            {/* <CompanyImagew position="top" /> */}
             <div className="mx-auto mb-4">
               <UserPlus className="w-12 h-12 text-green-600" />
             </div>
             <CardTitle className="text-2xl font-bold text-green-600">
-              Tạo tài khoản Staff mới
+              Tạo tài khoản staff mới
             </CardTitle>
             <CardDescription>
               Tạo tài khoản cho nhân viên mới
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-blue-800 text-sm">
+                  <p className="font-medium mb-1">Lưu ý:</p>
+                  <p>Tài khoản staff sẽ cần được xác minh bởi quản trị viên trước khi có thể sử dụng đầy đủ chức năng.</p>
+                </div>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Họ và tên *</Label>
+                <Label htmlFor="name">Họ và tên</Label>
                 <Input
                   id="name"
                   name="name"
@@ -90,7 +97,7 @@ export default function StaffRegistrationPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -103,7 +110,7 @@ export default function StaffRegistrationPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Số điện thoại *</Label>
+                <Label htmlFor="phoneNumber">Số điện thoại</Label>
                 <Input
                   id="phoneNumber"
                   name="phoneNumber"
@@ -128,6 +135,7 @@ export default function StaffRegistrationPage() {
             </form>
           </CardContent>
         </Card>
+        {/* <CompanyImage position="bottom" /> */}
       </div>
     </div>
   )

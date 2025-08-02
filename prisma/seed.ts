@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -60,17 +61,20 @@ async function main() {
     })
   }
 
-  // Create sample staff
+  // Create sample staff with password
+  const hashedPassword = await bcrypt.hash('password123', 12)
   const staffMembers = [
     {
       name: 'Lê Văn C',
       email: 'levanc@example.com',
       phoneNumber: '0901111111',
+      password: hashedPassword,
     },
     {
       name: 'Phạm Thị D',
       email: 'phamthid@example.com',
       phoneNumber: '0902222222',
+      password: hashedPassword,
     },
   ]
 
@@ -116,16 +120,7 @@ async function main() {
         studentId: createdStudents[0].id,
         score: 75,
         levelEstimate: 'B2',
-        notes: 'Làm bài tốt',
-      },
-    })
-
-    await prisma.exam.create({
-      data: {
-        studentId: createdStudents[1].id,
-        score: 45,
-        levelEstimate: 'A2',
-        notes: 'Cần cải thiện',
+        notes: 'Bài thi tốt',
       },
     })
   }
@@ -136,17 +131,8 @@ async function main() {
       data: {
         studentId: createdStudents[0].id,
         levelName: 'B2',
-        amountPaid: 2000000,
+        amountPaid: 5000000,
         paid: true,
-      },
-    })
-
-    await prisma.registration.create({
-      data: {
-        studentId: createdStudents[1].id,
-        levelName: 'A2',
-        amountPaid: 1500000,
-        paid: false,
       },
     })
   }

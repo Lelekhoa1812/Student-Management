@@ -102,7 +102,7 @@ export default function StudentRegistrationPage() {
 
         <Card>
           <CardHeader className="text-center">
-            <CompanyImage position="top" />
+            {/* <CompanyImage position="top" /> */}
             <div className="mx-auto mb-4">
               <UserPlus className="w-12 h-12 text-blue-600" />
             </div>

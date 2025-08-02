@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import bcrypt from "bcryptjs"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { name, email, phoneNumber } = body
 
+    // Generate a default password
+    const defaultPassword = "password123"
+    const hashedPassword = await bcrypt.hash(defaultPassword, 12)
+
     const staff = await prisma.staff.create({
       data: {
         name,
         email,
         phoneNumber,
+        password: hashedPassword,
       },
     })
 
-    return NextResponse.json(staff, { status: 201 })
+    return NextResponse.json(staff)
   } catch (error) {
     console.error("Error creating staff:", error)
     return NextResponse.json(

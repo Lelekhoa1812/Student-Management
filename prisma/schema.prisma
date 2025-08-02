@@ -79,6 +79,7 @@ model Staff {
   name        String
   email       String   @unique
   phoneNumber String
+  password       String
   createdAt   DateTime @default(now())
 }
 
