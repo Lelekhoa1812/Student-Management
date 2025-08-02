@@ -12,7 +12,6 @@ async function main() {
   await prisma.exam.deleteMany()
   await prisma.student.deleteMany()
   await prisma.staff.deleteMany()
-  await prisma.user.deleteMany()
 
   // Create level thresholds
   const levelThresholds = [
@@ -81,34 +80,6 @@ async function main() {
   for (const staff of staffMembers) {
     await prisma.staff.create({
       data: staff,
-    })
-  }
-
-  // Create sample users for authentication
-  const users = [
-    {
-      name: 'Nguyễn Văn A',
-      email: 'nguyenvana@gmail.com',
-      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
-      role: 'user',
-    },
-    {
-      name: 'Trần Thị B',
-      email: 'tranthib@gmail.com',
-      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
-      role: 'user',
-    },
-    {
-      name: 'Lê Văn C',
-      email: 'levanc@example.com',
-      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5u.Ge', // "password123"
-      role: 'staff',
-    },
-  ]
-
-  for (const user of users) {
-    await prisma.user.create({
-      data: user,
     })
   }
 

@@ -21,33 +21,49 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
+        // Check in Student collection first
+        const student = await prisma.student.findUnique({
+          where: { gmail: credentials.email }
         })
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!user || !(user as any).password) {
-          return null
+        if (student) {
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            student.password
+          )
+
+          if (isPasswordValid) {
+            return {
+              id: student.id,
+              email: student.gmail,
+              name: student.name,
+              role: student.role,
+            }
+          }
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (user as any).password
-        )
+        // Check in Staff collection if not found in Student
+        const staff = await prisma.staff.findUnique({
+          where: { email: credentials.email }
+        })
 
-        if (!isPasswordValid) {
-          return null
+        if (staff) {
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            staff.password
+          )
+
+          if (isPasswordValid) {
+            return {
+              id: staff.id,
+              email: staff.email,
+              name: staff.name,
+              role: staff.role,
+            }
+          }
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        }
+        return null
       }
     })
   ],
@@ -56,20 +72,29 @@ export const authOptions: NextAuthOptions = {
       // Handle Google OAuth sign in
       if (account?.provider === "google" && profile?.email) {
         try {
-          // Check if user exists in database
-          const existingUser = await prisma.user.findUnique({
+          // Check if user exists in Student collection
+          const student = await prisma.student.findUnique({
+            where: { gmail: profile.email }
+          })
+
+          if (student) {
+            console.log("✅ Google OAuth: Existing student found, allowing sign in")
+            return true
+          }
+
+          // Check if user exists in Staff collection
+          const staff = await prisma.staff.findUnique({
             where: { email: profile.email }
           })
 
-          if (existingUser) {
-            // User exists, allow sign in
-            console.log("✅ Google OAuth: Existing user found, allowing sign in")
+          if (staff) {
+            console.log("✅ Google OAuth: Existing staff found, allowing sign in")
             return true
-          } else {
-            // User doesn't exist, redirect to registration
-            console.log("❌ Google OAuth: User not found, redirecting to registration")
-            return "/tao-tai-khoan?error=no-account&email=" + encodeURIComponent(profile.email)
           }
+
+          // User doesn't exist, redirect to registration
+          console.log("❌ Google OAuth: User not found, redirecting to registration")
+          return "/tao-tai-khoan?error=no-account&email=" + encodeURIComponent(profile.email)
         } catch (error) {
           console.error("Error checking user existence:", error)
           return false
@@ -81,8 +106,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ user, token }) {
       if (user) {
         token.uid = user.id
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        token.role = (user as any).role
+        token.role = user.role
       }
       return token
     },
@@ -90,8 +114,7 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         if (user) {
           session.user.id = user.id
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          session.user.role = (user as any).role
+          session.user.role = user.role
         } else if (token) {
           session.user.id = token.uid as string
           session.user.role = token.role as string

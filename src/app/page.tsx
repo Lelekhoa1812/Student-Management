@@ -86,23 +86,6 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-green-600" />
-                  Tạo tài khoản staff
-                </CardTitle>
-                <CardDescription>
-                  Tạo tài khoản nhân viên mới
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/tao-tai-khoan-staff">
-                  <Button className="w-full">Tạo tài khoản</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-600" />
                   Quản lý học viên
                 </CardTitle>
@@ -121,7 +104,7 @@ export default function HomePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-purple-600" />
-                  Quản lý level và lớp
+                  Quản lý lớp học
                 </CardTitle>
                 <CardDescription>
                   Quản lý cấp độ và phân lớp học viên
@@ -155,7 +138,7 @@ export default function HomePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-gray-600" />
-                  Cài đặt ngưỡng điểm
+                  Cài đặt level
                 </CardTitle>
                 <CardDescription>
                   Cấu hình ngưỡng điểm xếp lớp

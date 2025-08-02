@@ -9,10 +9,10 @@ export async function PUT(
     const { id } = await params
     console.log("=== UPDATE STUDENT START ===")
     console.log("Student ID:", id)
-    
+
     const body = await request.json()
     console.log("Update data:", { ...body, password: "[REDACTED]" })
-    
+
     const {
       name,
       dob,
@@ -35,7 +35,7 @@ export async function PUT(
     console.log("1. Updating student record...")
     // Update Student record
     const updatedStudent = await prisma.student.update({
-      where: { id },
+      where: { id: id },
       data: {
         name,
         dob: new Date(dob),
@@ -48,22 +48,12 @@ export async function PUT(
     })
     console.log("✅ Student updated:", updatedStudent.id)
 
-    console.log("2. Updating user record...")
-    // Update User record using the gmail from the updated student
-    const updatedUser = await prisma.user.update({
-      where: { email: (updatedStudent as any).gmail }, // eslint-disable-line @typescript-eslint/no-explicit-any
-      data: {
-        name,
-      },
-    })
-    console.log("✅ User updated:", updatedUser.id)
-
     console.log("=== UPDATE STUDENT SUCCESS ===")
     return NextResponse.json(updatedStudent)
   } catch (error) {
     console.error("=== UPDATE STUDENT ERROR ===")
     console.error("Error:", error)
-    
+
     if (error instanceof Error) {
       if (error.message.includes("Record to update not found")) {
         return NextResponse.json(
@@ -71,7 +61,7 @@ export async function PUT(
           { status: 404 }
         )
       }
-      
+
       if (error.message.includes("Invalid date")) {
         return NextResponse.json(
           { error: "Ngày sinh không hợp lệ" },
@@ -79,7 +69,7 @@ export async function PUT(
         )
       }
     }
-    
+
     return NextResponse.json(
       { error: "Có lỗi xảy ra khi cập nhật thông tin" },
       { status: 500 }
@@ -95,9 +85,9 @@ export async function GET(
     const { id } = await params
     console.log("=== GET STUDENT BY ID ===")
     console.log("Student ID:", id)
-    
+
     const student = await prisma.student.findUnique({
-      where: { id },
+      where: { id: id },
     })
 
     if (!student) {

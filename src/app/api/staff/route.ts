@@ -5,11 +5,10 @@ import bcrypt from "bcryptjs"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, phoneNumber } = body
+    const { name, email, phoneNumber, password } = body
 
-    // Generate a default password
-    const defaultPassword = "password123"
-    const hashedPassword = await bcrypt.hash(defaultPassword, 12)
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 12)
 
     const staff = await prisma.staff.create({
       data: {

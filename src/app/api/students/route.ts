@@ -6,14 +6,14 @@ export async function POST(request: NextRequest) {
   try {
     console.log("=== STUDENT CREATION START ===")
     console.log("1. Testing database connection...")
-    
+
     // Test database connection first
     await prisma.$connect()
     console.log("✅ Database connection successful")
-    
+
     const body = await request.json()
     console.log("2. Request body received:", { ...body, password: "[REDACTED]" })
-    
+
     const {
       name,
       gmail,
@@ -35,21 +35,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("3. Checking for existing users...")
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: gmail }
-    })
-
-    if (existingUser) {
-      console.log("❌ User already exists:", gmail)
-      return NextResponse.json(
-        { error: "Email đã được sử dụng" },
-        { status: 409 }
-      )
-    }
-
-    console.log("4. Checking for existing students...")
+    console.log("3. Checking for existing students...")
     // Check if student already exists
     const existingStudent = await prisma.student.findUnique({
       where: { gmail }
@@ -63,24 +49,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("5. Hashing password...")
+    console.log("4. Hashing password...")
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12)
     console.log("✅ Password hashed successfully")
 
-    console.log("6. Creating user record...")
-    // Create User record
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email: gmail,
-        password: hashedPassword,
-        role: "user", // Default to student role
-      },
-    })
-    console.log("✅ User created:", user.id)
-
-    console.log("7. Creating student record...")
+    console.log("5. Creating student record...")
     // Create Student record
     const student = await prisma.student.create({
       data: {
@@ -92,18 +66,17 @@ export async function POST(request: NextRequest) {
         phoneNumber,
         school,
         platformKnown,
-        note: note || null,
+        note,
       },
     })
     console.log("✅ Student created:", student.id)
 
     console.log("=== STUDENT CREATION SUCCESS ===")
-    console.log("Final result:", { userId: user.id, studentId: student.id })
+    console.log("Final result:", { studentId: student.id })
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Tạo tài khoản thành công",
-      user: { id: user.id, name: user.name, email: user.email },
       student: { id: student.id, name: student.name }
     })
   } catch (error) {
@@ -113,7 +86,7 @@ export async function POST(request: NextRequest) {
     console.error("Error message:", error instanceof Error ? error.message : "No message")
     console.error("Error stack:", error instanceof Error ? error.stack : "No stack")
     console.error("Full error object:", error)
-    
+
     // Handle specific Prisma errors
     if (error instanceof Error) {
       if (error.message.includes("Unique constraint")) {
@@ -123,7 +96,7 @@ export async function POST(request: NextRequest) {
           { status: 409 }
         )
       }
-      
+
       if (error.message.includes("Invalid date")) {
         console.log("❌ Invalid date error")
         return NextResponse.json(
@@ -131,7 +104,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      
+
       if (error.message.includes("connect")) {
         console.log("❌ Database connection error")
         return NextResponse.json(
@@ -140,7 +113,7 @@ export async function POST(request: NextRequest) {
         )
       }
     }
-    
+
     return NextResponse.json(
       { error: "Có lỗi xảy ra khi tạo tài khoản. Vui lòng thử lại." },
       { status: 500 }
@@ -157,22 +130,19 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    console.log("=== FETCHING STUDENTS ===")
-    
     await prisma.$connect()
     console.log("✅ Database connected for GET request")
-    
+
     const students = await prisma.student.findMany({
       orderBy: {
         createdAt: "desc",
       },
     })
-    
-    console.log(`✅ Found ${students.length} students`)
+
+    console.log("✅ Retrieved students:", students.length)
     return NextResponse.json(students)
   } catch (error) {
-    console.error("=== FETCH STUDENTS ERROR ===")
-    console.error("Error:", error)
+    console.error("❌ Error fetching students:", error)
     return NextResponse.json(
       { error: "Có lỗi xảy ra khi lấy danh sách học viên" },
       { status: 500 }
@@ -180,8 +150,9 @@ export async function GET() {
   } finally {
     try {
       await prisma.$disconnect()
+      console.log("✅ Database disconnected")
     } catch (e) {
-      console.error("Error disconnecting:", e)
+      console.error("❌ Error disconnecting:", e)
     }
   }
 } 
