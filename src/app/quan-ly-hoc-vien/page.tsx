@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, Edit, Save, X, Filter, Calendar } from "lucide-react"
+import { Users, Edit, Save, X, Filter } from "lucide-react"
 import React from "react"
 
 interface Student {
@@ -158,10 +158,14 @@ export default function StudentManagementPage() {
           await fetchData()
           setEditingStudent(null)
           setEditedData({})
+        } else {
+          const errorData = await response.json()
+          alert(`Lỗi khi lưu: ${errorData.error || 'Có lỗi xảy ra'}`)
         }
       }
     } catch (error) {
       console.error("Error updating exam result:", error)
+      alert("Có lỗi xảy ra khi lưu dữ liệu")
     } finally {
       setIsSaving(false)
     }
@@ -183,9 +187,9 @@ export default function StudentManagementPage() {
   const getStatusColor = (student: Student) => {
     const status = getExamStatus(student)
     if (status === "Chưa đăng ký thi" || status === "Chưa có điểm") {
-      return "bg-red-50 border-red-200"
+      return "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
     }
-    return "bg-green-50 border-green-200"
+    return "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
   }
 
   const filteredStudents = students.filter(student => {
@@ -216,25 +220,25 @@ export default function StudentManagementPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-700">Đang tải...</p>
+          <p className="mt-4 text-lg text-gray-700 dark:text-gray-300">Đang tải...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardHeader className="text-center">
-            {/* <CompanyImage position="top" /> */}
+            <CompanyImage position="top" />
             <div className="flex items-center justify-center mb-4">
-              <Users className="w-8 h-8 text-blue-600 mr-2" />
-              <CardTitle className="text-2xl font-bold text-blue-600">
+              <Users className="w-8 h-8 text-blue-600 dark:text-blue-400 mr-2" />
+              <CardTitle className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 Quản lý học viên
               </CardTitle>
             </div>
@@ -244,18 +248,18 @@ export default function StudentManagementPage() {
           </CardHeader>
           <CardContent>
             {/* Filters */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center gap-2 mb-4">
-                <Filter className="w-5 h-5 text-gray-600" />
-                <h3 className="font-semibold">Bộ lọc</h3>
+                <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Bộ lọc</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label>Trạng thái thi</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Trạng thái thi</Label>
                   <select
                     value={examStatusFilter}
                     onChange={(e) => setExamStatusFilter(e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                   >
                     <option value="all">Tất cả</option>
                     <option value="Đã đăng ký thi">Đã đăng ký thi</option>
@@ -263,11 +267,11 @@ export default function StudentManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <Label>Level</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Level</Label>
                   <select
                     value={levelFilter}
                     onChange={(e) => setLevelFilter(e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                   >
                     <option value="all">Tất cả</option>
                     {levelThresholds.map((threshold) => (
@@ -278,19 +282,21 @@ export default function StudentManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <Label>Từ ngày</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Từ ngày</Label>
                   <Input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
+                    className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                   />
                 </div>
                 <div>
-                  <Label>Đến ngày</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Đến ngày</Label>
                   <Input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
+                    className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                   />
                 </div>
               </div>
@@ -298,25 +304,25 @@ export default function StudentManagementPage() {
 
             {/* Students Table */}
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300">
+              <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 p-2 text-left">Họ tên</th>
-                    <th className="border border-gray-300 p-2 text-left">Email</th>
-                    <th className="border border-gray-300 p-2 text-left">SĐT</th>
-                    <th className="border border-gray-300 p-2 text-left">Điểm thi</th>
-                    <th className="border border-gray-300 p-2 text-left">Ngày thi</th>
-                    <th className="border border-gray-300 p-2 text-left">Level</th>
-                    <th className="border border-gray-300 p-2 text-left">Thao tác</th>
+                  <tr className="bg-gray-100 dark:bg-gray-800">
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Họ tên</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Email</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">SĐT</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Điểm thi</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ngày thi</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Level</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredStudents.map((student) => (
                     <tr key={student.id} className={getStatusColor(student)}>
-                      <td className="border border-gray-300 p-2">{student.name}</td>
-                      <td className="border border-gray-300 p-2">{student.gmail}</td>
-                      <td className="border border-gray-300 p-2">{student.phoneNumber}</td>
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 text-gray-900 dark:text-gray-100">{student.name}</td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 text-gray-900 dark:text-gray-100">{student.gmail}</td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 text-gray-900 dark:text-gray-100">{student.phoneNumber}</td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
                         {editingStudent === student.id ? (
                           <Input
                             type="number"
@@ -330,13 +336,15 @@ export default function StudentManagementPage() {
                                 score: parseFloat(e.target.value) || 0
                               }
                             })}
-                            className="w-20"
+                            className="w-20 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           />
                         ) : (
-                          student.examResult?.score || "Chưa có"
+                          <span className="text-gray-900 dark:text-gray-100">
+                            {student.examResult?.score || "Chưa có"}
+                          </span>
                         )}
                       </td>
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
                         {editingStudent === student.id ? (
                           <Input
                             type="date"
@@ -348,15 +356,18 @@ export default function StudentManagementPage() {
                                 examDate: e.target.value
                               }
                             })}
-                            className="w-32"
+                            className="w-40 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           />
                         ) : (
-                          student.examResult?.examDate 
-                            ? new Date(student.examResult.examDate).toLocaleDateString('vi-VN')
-                            : "Chưa có"
+                          <span className="text-gray-900 dark:text-gray-100">
+                            {student.examResult?.examDate 
+                              ? new Date(student.examResult.examDate).toLocaleDateString('vi-VN')
+                              : "Chưa có"
+                            }
+                          </span>
                         )}
                       </td>
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
                         {editingStudent === student.id ? (
                           <select
                             value={editedData.examResult?.levelEstimate || ""}
@@ -367,7 +378,7 @@ export default function StudentManagementPage() {
                                 levelEstimate: e.target.value
                               }
                             })}
-                            className="w-24 p-1 border rounded"
+                            className="w-24 p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           >
                             <option value="">Chọn level</option>
                             {levelThresholds.map((threshold) => (
@@ -377,10 +388,12 @@ export default function StudentManagementPage() {
                             ))}
                           </select>
                         ) : (
-                          student.examResult?.levelEstimate || "Chưa có"
+                          <span className="text-gray-900 dark:text-gray-100">
+                            {student.examResult?.levelEstimate || "Chưa có"}
+                          </span>
                         )}
                       </td>
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
                         {editingStudent === student.id ? (
                           <div className="flex space-x-2">
                             <Button
@@ -413,12 +426,12 @@ export default function StudentManagementPage() {
               </table>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               Tổng số học viên: {filteredStudents.length}
             </div>
           </CardContent>
         </Card>
-        {/* <CompanyImage position="bottom" /> */}
+        <CompanyImage position="bottom" />
       </div>
     </div>
   )
