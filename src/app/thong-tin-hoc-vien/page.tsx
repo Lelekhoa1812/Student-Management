@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
+import { Navbar } from "@/components/ui/navbar"
 import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, GraduationCap, Calendar, MessageSquare } from "lucide-react"
 import Link from "next/link"
 
@@ -149,34 +150,24 @@ export default function StudentInfoPage() {
 
   if (!studentData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <div className="mb-6">
-            <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Quay lại trang chủ
-            </Link>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Navbar />
+        <div className="container mx-auto px-4 max-w-2xl py-8">
           <Card>
             <CardContent className="text-center py-8">
               <p className="text-gray-600">Không tìm thấy thông tin học viên</p>
             </CardContent>
           </Card>
+          <CompanyImage position="bottom" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="mb-6">
-          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Quay lại trang chủ
-          </Link>
-        </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Navbar />
+      <div className="container mx-auto px-4 max-w-4xl py-8">
         <Card>
           <CardHeader className="text-center">
             <CompanyImage position="top" />
@@ -374,6 +365,7 @@ export default function StudentInfoPage() {
             )}
           </CardContent>
         </Card>
+        <CompanyImage position="bottom" />
       </div>
     </div>
   )

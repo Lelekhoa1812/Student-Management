@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { signIn, useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,16 +10,28 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { PasswordInput } from "@/components/ui/password-input"
 import { CompanyImage } from "@/components/ui/company-image"
-import { GraduationCap, Mail, ArrowLeft } from "lucide-react"
+import { GraduationCap, Mail, ArrowLeft, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
-export default function LoginPage() {
+function LoginForm() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Check for error parameters from Google OAuth
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    const emailParam = searchParams.get('email')
+    
+    if (errorParam === 'no-account' && emailParam) {
+      setError(`Tài khoản với email ${emailParam} chưa được tạo. Vui lòng đăng ký tài khoản trước.`)
+      setEmail(emailParam)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     if (session) {
@@ -86,6 +97,23 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-start space-x-2">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="text-red-600 text-sm">
+                {error}
+                {error.includes("chưa được tạo") && (
+                  <div className="mt-2">
+                    <Link href="/tao-tai-khoan" className="text-blue-600 hover:underline font-medium">
+                      Đăng ký tài khoản ngay
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Email/Password Login Form */}
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-2">
@@ -113,9 +141,6 @@ export default function LoginPage() {
                 required
               />
             </div>
-            {error && (
-              <div className="text-red-500 text-sm text-center">{error}</div>
-            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
@@ -175,5 +200,20 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-700">Đang tải...</p>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 } 

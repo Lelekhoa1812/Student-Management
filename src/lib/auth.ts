@@ -52,7 +52,41 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    session: async ({ session, user, token }) => {
+    async signIn({ user, account, profile }) {
+      // Handle Google OAuth sign in
+      if (account?.provider === "google" && profile?.email) {
+        try {
+          // Check if user exists in database
+          const existingUser = await prisma.user.findUnique({
+            where: { email: profile.email }
+          })
+
+          if (existingUser) {
+            // User exists, allow sign in
+            console.log("✅ Google OAuth: Existing user found, allowing sign in")
+            return true
+          } else {
+            // User doesn't exist, redirect to registration
+            console.log("❌ Google OAuth: User not found, redirecting to registration")
+            return "/tao-tai-khoan?error=no-account&email=" + encodeURIComponent(profile.email)
+          }
+        } catch (error) {
+          console.error("Error checking user existence:", error)
+          return false
+        }
+      }
+
+      return true
+    },
+    async jwt({ user, token }) {
+      if (user) {
+        token.uid = user.id
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        token.role = (user as any).role
+      }
+      return token
+    },
+    async session({ session, user, token }) {
       if (session?.user) {
         if (user) {
           session.user.id = user.id
@@ -64,14 +98,6 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return session
-    },
-    jwt: async ({ user, token }) => {
-      if (user) {
-        token.uid = user.id
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        token.role = (user as any).role
-      }
-      return token
     },
   },
   pages: {

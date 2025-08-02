@@ -9,26 +9,47 @@ interface CompanyImageProps {
 }
 
 export function CompanyImage({ className, position = "top" }: CompanyImageProps) {
+  if (position === "top") {
+    return (
+      <div className={cn(
+        "flex justify-center items-center mb-6",
+        className
+      )}>
+        <div className="relative group">
+          <Image
+            src="/company.JPG"
+            alt="Company Information"
+            width={300}
+            height={200}
+            className="relative rounded-lg shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl object-cover max-w-full h-auto"
+            style={{
+              maxWidth: 'min(300px, 90vw)',
+              height: 'auto'
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Footer version - full width
   return (
     <div className={cn(
-      "flex justify-center items-center",
-      position === "top" ? "mb-6" : "mt-8",
+      "w-full mt-8",
       className
     )}>
       <div className="relative group">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
         <Image
           src="/company.JPG"
           alt="Company Information"
-          width={300}
-          height={200}
-          className="relative rounded-lg transition-all duration-300 group-hover:scale-105 object-cover max-w-full h-auto"
+          width={1200}
+          height={400}
+          className="w-full h-auto object-cover transition-all duration-300 group-hover:scale-105 shadow-lg"
           style={{
-            maxWidth: 'min(300px, 90vw)',
-            height: 'auto'
+            minHeight: '200px',
+            maxHeight: '400px'
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
     </div>
   )

@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CompanyImage } from "@/components/ui/company-image"
-import { GraduationCap, Users, BookOpen, CreditCard, Settings, UserPlus } from "lucide-react"
+import { Navbar } from "@/components/ui/navbar"
+import { Users, BookOpen, CreditCard, Settings, UserPlus } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -26,7 +27,7 @@ export default function HomePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
+          <CardHeader className="text-center w-full">
             <CompanyImage position="top" />
             <CardTitle className="text-2xl font-bold text-blue-600">
               Hệ thống Quản lý Học viên
@@ -70,6 +71,7 @@ export default function HomePage() {
   if (isStaff) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-blue-600 mb-2">
@@ -176,6 +178,7 @@ export default function HomePage() {
   // Student dashboard
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-blue-600 mb-2">
@@ -187,23 +190,6 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-green-600" />
-                Tạo tài khoản mới
-              </CardTitle>
-              <CardDescription>
-                Đăng ký tài khoản học viên mới
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/tao-tai-khoan">
-                <Button className="w-full">Bắt đầu</Button>
-              </Link>
-            </CardContent>
-          </Card>
-
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

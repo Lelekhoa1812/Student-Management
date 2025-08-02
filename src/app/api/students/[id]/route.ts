@@ -3,11 +3,12 @@ import { prisma } from "@/lib/db"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     console.log("=== UPDATE STUDENT START ===")
-    console.log("Student ID:", params.id)
+    console.log("Student ID:", id)
     
     const body = await request.json()
     console.log("Update data:", { ...body, password: "[REDACTED]" })
@@ -34,7 +35,7 @@ export async function PUT(
     console.log("1. Updating student record...")
     // Update Student record
     const updatedStudent = await prisma.student.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         dob: new Date(dob),
@@ -50,7 +51,7 @@ export async function PUT(
     console.log("2. Updating user record...")
     // Update User record using the gmail from the updated student
     const updatedUser = await prisma.user.update({
-      where: { email: (updatedStudent as any).gmail },
+      where: { email: (updatedStudent as any).gmail }, // eslint-disable-line @typescript-eslint/no-explicit-any
       data: {
         name,
       },
@@ -88,14 +89,15 @@ export async function PUT(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     console.log("=== GET STUDENT BY ID ===")
-    console.log("Student ID:", params.id)
+    console.log("Student ID:", id)
     
     const student = await prisma.student.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!student) {
