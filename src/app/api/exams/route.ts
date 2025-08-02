@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const { score, levelEstimate, examDate, studentEmail, notes } = body
 
     // Validate required fields
-    if (!score || !levelEstimate || !examDate || !studentEmail) {
+    if (!score || !examDate || !studentEmail) {
       return NextResponse.json(
         { error: "Thiếu thông tin bắt buộc" },
         { status: 400 }
@@ -70,11 +70,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // If levelEstimate is empty, calculate it based on score
+    let finalLevelEstimate = levelEstimate
+    if (!finalLevelEstimate && score > 0) {
+      // Get level thresholds and calculate level
+      const thresholds = await prisma.levelThreshold.findMany({
+        orderBy: { minScore: 'asc' }
+      })
+      
+      const threshold = thresholds.find(
+        t => score >= t.minScore && score <= t.maxScore
+      )
+      
+      finalLevelEstimate = threshold ? threshold.level : "Chưa xác định"
+    }
+
     // Create exam record
     const exam = await prisma.exam.create({
       data: {
         score: parseFloat(score),
-        levelEstimate,
+        levelEstimate: finalLevelEstimate || "Chưa xác định",
         studentId: student.id,
         notes: notes || null
       }

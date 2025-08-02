@@ -138,9 +138,16 @@ export default function StudentManagementPage() {
 
       // Update exam result
       if (editedData.examResult) {
+        let levelEstimate = editedData.examResult.levelEstimate
+
+        // If level is empty, calculate it based on score using thresholds
+        if (!levelEstimate && editedData.examResult.score > 0) {
+          levelEstimate = getLevelFromScore(editedData.examResult.score)
+        }
+
         const examData = {
           score: editedData.examResult.score,
-          levelEstimate: editedData.examResult.levelEstimate,
+          levelEstimate: levelEstimate,
           examDate: editedData.examResult.examDate,
           studentEmail: student.gmail
         }
@@ -192,6 +199,22 @@ export default function StudentManagementPage() {
     return "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
   }
 
+  const getLevelDisplay = (student: Student) => {
+    if (!student.examResult?.levelEstimate) {
+      return "Chưa có"
+    }
+    
+    // Check if this level matches the auto-calculated level based on score
+    if (student.examResult.score > 0) {
+      const autoLevel = getLevelFromScore(student.examResult.score)
+      if (autoLevel === student.examResult.levelEstimate) {
+        return `${student.examResult.levelEstimate} (tự động)`
+      }
+    }
+    
+    return `${student.examResult.levelEstimate} (thủ công)`
+  }
+
   const filteredStudents = students.filter(student => {
     const examStatus = getExamStatus(student)
     const level = student.examResult?.levelEstimate || ""
@@ -235,7 +258,7 @@ export default function StudentManagementPage() {
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardHeader className="text-center">
-            <CompanyImage position="top" />
+            {/* <CompanyImage position="top" /> */}
             <div className="flex items-center justify-center mb-4">
               <Users className="w-8 h-8 text-blue-600 dark:text-blue-400 mr-2" />
               <CardTitle className="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -378,9 +401,9 @@ export default function StudentManagementPage() {
                                 levelEstimate: e.target.value
                               }
                             })}
-                            className="w-24 p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                            className="w-32 p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           >
-                            <option value="">Chọn level</option>
+                            <option value="">Tự động tính</option>
                             {levelThresholds.map((threshold) => (
                               <option key={threshold.id} value={threshold.level}>
                                 {threshold.level}
@@ -389,7 +412,7 @@ export default function StudentManagementPage() {
                           </select>
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">
-                            {student.examResult?.levelEstimate || "Chưa có"}
+                            {getLevelDisplay(student)}
                           </span>
                         )}
                       </td>
@@ -431,7 +454,7 @@ export default function StudentManagementPage() {
             </div>
           </CardContent>
         </Card>
-        <CompanyImage position="bottom" />
+        {/* <CompanyImage position="bottom" /> */}
       </div>
     </div>
   )
