@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { GraduationCap, Mail, Lock, ArrowLeft } from "lucide-react"
+import { PasswordInput } from "@/components/ui/password-input"
+import { CompanyImage } from "@/components/ui/company-image"
+import { GraduationCap, Mail, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export default function LoginPage() {
@@ -72,6 +74,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <CompanyImage position="top" />
           <div className="flex items-center justify-center mb-4">
             <GraduationCap className="w-8 h-8 text-blue-600 mr-2" />
             <CardTitle className="text-2xl font-bold text-blue-600">
@@ -102,18 +105,13 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Mật khẩu</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Nhập mật khẩu"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+              <PasswordInput
+                id="password"
+                placeholder="Nhập mật khẩu"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
             {error && (
               <div className="text-red-500 text-sm text-center">{error}</div>

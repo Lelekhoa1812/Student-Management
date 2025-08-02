@@ -1,9 +1,10 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { CompanyImage } from "@/components/ui/company-image"
 import { GraduationCap, Users, BookOpen, CreditCard, Settings, UserPlus } from "lucide-react"
 import Link from "next/link"
 
@@ -26,6 +27,7 @@ export default function HomePage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            <CompanyImage position="top" />
             <CardTitle className="text-2xl font-bold text-blue-600">
               Hệ thống Quản lý Học viên
             </CardTitle>
@@ -39,6 +41,18 @@ export default function HomePage() {
                 Đăng nhập
               </Button>
             </Link>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Hoặc
+                </span>
+              </div>
+            </div>
+
             <Link href="/tao-tai-khoan">
               <Button className="w-full" variant="outline" size="lg">
                 Đăng ký tài khoản
@@ -152,6 +166,8 @@ export default function HomePage() {
               </CardContent>
             </Card>
           </div>
+
+          <CompanyImage position="bottom" />
         </div>
       </div>
     )
@@ -239,6 +255,8 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </div>
+
+        <CompanyImage position="bottom" />
       </div>
     </div>
   )
