@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, Calendar, MessageSquare, Shield } from "lucide-react"
+import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, Calendar, MessageSquare, Users } from "lucide-react"
 import Link from "next/link"
 
 interface StaffData {
@@ -159,7 +159,7 @@ export default function StaffInfoPage() {
         <Card>
           <CardHeader className="text-center">
             <div className="flex items-center justify-center mb-4">
-              <Shield className="w-8 h-8 text-blue-600 mr-2" />
+              <Users className="w-8 h-8 text-blue-600 mr-2" />
               <CardTitle className="text-2xl font-bold text-blue-600">
                 Thông tin nhân viên
               </CardTitle>
@@ -219,7 +219,7 @@ export default function StaffInfoPage() {
               {/* Vai trò */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <Shield className="w-4 h-4" />
+                  <User className="w-4 h-4" />
                   Vai trò
                 </Label>
                 <div className="p-3 bg-gray-50 rounded-md">

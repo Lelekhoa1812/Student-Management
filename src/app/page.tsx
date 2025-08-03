@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, BookOpen, CreditCard, Settings, UserPlus, Shield } from "lucide-react"
+import { Users, BookOpen, CreditCard, Settings, UserPlus } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -86,7 +86,7 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-blue-600" />
+                  <UserPlus className="w-5 h-5 text-green-600" />
                   Quản lý học viên
                 </CardTitle>
                 <CardDescription>
@@ -154,7 +154,7 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-green-600" />
+                  <Users className="w-5 h-5 text-blue-600" />
                   Thông tin cá nhân
                 </CardTitle>
                 <CardDescription>

@@ -34,7 +34,7 @@ export function Navbar({ className }: NavbarProps) {
   const navigationLinks = isStaff 
     ? [
         { href: "/quan-ly-hoc-vien", label: "Quản lý học viên" },
-        { href: "/quan-ly-level", label: "Quản lý lớp học" },
+        { href: "/quan-ly-lop-hoc", label: "Quản lý lớp học" },
         { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
         { href: "/cai-dat-nguong", label: "Cài đặt level" },
       ]

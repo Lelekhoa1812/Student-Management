@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, Edit, Save, X, Filter, CheckCircle, AlertCircle } from "lucide-react"
+import { GraduationCap, Edit, Save, X, Filter, CheckCircle, AlertCircle } from "lucide-react"
 import React from "react"
 
 interface Student {
@@ -393,7 +393,7 @@ export default function StudentManagementPage() {
           <CardHeader className="text-center">
             {/* <CompanyImage position="top" /> */}
             <div className="flex items-center justify-center mb-4">
-              <Users className="w-8 h-8 text-blue-600 dark:text-blue-400 mr-2" />
+              <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400 mr-2" />
               <CardTitle className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 Quản lý học viên
               </CardTitle>
