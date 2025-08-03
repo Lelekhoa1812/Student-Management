@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const { score, levelEstimate, examDate, studentEmail, notes } = body
 
     // Validate required fields
-    if (!score || !examDate || !studentEmail) {
+    if (!score || !studentEmail) {
       return NextResponse.json(
         { error: "Thiếu thông tin bắt buộc" },
         { status: 400 }
@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
         data: {
           score: parseFloat(score),
           levelEstimate: finalLevelEstimate,
+          examDate: examDate ? new Date(examDate) : null,
           notes: notes || null
         }
       })
@@ -114,6 +115,7 @@ export async function POST(request: NextRequest) {
         data: {
           score: parseFloat(score),
           levelEstimate: finalLevelEstimate,
+          examDate: examDate ? new Date(examDate) : null,
           studentId: student.id,
           notes: notes || null
         }

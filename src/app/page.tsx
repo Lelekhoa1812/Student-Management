@@ -241,9 +241,8 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </div>
+        <CompanyImage position="bottom" />
       </div>
-
-      <CompanyImage position="bottom" />
     </div>
   )
 } 

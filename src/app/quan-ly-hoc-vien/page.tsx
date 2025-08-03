@@ -145,7 +145,9 @@ export default function StudentManagementPage() {
         examResult: student.examResult ? {
           score: student.examResult.score,
           levelEstimate: student.examResult.levelEstimate || "",
-          examDate: student.examResult.examDate || new Date().toISOString().split('T')[0]
+          examDate: student.examResult.examDate ? 
+            new Date(student.examResult.examDate).toISOString().split('T')[0] : 
+            new Date().toISOString().split('T')[0]
         } : {
           score: 0,
           levelEstimate: "",

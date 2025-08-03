@@ -85,6 +85,7 @@ model Exam {
   student        Student  @relation(fields: [studentId], references: [id])
   score          Float
   levelEstimate  String
+  examDate       DateTime?
   notes          String?
   createdAt      DateTime @default(now())
 }
