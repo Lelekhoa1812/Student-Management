@@ -21,7 +21,7 @@ export function CompanyImage({ className, position = "top" }: CompanyImageProps)
             alt="Company Information"
             width={400}
             height={250}
-            className="relative rounded-lg shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl object-cover max-w-full h-auto"
+            className="relative rounded-lg shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl object-contain max-w-full h-auto"
             style={{
               maxWidth: 'min(400px, 95vw)',
               height: 'auto'
@@ -44,7 +44,7 @@ export function CompanyImage({ className, position = "top" }: CompanyImageProps)
           alt="Company Information"
           width={1200}
           height={400}
-          className="w-full h-auto object-cover transition-all duration-300 group-hover:scale-105 shadow-lg"
+          className="w-full h-auto object-contain transition-all duration-300 group-hover:scale-105 shadow-lg"
           style={{
             minHeight: '200px',
             maxHeight: '400px'

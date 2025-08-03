@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, Edit, Save, X, Filter } from "lucide-react"
+import { Users, Edit, Save, X, Filter, CheckCircle, AlertCircle } from "lucide-react"
 import React from "react"
 
 interface Student {
@@ -23,11 +23,22 @@ interface Student {
   platformKnown: string
   note?: string
   createdAt: string
+  classId?: string
+  class?: Class
   examResult?: {
     score: number
     levelEstimate: string
     examDate: string
   }
+}
+
+interface Class {
+  id: string
+  name: string
+  level: string
+  maxStudents: number
+  teacherName?: string
+  isActive: boolean
 }
 
 interface LevelThreshold {
@@ -41,11 +52,17 @@ export default function StudentManagementPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [students, setStudents] = useState<Student[]>([])
+  const [classes, setClasses] = useState<Class[]>([])
   const [levelThresholds, setLevelThresholds] = useState<LevelThreshold[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [editingStudent, setEditingStudent] = useState<string | null>(null)
   const [editedData, setEditedData] = useState<Partial<Student>>({})
   const [isSaving, setIsSaving] = useState(false)
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info';
+    message: string;
+    show: boolean;
+  } | null>(null)
 
   // Filter states
   const [examStatusFilter, setExamStatusFilter] = useState("all")
@@ -71,7 +88,7 @@ export default function StudentManagementPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch students
+      // Fetch students with class information
       const studentsResponse = await fetch("/api/students")
       if (studentsResponse.ok) {
         const studentsData = await studentsResponse.json()
@@ -94,6 +111,13 @@ export default function StudentManagementPage() {
         setStudents(studentsWithExams)
       }
 
+      // Fetch classes
+      const classesResponse = await fetch("/api/classes?active=true")
+      if (classesResponse.ok) {
+        const classesData = await classesResponse.json()
+        setClasses(classesData)
+      }
+
       // Fetch level thresholds
       const thresholdsResponse = await fetch("/api/level-thresholds")
       if (thresholdsResponse.ok) {
@@ -112,10 +136,16 @@ export default function StudentManagementPage() {
     if (student) {
       setEditingStudent(studentId)
       setEditedData({
+        name: student.name,
+        phoneNumber: student.phoneNumber,
+        school: student.school,
+        platformKnown: student.platformKnown,
+        note: student.note,
+        classId: student.classId,
         examResult: student.examResult ? {
           score: student.examResult.score,
-          levelEstimate: student.examResult.levelEstimate,
-          examDate: student.examResult.examDate
+          levelEstimate: student.examResult.levelEstimate || "",
+          examDate: student.examResult.examDate || new Date().toISOString().split('T')[0]
         } : {
           score: 0,
           levelEstimate: "",
@@ -130,19 +160,86 @@ export default function StudentManagementPage() {
     setEditedData({})
   }
 
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message, show: true })
+    setTimeout(() => {
+      setNotification(null)
+    }, 3000)
+  }
+
   const handleSave = async (studentId: string) => {
     setIsSaving(true)
     try {
       const student = students.find(s => s.id === studentId)
       if (!student) return
 
+      console.log("Saving student:", studentId)
+      console.log("Edited data:", editedData)
+
+      let hasChanges = false
+
+      // Update student data if there are changes
+      const hasStudentChanges = editedData.name !== student.name ||
+        editedData.phoneNumber !== student.phoneNumber ||
+        editedData.school !== student.school ||
+        editedData.platformKnown !== student.platformKnown ||
+        editedData.note !== student.note ||
+        editedData.classId !== student.classId
+
+      console.log("Has student changes:", hasStudentChanges)
+
+      if (hasStudentChanges) {
+        
+        const studentUpdateData = {
+          name: editedData.name || student.name,
+          dob: student.dob,
+          address: editedData.address || student.address,
+          phoneNumber: editedData.phoneNumber || student.phoneNumber,
+          school: editedData.school || student.school,
+          platformKnown: editedData.platformKnown || student.platformKnown,
+          note: editedData.note !== undefined ? editedData.note : student.note,
+          classId: editedData.classId !== undefined ? editedData.classId : student.classId
+        }
+
+        console.log("Sending student update data:", studentUpdateData)
+
+        const studentResponse = await fetch(`/api/students/${studentId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(studentUpdateData),
+        })
+
+        if (studentResponse.ok) {
+          hasChanges = true
+          console.log("Student data updated successfully")
+        } else {
+          const errorData = await studentResponse.json()
+          showNotification('error', `Lỗi khi cập nhật thông tin học viên: ${errorData.error || 'Có lỗi xảy ra'}`)
+          return
+        }
+      }
+
       // Update exam result
-      if (editedData.examResult) {
+      const hasExamChanges = editedData.examResult && (
+        editedData.examResult.score !== (student.examResult?.score || 0) ||
+        editedData.examResult.examDate !== (student.examResult?.examDate || "") ||
+        editedData.examResult.levelEstimate !== (student.examResult?.levelEstimate || "")
+      )
+
+      console.log("Has exam changes:", hasExamChanges)
+
+      if (editedData.examResult && hasExamChanges) {
         let levelEstimate = editedData.examResult.levelEstimate
 
-        // If level is empty, calculate it based on score using thresholds
-        if (!levelEstimate && editedData.examResult.score > 0) {
-          levelEstimate = getLevelFromScore(editedData.examResult.score)
+        // Only auto-calculate if level is completely empty and score exists
+        if (!levelEstimate || levelEstimate.trim() === "") {
+          if (editedData.examResult.score > 0) {
+            levelEstimate = getLevelFromScore(editedData.examResult.score)
+          } else {
+            levelEstimate = "Chưa xác định"
+          }
         }
 
         const examData = {
@@ -152,7 +249,9 @@ export default function StudentManagementPage() {
           studentEmail: student.gmail
         }
 
-        const response = await fetch("/api/exams", {
+        console.log("Sending exam data:", examData)
+
+        const examResponse = await fetch("/api/exams", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -160,19 +259,28 @@ export default function StudentManagementPage() {
           body: JSON.stringify(examData),
         })
 
-        if (response.ok) {
-          // Refresh data
-          await fetchData()
-          setEditingStudent(null)
-          setEditedData({})
+        if (examResponse.ok) {
+          hasChanges = true
+          console.log("Exam data updated successfully")
         } else {
-          const errorData = await response.json()
-          alert(`Lỗi khi lưu: ${errorData.error || 'Có lỗi xảy ra'}`)
+          const errorData = await examResponse.json()
+          showNotification('error', `Lỗi khi lưu điểm thi: ${errorData.error || 'Có lỗi xảy ra'}`)
+          return
         }
       }
+
+      if (hasChanges) {
+        // Refresh data
+        await fetchData()
+        setEditingStudent(null)
+        setEditedData({})
+        showNotification('success', "Dữ liệu đã được lưu thành công!")
+      } else {
+        showNotification('info', "Không có thay đổi nào để lưu")
+      }
     } catch (error) {
-      console.error("Error updating exam result:", error)
-      alert("Có lỗi xảy ra khi lưu dữ liệu")
+      console.error("Error updating data:", error)
+      showNotification('error', "Có lỗi xảy ra khi lưu dữ liệu")
     } finally {
       setIsSaving(false)
     }
@@ -200,7 +308,7 @@ export default function StudentManagementPage() {
   }
 
   const getLevelDisplay = (student: Student) => {
-    if (!student.examResult?.levelEstimate) {
+    if (!student.examResult?.levelEstimate || student.examResult.levelEstimate === "Chưa xác định") {
       return "Chưa có"
     }
     
@@ -255,6 +363,29 @@ export default function StudentManagementPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
+      
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 ${
+          notification.type === 'success' 
+            ? 'bg-green-100 border border-green-400 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400'
+            : notification.type === 'error'
+            ? 'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400'
+            : 'bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400'
+        }`}>
+          <div className="flex items-center">
+            {notification.type === 'success' ? (
+              <CheckCircle className="w-5 h-5 mr-2" />
+            ) : notification.type === 'error' ? (
+              <AlertCircle className="w-5 h-5 mr-2" />
+            ) : (
+              <AlertCircle className="w-5 h-5 mr-2" />
+            )}
+            <span className="font-medium">{notification.message}</span>
+          </div>
+        </div>
+      )}
+      
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardHeader className="text-center">
@@ -333,6 +464,10 @@ export default function StudentManagementPage() {
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Họ tên</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Email</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">SĐT</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Trường học</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Nền tảng</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ghi chú</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Lớp học</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Điểm thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ngày thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Level</th>
@@ -342,9 +477,105 @@ export default function StudentManagementPage() {
                 <tbody>
                   {filteredStudents.map((student) => (
                     <tr key={student.id} className={getStatusColor(student)}>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2 text-gray-900 dark:text-gray-100">{student.name}</td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                        {editingStudent === student.id ? (
+                          <Input
+                            type="text"
+                            value={editedData.name || student.name}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              name: e.target.value
+                            })}
+                            className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-gray-100">{student.name}</span>
+                        )}
+                      </td>
                       <td className="border border-gray-300 dark:border-gray-600 p-2 text-gray-900 dark:text-gray-100">{student.gmail}</td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2 text-gray-900 dark:text-gray-100">{student.phoneNumber}</td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                        {editingStudent === student.id ? (
+                          <Input
+                            type="text"
+                            value={editedData.phoneNumber || student.phoneNumber}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              phoneNumber: e.target.value
+                            })}
+                            className="w-28 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-gray-100">{student.phoneNumber}</span>
+                        )}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                        {editingStudent === student.id ? (
+                          <Input
+                            type="text"
+                            value={editedData.school || student.school}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              school: e.target.value
+                            })}
+                            className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-gray-100">{student.school}</span>
+                        )}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                        {editingStudent === student.id ? (
+                          <Input
+                            type="text"
+                            value={editedData.platformKnown || student.platformKnown}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              platformKnown: e.target.value
+                            })}
+                            className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-gray-100">{student.platformKnown}</span>
+                        )}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                        {editingStudent === student.id ? (
+                          <Input
+                            type="text"
+                            value={editedData.note || student.note || ""}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              note: e.target.value
+                            })}
+                            className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-gray-100">{student.note || "Không có"}</span>
+                        )}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                        {editingStudent === student.id ? (
+                          <select
+                            value={editedData.classId || student.classId || ""}
+                            onChange={(e) => setEditedData({
+                              ...editedData,
+                              classId: e.target.value || undefined
+                            })}
+                            className="w-32 p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                          >
+                            <option value="">Không có lớp</option>
+                            {classes.map((cls) => (
+                              <option key={cls.id} value={cls.id}>
+                                {cls.name} ({cls.level})
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-gray-900 dark:text-gray-100">
+                            {student.class ? `${student.class.name} (${student.class.level})` : "Không có lớp"}
+                          </span>
+                        )}
+                      </td>
                       <td className="border border-gray-300 dark:border-gray-600 p-2">
                         {editingStudent === student.id ? (
                           <Input

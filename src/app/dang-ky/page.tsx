@@ -111,8 +111,9 @@ export default function CourseRegistrationPage() {
               </Link>
             </CardContent>
           </Card>
-          <CompanyImage position="bottom" />
         </div>
+
+        <CompanyImage position="bottom" />
       </div>
     )
   }
@@ -185,8 +186,9 @@ export default function CourseRegistrationPage() {
             </form>
           </CardContent>
         </Card>
-        <CompanyImage position="bottom" />
       </div>
+
+      <CompanyImage position="bottom" />
     </div>
   )
 } 

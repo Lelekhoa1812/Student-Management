@@ -58,6 +58,8 @@ model Student {
   platformKnown  String
   note           String?
   role           String         @default("user")
+  classId        String?        @db.ObjectId
+  class          Class?         @relation(fields: [classId], references: [id])
   createdAt      DateTime       @default(now())
   exams          Exam[]
   registrations  Registration[]
@@ -103,4 +105,15 @@ model LevelThreshold {
   minScore  Float
   maxScore  Float
   createdAt DateTime @default(now())
+}
+
+model Class {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  level        String
+  maxStudents  Int
+  teacherName  String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  students     Student[]
 } 

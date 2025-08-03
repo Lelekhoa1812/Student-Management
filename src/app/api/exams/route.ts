@@ -70,30 +70,55 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If levelEstimate is empty, calculate it based on score
+    // Determine the final level estimate
     let finalLevelEstimate = levelEstimate
-    if (!finalLevelEstimate && score > 0) {
-      // Get level thresholds and calculate level
-      const thresholds = await prisma.levelThreshold.findMany({
-        orderBy: { minScore: 'asc' }
-      })
-      
-      const threshold = thresholds.find(
-        t => score >= t.minScore && score <= t.maxScore
-      )
-      
-      finalLevelEstimate = threshold ? threshold.level : "Chưa xác định"
+    
+    // Only auto-calculate if level is completely empty or "Chưa xác định"
+    if (!finalLevelEstimate || finalLevelEstimate.trim() === "" || finalLevelEstimate === "Chưa xác định") {
+      if (score > 0) {
+        // Get level thresholds and calculate level
+        const thresholds = await prisma.levelThreshold.findMany({
+          orderBy: { minScore: 'asc' }
+        })
+        
+        const threshold = thresholds.find(
+          t => score >= t.minScore && score <= t.maxScore
+        )
+        
+        finalLevelEstimate = threshold ? threshold.level : "Chưa xác định"
+      } else {
+        finalLevelEstimate = "Chưa xác định"
+      }
     }
 
-    // Create exam record
-    const exam = await prisma.exam.create({
-      data: {
-        score: parseFloat(score),
-        levelEstimate: finalLevelEstimate || "Chưa xác định",
-        studentId: student.id,
-        notes: notes || null
-      }
+    // Check if there's an existing exam for this student
+    const existingExam = await prisma.exam.findFirst({
+      where: { studentId: student.id },
+      orderBy: { createdAt: 'desc' }
     })
+
+    let exam
+    if (existingExam) {
+      // Update existing exam
+      exam = await prisma.exam.update({
+        where: { id: existingExam.id },
+        data: {
+          score: parseFloat(score),
+          levelEstimate: finalLevelEstimate,
+          notes: notes || null
+        }
+      })
+    } else {
+      // Create new exam record
+      exam = await prisma.exam.create({
+        data: {
+          score: parseFloat(score),
+          levelEstimate: finalLevelEstimate,
+          studentId: student.id,
+          notes: notes || null
+        }
+      })
+    }
 
     return NextResponse.json(exam)
   } catch (error) {

@@ -20,7 +20,8 @@ export async function PUT(
       phoneNumber,
       school,
       platformKnown,
-      note
+      note,
+      classId
     } = body
 
     // Validate required fields
@@ -44,6 +45,7 @@ export async function PUT(
         school,
         platformKnown,
         note: note || null,
+        classId: classId || null,
       },
     })
     console.log("✅ Student updated:", updatedStudent.id)

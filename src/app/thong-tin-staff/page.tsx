@@ -9,31 +9,28 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, GraduationCap, Calendar, MessageSquare } from "lucide-react"
+import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, Calendar, MessageSquare, Shield } from "lucide-react"
 import Link from "next/link"
 
-interface StudentData {
+interface StaffData {
   id: string
   name: string
-  gmail: string
-  dob: string
-  address: string
+  email: string
   phoneNumber: string
-  school: string
-  platformKnown: string
-  note?: string
+  address: string
+  role: string
   createdAt: string
 }
 
-export default function StudentInfoPage() {
+export default function StaffInfoPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [studentData, setStudentData] = useState<StudentData | null>(null)
+  const [staffData, setStaffData] = useState<StaffData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
-  const [editedData, setEditedData] = useState<Partial<StudentData>>({})
+  const [editedData, setEditedData] = useState<Partial<StaffData>>({})
 
   useEffect(() => {
     if (status === "loading") return
@@ -43,37 +40,33 @@ export default function StudentInfoPage() {
       return
     }
 
-    if (session.user?.role === "staff") {
+    if (session.user?.role !== "staff") {
       router.push("/")
       return
     }
 
-    fetchStudentData()
+    fetchStaffData()
   }, [session, status, router])
 
-  const fetchStudentData = async () => {
+  const fetchStaffData = async () => {
     try {
-      const response = await fetch(`/api/students?email=${session?.user?.email}`)
+      const response = await fetch(`/api/staff?email=${session?.user?.email}`)
       if (response.ok) {
-        const students = await response.json()
-        if (students.length > 0) {
-          const student = students[0]
-          setStudentData(student)
+        const staff = await response.json()
+        if (staff) {
+          setStaffData(staff)
           setEditedData({
-            name: student.name,
-            gmail: student.gmail,
-            dob: new Date(student.dob).toISOString().split('T')[0],
-            address: student.address,
-            phoneNumber: student.phoneNumber,
-            school: student.school,
-            platformKnown: student.platformKnown,
-            note: student.note || ""
+            name: staff.name,
+            email: staff.email,
+            phoneNumber: staff.phoneNumber,
+            address: staff.address,
+            role: staff.role
           })
         }
       }
     } catch (error) {
-      console.error("Error fetching student data:", error)
-      setError("Không thể tải thông tin học viên")
+      console.error("Error fetching staff data:", error)
+      setError("Không thể tải thông tin nhân viên")
     } finally {
       setIsLoading(false)
     }
@@ -87,25 +80,22 @@ export default function StudentInfoPage() {
   const handleCancel = () => {
     setIsEditing(false)
     setEditedData({
-      name: studentData?.name || "",
-      gmail: studentData?.gmail || "",
-      dob: studentData?.dob ? new Date(studentData.dob).toISOString().split('T')[0] : "",
-      address: studentData?.address || "",
-      phoneNumber: studentData?.phoneNumber || "",
-      school: studentData?.school || "",
-      platformKnown: studentData?.platformKnown || "",
-      note: studentData?.note || ""
+      name: staffData?.name || "",
+      email: staffData?.email || "",
+      phoneNumber: staffData?.phoneNumber || "",
+      address: staffData?.address || "",
+      role: staffData?.role || ""
     })
   }
 
   const handleSave = async () => {
-    if (!studentData) return
+    if (!staffData) return
 
     setIsSaving(true)
     setError("")
 
     try {
-      const response = await fetch(`/api/students/${studentData.id}`, {
+      const response = await fetch(`/api/staff/${staffData.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -114,8 +104,8 @@ export default function StudentInfoPage() {
       })
 
       if (response.ok) {
-        const updatedStudent = await response.json()
-        setStudentData(updatedStudent)
+        const updatedStaff = await response.json()
+        setStaffData(updatedStaff)
         setIsEditing(false)
         alert("Cập nhật thông tin thành công!")
       } else {
@@ -123,14 +113,14 @@ export default function StudentInfoPage() {
         setError(errorData.error || "Có lỗi xảy ra khi cập nhật")
       }
     } catch (error) {
-      console.error("Error updating student:", error)
+      console.error("Error updating staff:", error)
       setError("Có lỗi xảy ra khi cập nhật thông tin")
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleChange = (field: keyof StudentData, value: string) => {
+  const handleChange = (field: keyof StaffData, value: string) => {
     setEditedData(prev => ({
       ...prev,
       [field]: value
@@ -148,19 +138,19 @@ export default function StudentInfoPage() {
     )
   }
 
-  if (!studentData) {
+  if (!staffData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <Navbar />
         <div className="container mx-auto px-4 max-w-2xl py-8">
           <Card>
             <CardContent className="text-center py-8">
-              <p className="text-gray-600">Không tìm thấy thông tin học viên</p>
+              <p className="text-gray-600">Không tìm thấy thông tin nhân viên</p>
             </CardContent>
           </Card>
         </div>
 
-        <CompanyImage position="bottom" />
+        {/* <CompanyImage position="bottom" /> */}
       </div>
     )
   }
@@ -171,11 +161,10 @@ export default function StudentInfoPage() {
       <div className="container mx-auto px-4 max-w-4xl py-8">
         <Card>
           <CardHeader className="text-center">
-            {/* <CompanyImage position="top" /> */}
             <div className="flex items-center justify-center mb-4">
-              <User className="w-8 h-8 text-blue-600 mr-2" />
+              <Shield className="w-8 h-8 text-blue-600 mr-2" />
               <CardTitle className="text-2xl font-bold text-blue-600">
-                Thông tin học viên
+                Thông tin nhân viên
               </CardTitle>
             </div>
             <CardDescription>
@@ -214,7 +203,7 @@ export default function StudentInfoPage() {
                   />
                 ) : (
                   <div className="p-3 bg-gray-50 rounded-md">
-                    {studentData.name}
+                    {staffData.name}
                   </div>
                 )}
               </div>
@@ -226,27 +215,19 @@ export default function StudentInfoPage() {
                   Email
                 </Label>
                 <div className="p-3 bg-gray-50 rounded-md">
-                  {studentData.gmail}
+                  {staffData.email}
                 </div>
               </div>
 
-              {/* Ngày sinh */}
+              {/* Vai trò */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Ngày sinh
+                  <Shield className="w-4 h-4" />
+                  Vai trò
                 </Label>
-                {isEditing ? (
-                  <Input
-                    type="date"
-                    value={editedData.dob || ""}
-                    onChange={(e) => handleChange("dob", e.target.value)}
-                  />
-                ) : (
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {new Date(studentData.dob).toLocaleDateString('vi-VN')}
-                  </div>
-                )}
+                <div className="p-3 bg-gray-50 rounded-md">
+                  {staffData.role === "staff" ? "Nhân viên" : staffData.role}
+                </div>
               </div>
 
               {/* Số điện thoại */}
@@ -263,45 +244,7 @@ export default function StudentInfoPage() {
                   />
                 ) : (
                   <div className="p-3 bg-gray-50 rounded-md">
-                    {studentData.phoneNumber}
-                  </div>
-                )}
-              </div>
-
-              {/* Trường học */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4" />
-                  Trường học
-                </Label>
-                {isEditing ? (
-                  <Input
-                    value={editedData.school || ""}
-                    onChange={(e) => handleChange("school", e.target.value)}
-                    placeholder="Nhập tên trường"
-                  />
-                ) : (
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {studentData.school}
-                  </div>
-                )}
-              </div>
-
-              {/* Platform */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  Biết qua kênh
-                </Label>
-                {isEditing ? (
-                  <Input
-                    value={editedData.platformKnown || ""}
-                    onChange={(e) => handleChange("platformKnown", e.target.value)}
-                    placeholder="Facebook, Google, Bạn bè, v.v."
-                  />
-                ) : (
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {studentData.platformKnown}
+                    {staffData.phoneNumber}
                   </div>
                 )}
               </div>
@@ -321,27 +264,20 @@ export default function StudentInfoPage() {
                 />
               ) : (
                 <div className="p-3 bg-gray-50 rounded-md">
-                  {studentData.address}
+                  {staffData.address}
                 </div>
               )}
             </div>
 
-            {/* Ghi chú */}
+            {/* Ngày tạo tài khoản */}
             <div className="mt-6 space-y-2">
-              <Label>Ghi chú</Label>
-              {isEditing ? (
-                <textarea
-                  value={editedData.note || ""}
-                  onChange={(e) => handleChange("note", e.target.value)}
-                  placeholder="Ghi chú thêm"
-                  rows={3}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              ) : (
-                <div className="p-3 bg-gray-50 rounded-md min-h-[60px]">
-                  {studentData.note || "Không có ghi chú"}
-                </div>
-              )}
+              <Label className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Ngày tạo tài khoản
+              </Label>
+              <div className="p-3 bg-gray-50 rounded-md">
+                {new Date(staffData.createdAt).toLocaleDateString('vi-VN')}
+              </div>
             </div>
 
             {/* Action buttons */}

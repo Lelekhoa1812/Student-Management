@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, BookOpen, CreditCard, Settings, UserPlus } from "lucide-react"
+import { Users, BookOpen, CreditCard, Settings, UserPlus, Shield } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -107,11 +107,11 @@ export default function HomePage() {
                   Quản lý lớp học
                 </CardTitle>
                 <CardDescription>
-                  Quản lý cấp độ và phân lớp học viên
+                  Tạo và quản lý các lớp học
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/quan-ly-level">
+                <Link href="/quan-ly-lop-hoc">
                   <Button className="w-full">Quản lý</Button>
                 </Link>
               </CardContent>
@@ -147,6 +147,23 @@ export default function HomePage() {
               <CardContent>
                 <Link href="/cai-dat-nguong">
                   <Button className="w-full">Cài đặt</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-green-600" />
+                  Thông tin cá nhân
+                </CardTitle>
+                <CardDescription>
+                  Xem và cập nhật thông tin nhân viên
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/thong-tin-staff">
+                  <Button className="w-full">Xem thông tin</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -197,12 +214,12 @@ export default function HomePage() {
                 Thi xếp lớp
               </CardTitle>
               <CardDescription>
-                Làm bài kiểm tra xếp lớp
+                Kiểm tra kết quả xếp lớp
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/thi-xep-lop">
-                <Button className="w-full">Bắt đầu thi</Button>
+                <Button className="w-full">Xem điểm thi</Button>
               </Link>
             </CardContent>
           </Card>
@@ -224,9 +241,9 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </div>
-
-        <CompanyImage position="bottom" />
       </div>
+
+      <CompanyImage position="bottom" />
     </div>
   )
 } 

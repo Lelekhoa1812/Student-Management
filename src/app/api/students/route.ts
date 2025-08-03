@@ -134,6 +134,9 @@ export async function GET() {
     console.log("✅ Database connected for GET request")
 
     const students = await prisma.student.findMany({
+      include: {
+        class: true
+      },
       orderBy: {
         createdAt: "desc",
       },

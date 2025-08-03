@@ -181,8 +181,9 @@ export default function StaffRegistrationPage() {
             </form>
           </CardContent>
         </Card>
-        <CompanyImage position="bottom" />
       </div>
+
+      {/* <CompanyImage position="bottom" /> */}
     </div>
   )
 } 
