@@ -101,7 +101,7 @@ export default function StudentManagementPage() {
               const exams = await examResponse.json()
               return {
                 ...student,
-                examResult: exams.length > 0 ? exams[exams.length - 1] : null
+                examResult: exams.length > 0 ? exams[0] : null
               }
             }
             return student

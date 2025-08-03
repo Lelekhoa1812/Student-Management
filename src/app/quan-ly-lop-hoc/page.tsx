@@ -343,9 +343,9 @@ export default function ClassManagementPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`${(isCreating || editingClass || selectedClass) ? 'grid grid-cols-1 lg:grid-cols-3 gap-6' : 'flex justify-center'}`}>
           {/* Left side - Class list */}
-          <div className="lg:col-span-2">
+          <div className={`${(isCreating || editingClass || selectedClass) ? 'lg:col-span-2' : 'w-full max-w-2xl'}`}>
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -432,7 +432,7 @@ export default function ClassManagementPage() {
           </div>
 
           {/* Right side - Class details and form */}
-          <div className="space-y-6">
+          <div className={`${(isCreating || editingClass || selectedClass) ? 'space-y-6' : 'hidden'}`}>
             {/* Create/Edit form */}
             {(isCreating || editingClass) && (
               <Card>

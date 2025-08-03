@@ -112,9 +112,9 @@ export default function CourseRegistrationPage() {
             </CardContent>
           </Card>
         </div>
-
-        <CompanyImage position="bottom" />
       </div>
+
+      <CompanyImage position="bottom" />
     )
   }
 
