@@ -17,7 +17,6 @@ interface StaffData {
   name: string
   email: string
   phoneNumber: string
-  address: string
   role: string
   createdAt: string
 }
@@ -59,7 +58,6 @@ export default function StaffInfoPage() {
             name: staff.name,
             email: staff.email,
             phoneNumber: staff.phoneNumber,
-            address: staff.address,
             role: staff.role
           })
         }
@@ -83,7 +81,6 @@ export default function StaffInfoPage() {
       name: staffData?.name || "",
       email: staffData?.email || "",
       phoneNumber: staffData?.phoneNumber || "",
-      address: staffData?.address || "",
       role: staffData?.role || ""
     })
   }
@@ -250,24 +247,7 @@ export default function StaffInfoPage() {
               </div>
             </div>
 
-            {/* Địa chỉ */}
-            <div className="mt-6 space-y-2">
-              <Label className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                Địa chỉ
-              </Label>
-              {isEditing ? (
-                <Input
-                  value={editedData.address || ""}
-                  onChange={(e) => handleChange("address", e.target.value)}
-                  placeholder="Nhập địa chỉ"
-                />
-              ) : (
-                <div className="p-3 bg-gray-50 rounded-md">
-                  {staffData.address}
-                </div>
-              )}
-            </div>
+
 
             {/* Ngày tạo tài khoản */}
             <div className="mt-6 space-y-2">
@@ -304,7 +284,7 @@ export default function StaffInfoPage() {
         </Card>
       </div>
 
-      <CompanyImage position="bottom" />
+      {/* <CompanyImage position="bottom" /> */}
     </div>
   )
 } 

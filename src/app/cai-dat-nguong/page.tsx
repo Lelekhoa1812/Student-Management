@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Navbar } from "@/components/ui/navbar"
 import { Settings, ArrowLeft, Plus, Edit, Trash2 } from "lucide-react"
 import Link from "next/link"
 
@@ -117,6 +118,7 @@ export default function LevelThresholdPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+      <Navbar />
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-6">
           <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">

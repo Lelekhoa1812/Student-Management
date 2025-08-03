@@ -78,7 +78,7 @@ export default function StaffRegistrationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="container mx-auto px-4 py-8">
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">

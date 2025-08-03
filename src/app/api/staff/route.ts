@@ -29,15 +29,35 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const staff = await prisma.staff.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-    })
+    const { searchParams } = new URL(request.url)
+    const email = searchParams.get('email')
 
-    return NextResponse.json(staff)
+    if (email) {
+      // Fetch specific staff member by email
+      const staff = await prisma.staff.findUnique({
+        where: { email }
+      })
+
+      if (!staff) {
+        return NextResponse.json(
+          { error: "Không tìm thấy nhân viên" },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json(staff)
+    } else {
+      // Fetch all staff members
+      const staff = await prisma.staff.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+
+      return NextResponse.json(staff)
+    }
   } catch (error) {
     console.error("Error fetching staff:", error)
     return NextResponse.json(
