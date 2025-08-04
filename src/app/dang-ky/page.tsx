@@ -103,6 +103,7 @@ export default function CourseRegistrationPage() {
       console.error("Error fetching data:", error)
       setError("Có lỗi xảy ra khi tải dữ liệu")
     } finally {
+      console.log("🔍 Debug - Setting isLoading to false")
       setIsLoading(false)
     }
   }, [session?.user?.email])
@@ -110,6 +111,10 @@ export default function CourseRegistrationPage() {
   useEffect(() => {
     console.log("🔍 Debug - Payments state updated:", payments.length, payments)
   }, [payments])
+
+  useEffect(() => {
+    console.log("🔍 Debug - isLoading state changed:", isLoading)
+  }, [isLoading])
 
   useEffect(() => {
     if (status === "loading") return
@@ -136,11 +141,10 @@ export default function CourseRegistrationPage() {
       return
     }
 
-    if (session.user.role !== "user") {
-      console.log("🔍 Debug - User role is not student:", session.user.role, "but allowing access for testing")
-      // Temporarily allow access for debugging
-      // router.push("/")
-      // return
+    if (session.user.role !== "student" && session.user.role !== "user") {
+      console.log("🔍 Debug - User role is not student or user:", session.user.role, "redirecting to dashboard")
+      router.push("/")
+      return
     }
 
     console.log("🔍 Debug - User is student, fetching data")
