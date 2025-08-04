@@ -1,3 +1,4 @@
+// src/app/api/classes/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 
@@ -19,6 +20,11 @@ export async function GET(request: NextRequest) {
               gmail: true,
               dob: true,
               phoneNumber: true
+            }
+          },
+          _count: {
+            select: {
+              students: true
             }
           }
         }

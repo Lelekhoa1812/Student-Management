@@ -147,9 +147,9 @@ export default function CourseRegistrationPage() {
       return
     }
 
-    console.log("🔍 Debug - User is student, fetching data")
+    console.log("🔍 Debug - User is authorized, fetching data")
     fetchStudentData()
-  }, [session, status, router, fetchStudentData])
+  }, [session, status, router])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -180,8 +180,8 @@ export default function CourseRegistrationPage() {
     )
   }
 
-  if (!session || session.user?.role !== "student") {
-    console.log("🔍 Debug - Session check failed:", { session: !!session, role: session?.user?.role })
+  if (!session || (session.user?.role !== "student" && session.user?.role !== "user")) {
+    console.log("🔍 Debug - Session check failed in render:", { session: !!session, role: session?.user?.role })
     return null
   }
 
