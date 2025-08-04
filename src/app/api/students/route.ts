@@ -159,7 +159,12 @@ export async function GET(request: NextRequest) {
     // Get all students
     const students = await prisma.student.findMany({
       include: {
-        class: true
+        class: true,
+        studentClasses: {
+          include: {
+            class: true
+          }
+        }
       },
       orderBy: {
         createdAt: "desc",

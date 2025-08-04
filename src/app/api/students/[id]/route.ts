@@ -2,11 +2,71 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Ensure database connection
+    await prisma.$connect()
+    
+    const { id } = await params
+    console.log("=== DELETE STUDENT START ===")
+    console.log("Student ID:", id)
+
+    // Check if student exists
+    const student = await prisma.student.findUnique({
+      where: { id },
+      include: {
+        class: true,
+        exams: true,
+        payments: true
+      }
+    })
+
+    if (!student) {
+      return NextResponse.json(
+        { error: "Không tìm thấy học viên" },
+        { status: 404 }
+      )
+    }
+
+    // Delete related records first (cascade delete will handle most, but we'll be explicit)
+    await prisma.payment.deleteMany({
+      where: { user_id: id }
+    })
+
+    await prisma.exam.deleteMany({
+      where: { studentId: id }
+    })
+
+    // Delete the student
+    await prisma.student.delete({
+      where: { id }
+    })
+
+    console.log("=== DELETE STUDENT SUCCESS ===")
+    return NextResponse.json({ message: "Xóa học viên thành công" })
+  } catch (error) {
+    console.error("=== DELETE STUDENT ERROR ===")
+    console.error("Error:", error)
+    return NextResponse.json(
+      { error: "Có lỗi xảy ra khi xóa học viên" },
+      { status: 500 }
+    )
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const { id } = await params
     console.log("=== UPDATE STUDENT START ===")
     console.log("Student ID:", id)
@@ -23,6 +83,7 @@ export async function PUT(
       platformKnown,
       note,
       classId,
+      classIds,
       password,
       currentPassword
     } = body
@@ -102,60 +163,138 @@ export async function PUT(
         classId: classId || null,
       },
       include: {
-        class: true
+        class: true,
+        studentClasses: {
+          include: {
+            class: true
+          }
+        }
       }
     })
     console.log("✅ Student updated:", updatedStudent.id)
 
-    // Handle payment creation/deletion based on class assignment changes
-    const oldClassId = currentStudent.classId
-    const newClassId = classId || null
-
-    if (oldClassId !== newClassId) {
-      console.log("2. Class assignment changed, handling payments...")
+    // Handle multiple class assignments
+    if (classIds && Array.isArray(classIds)) {
+      console.log("2. Handling multiple class assignments...")
       
-      // If student was removed from a class, delete existing payment
-      if (oldClassId) {
-        console.log("Deleting payment for old class:", oldClassId)
+      // Get current class assignments
+      const currentClassAssignments = await prisma.studentClass.findMany({
+        where: { studentId: id }
+      })
+      
+      const currentClassIds = currentClassAssignments.map(sc => sc.classId)
+      const newClassIds = classIds.filter(Boolean)
+      
+      // Remove classes that are no longer assigned
+      const classesToRemove = currentClassIds.filter(classId => !newClassIds.includes(classId))
+      if (classesToRemove.length > 0) {
+        console.log("Removing classes:", classesToRemove)
+        await prisma.studentClass.deleteMany({
+          where: {
+            studentId: id,
+            classId: { in: classesToRemove }
+          }
+        })
+        
+        // Delete payments for removed classes
         await prisma.payment.deleteMany({
           where: {
-            class_id: oldClassId,
-            user_id: id
+            user_id: id,
+            class_id: { in: classesToRemove }
           }
         })
       }
-
-      // If student was assigned to a new class, create payment
-      if (newClassId) {
-        console.log("Creating payment for new class:", newClassId)
+      
+      // Add new class assignments
+      const classesToAdd = newClassIds.filter(classId => !currentClassIds.includes(classId))
+      if (classesToAdd.length > 0) {
+        console.log("Adding classes:", classesToAdd)
         
-        // Get class details to check if it has payment_amount
-        const newClass = await prisma.class.findUnique({
-          where: { id: newClassId }
+        // Create StudentClass records
+        await prisma.studentClass.createMany({
+          data: classesToAdd.map(classId => ({
+            studentId: id,
+            classId
+          })),
+          skipDuplicates: true
         })
-
-        if (newClass && newClass.payment_amount) {
-          // Get the first available staff member for the placeholder
-          const firstStaff = await prisma.staff.findFirst()
+        
+        // Create payments for new classes
+        for (const classId of classesToAdd) {
+          const newClass = await prisma.class.findUnique({
+            where: { id: classId }
+          })
           
-          if (firstStaff) {
-            // Create payment record with actual staff ID
-            await prisma.payment.create({
-              data: {
-                class_id: newClassId,
-                payment_amount: newClass.payment_amount,
-                user_id: id,
-                payment_method: "Chưa thanh toán",
-                staff_assigned: firstStaff.id,
-                have_paid: false
-              }
-            })
-            console.log("✅ Payment created for new class with staff:", firstStaff.name)
-          } else {
-            console.log("⚠️ No staff members found, skipping payment creation")
+          if (newClass && newClass.payment_amount) {
+            const firstStaff = await prisma.staff.findFirst()
+            
+            if (firstStaff) {
+              await prisma.payment.create({
+                data: {
+                  class_id: classId,
+                  payment_amount: newClass.payment_amount,
+                  user_id: id,
+                  payment_method: "Chưa thanh toán",
+                  staff_assigned: firstStaff.id,
+                  have_paid: false
+                }
+              })
+              console.log("✅ Payment created for class:", newClass.name)
+            }
           }
-        } else {
-          console.log("⚠️ No payment_amount set for class, skipping payment creation")
+        }
+      }
+    } else if (classId !== undefined) {
+      // Handle single class assignment (backward compatibility)
+      const oldClassId = currentStudent.classId
+      const newClassId = classId || null
+
+      if (oldClassId !== newClassId) {
+        console.log("2. Single class assignment changed, handling payments...")
+        
+        // If student was removed from a class, delete existing payment
+        if (oldClassId) {
+          console.log("Deleting payment for old class:", oldClassId)
+          await prisma.payment.deleteMany({
+            where: {
+              class_id: oldClassId,
+              user_id: id
+            }
+          })
+        }
+
+        // If student was assigned to a new class, create payment
+        if (newClassId) {
+          console.log("Creating payment for new class:", newClassId)
+          
+          // Get class details to check if it has payment_amount
+          const newClass = await prisma.class.findUnique({
+            where: { id: newClassId }
+          })
+
+          if (newClass && newClass.payment_amount) {
+            // Get the first available staff member for the placeholder
+            const firstStaff = await prisma.staff.findFirst()
+            
+            if (firstStaff) {
+              // Create payment record with actual staff ID
+              await prisma.payment.create({
+                data: {
+                  class_id: newClassId,
+                  payment_amount: newClass.payment_amount,
+                  user_id: id,
+                  payment_method: "Chưa thanh toán",
+                  staff_assigned: firstStaff.id,
+                  have_paid: false
+                }
+              })
+              console.log("✅ Payment created for new class with staff:", firstStaff.name)
+            } else {
+              console.log("⚠️ No staff members found, skipping payment creation")
+            }
+          } else {
+            console.log("⚠️ No payment_amount set for class, skipping payment creation")
+          }
         }
       }
     }
@@ -186,6 +325,8 @@ export async function PUT(
       { error: "Có lỗi xảy ra khi cập nhật thông tin" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -194,6 +335,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const { id } = await params
     console.log("=== GET STUDENT BY ID ===")
     console.log("Student ID:", id)
@@ -219,5 +363,7 @@ export async function GET(
       { error: "Có lỗi xảy ra khi lấy thông tin học viên" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 } 

@@ -66,6 +66,7 @@ model Student {
   payments       Payment[]
   accounts       Account[]
   sessions       Session[]
+  studentClasses StudentClass[]
 }
 
 model Staff {
@@ -121,6 +122,7 @@ model Class {
   createdAt      DateTime  @default(now())
   students       Student[]
   payments       Payment[]
+  studentClasses StudentClass[]
 }
 
 model Payment {
@@ -136,4 +138,16 @@ model Payment {
   staff          Staff    @relation(fields: [staff_assigned], references: [id])
   have_paid      Boolean  @default(false)
   createdAt      DateTime @default(now())
+}
+
+// New model for many-to-many relationship
+model StudentClass {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  studentId String   @db.ObjectId
+  classId   String   @db.ObjectId
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, classId])
 } 

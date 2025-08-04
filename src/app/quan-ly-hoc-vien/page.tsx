@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { GraduationCap, Edit, Save, X, Filter, CheckCircle, AlertCircle } from "lucide-react"
+import { GraduationCap, Edit, Save, X, Filter, CheckCircle, AlertCircle, Trash2, AlertTriangle, Undo } from "lucide-react"
 import React from "react"
 
 interface Student {
@@ -25,6 +25,7 @@ interface Student {
   createdAt: string
   classId?: string
   class?: Class
+  classes?: Class[]
   examResult?: {
     score: number
     levelEstimate: string
@@ -56,13 +57,19 @@ export default function StudentManagementPage() {
   const [levelThresholds, setLevelThresholds] = useState<LevelThreshold[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [editingStudent, setEditingStudent] = useState<string | null>(null)
-  const [editedData, setEditedData] = useState<Partial<Student>>({})
+  const [editedData, setEditedData] = useState<Partial<Student> & { classIds?: string[] }>({})
   const [isSaving, setIsSaving] = useState(false)
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info';
     message: string;
     show: boolean;
   } | null>(null)
+
+  // Delete modal states
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null)
+  const [deletedStudent, setDeletedStudent] = useState<Student | null>(null)
+  const [showUndoSnackbar, setShowUndoSnackbar] = useState(false)
 
   // Filter states
   const [examStatusFilter, setExamStatusFilter] = useState("all")
@@ -169,6 +176,89 @@ export default function StudentManagementPage() {
     }, 3000)
   }
 
+  const handleDelete = (student: Student) => {
+    setStudentToDelete(student)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!studentToDelete) return
+
+    try {
+      const response = await fetch(`/api/students/${studentToDelete.id}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        // Store the deleted student for potential undo
+        setDeletedStudent(studentToDelete)
+        
+        // Remove from current list
+        setStudents(students.filter(s => s.id !== studentToDelete.id))
+        
+        // Show undo snackbar
+        setShowUndoSnackbar(true)
+        
+        // Auto-hide snackbar after 5 seconds
+        setTimeout(() => {
+          setShowUndoSnackbar(false)
+          setDeletedStudent(null)
+        }, 5000)
+        
+        showNotification('success', 'Xóa học viên thành công!')
+      } else {
+        const errorData = await response.json()
+        showNotification('error', errorData.error || 'Có lỗi xảy ra khi xóa học viên')
+      }
+    } catch (error) {
+      console.error("Error deleting student:", error)
+      showNotification('error', 'Có lỗi xảy ra khi xóa học viên')
+    } finally {
+      setShowDeleteConfirm(false)
+      setStudentToDelete(null)
+    }
+  }
+
+  const handleUndoDelete = async () => {
+    if (!deletedStudent) return
+
+    try {
+      const response = await fetch("/api/students", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: deletedStudent.name,
+          gmail: deletedStudent.gmail,
+          password: "tempPassword123", // Will need to be changed by student
+          dob: deletedStudent.dob,
+          address: deletedStudent.address,
+          phoneNumber: deletedStudent.phoneNumber,
+          school: deletedStudent.school,
+          platformKnown: deletedStudent.platformKnown,
+          note: deletedStudent.note
+        }),
+      })
+
+      if (response.ok) {
+        // Re-add to list
+        const restoredStudent = await response.json()
+        setStudents([...students, { ...deletedStudent, ...restoredStudent.student }])
+        showNotification('success', 'Khôi phục học viên thành công!')
+      } else {
+        const errorData = await response.json()
+        showNotification('error', errorData.error || 'Có lỗi xảy ra khi khôi phục học viên')
+      }
+    } catch (error) {
+      console.error("Error restoring student:", error)
+      showNotification('error', 'Có lỗi xảy ra khi khôi phục học viên')
+    } finally {
+      setShowUndoSnackbar(false)
+      setDeletedStudent(null)
+    }
+  }
+
   const handleSave = async (studentId: string) => {
     setIsSaving(true)
     try {
@@ -186,7 +276,7 @@ export default function StudentManagementPage() {
         editedData.school !== student.school ||
         editedData.platformKnown !== student.platformKnown ||
         editedData.note !== student.note ||
-        editedData.classId !== student.classId
+        JSON.stringify(editedData.classIds) !== JSON.stringify([student.classId].filter(Boolean))
 
       console.log("Has student changes:", hasStudentChanges)
 
@@ -200,7 +290,7 @@ export default function StudentManagementPage() {
           school: editedData.school || student.school,
           platformKnown: editedData.platformKnown || student.platformKnown,
           note: editedData.note !== undefined ? editedData.note : student.note,
-          classId: editedData.classId !== undefined ? editedData.classId : student.classId
+          classIds: editedData.classIds || [student.classId].filter(Boolean)
         }
 
         console.log("Sending student update data:", studentUpdateData)
@@ -557,24 +647,35 @@ export default function StudentManagementPage() {
                       </td>
                       <td className="border border-gray-300 dark:border-gray-600 p-2">
                         {editingStudent === student.id ? (
-                          <select
-                            value={editedData.classId || student.classId || ""}
-                            onChange={(e) => setEditedData({
-                              ...editedData,
-                              classId: e.target.value || undefined
-                            })}
-                            className="w-32 p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-                          >
-                            <option value="">Không có lớp</option>
-                            {classes.map((cls) => (
-                              <option key={cls.id} value={cls.id}>
-                                {cls.name} ({cls.level})
-                              </option>
-                            ))}
-                          </select>
+                          <div className="space-y-2">
+                            <select
+                              multiple
+                              value={editedData.classIds || [student.classId].filter(Boolean) || []}
+                              onChange={(e) => {
+                                const selectedOptions = Array.from(e.target.selectedOptions, option => option.value)
+                                setEditedData({
+                                  ...editedData,
+                                  classIds: selectedOptions
+                                })
+                              }}
+                              className="w-full p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 min-h-[80px]"
+                            >
+                              {classes.map((cls) => (
+                                <option key={cls.id} value={cls.id}>
+                                  {cls.name} ({cls.level})
+                                </option>
+                              ))}
+                            </select>
+                            <p className="text-xs text-gray-500">Giữ Ctrl (Cmd trên Mac) để chọn nhiều lớp</p>
+                          </div>
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">
-                            {student.class ? `${student.class.name} (${student.class.level})` : "Không có lớp"}
+                            {student.classes && student.classes.length > 0 
+                              ? student.classes.map(cls => `${cls.name} (${cls.level})`).join(', ')
+                              : student.class 
+                                ? `${student.class.name} (${student.class.level})`
+                                : "Không có lớp"
+                            }
                           </span>
                         )}
                       </td>
@@ -668,12 +769,22 @@ export default function StudentManagementPage() {
                             </Button>
                           </div>
                         ) : (
-                          <Button
-                            size="sm"
-                            onClick={() => handleEdit(student.id)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleEdit(student.id)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete(student)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -688,6 +799,60 @@ export default function StudentManagementPage() {
           </CardContent>
         </Card>
         {/* <CompanyImage position="bottom" /> */}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && studentToDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+                <h3 className="text-lg font-semibold text-gray-900">Xác nhận xóa học viên</h3>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn xóa học viên <strong>{studentToDelete.name}</strong>? 
+                Hành động này không thể hoàn tác sau khi hoàn thành.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeleteConfirm(false)
+                    setStudentToDelete(null)
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDelete}
+                >
+                  Xóa
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Undo Snackbar */}
+        {showUndoSnackbar && (
+          <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-gray-900 text-white p-4 rounded-lg shadow-lg z-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span>Học viên đã được xóa</span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleUndoDelete}
+                className="text-white border-white hover:bg-white hover:text-gray-900"
+              >
+                <Undo className="w-4 h-4 mr-1" />
+                Hoàn tác
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
