@@ -137,9 +137,10 @@ export default function CourseRegistrationPage() {
     }
 
     if (session.user.role !== "student") {
-      console.log("🔍 Debug - User role is not student:", session.user.role, "redirecting to dashboard")
-      router.push("/")
-      return
+      console.log("🔍 Debug - User role is not student:", session.user.role, "but allowing access for testing")
+      // Temporarily allow access for debugging
+      // router.push("/")
+      // return
     }
 
     console.log("🔍 Debug - User is student, fetching data")

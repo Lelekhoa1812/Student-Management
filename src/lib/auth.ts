@@ -128,6 +128,10 @@ export const authOptions: NextAuthOptions = {
       return true
     },
     async jwt({ user, token, account, profile }) {
+      console.log("🔍 JWT callback - user:", user)
+      console.log("🔍 JWT callback - token before:", token)
+      console.log("🔍 JWT callback - account:", account)
+      
       // Handle Google OAuth JWT creation
       if (account?.provider === "google" && profile?.email) {
         try {
@@ -141,7 +145,7 @@ export const authOptions: NextAuthOptions = {
             token.role = student.role
             token.email = student.gmail
             token.name = student.name
-            console.log("✅ JWT: Student data set for:", student.gmail)
+            console.log("✅ JWT: Student data set for:", student.gmail, "role:", student.role)
             return token
           }
 
@@ -154,7 +158,7 @@ export const authOptions: NextAuthOptions = {
             token.role = staff.role
             token.email = staff.email
             token.name = staff.name
-            console.log("✅ JWT: Staff data set for:", staff.email)
+            console.log("✅ JWT: Staff data set for:", staff.email, "role:", staff.role)
             return token
           }
         } catch (error) {
@@ -164,26 +168,36 @@ export const authOptions: NextAuthOptions = {
 
       // Handle regular user data
       if (user) {
+        console.log("🔍 JWT callback - Setting user data, role:", user.role)
         token.uid = user.id
         token.role = user.role
         token.email = user.email || undefined
         token.name = user.name || undefined
       }
       
+      console.log("🔍 JWT callback - token after:", token)
       return token
     },
     async session({ session, user, token }) {
+      console.log("🔍 Session callback - user:", user)
+      console.log("🔍 Session callback - token:", token)
+      console.log("🔍 Session callback - session before:", session)
+      
       if (session?.user) {
         if (user) {
+          console.log("🔍 Session callback - Using user data, role:", user.role)
           session.user.id = user.id
           session.user.role = user.role
         } else if (token) {
+          console.log("🔍 Session callback - Using token data, role:", token.role)
           session.user.id = token.uid as string
           session.user.role = token.role as string
           session.user.email = token.email as string
           session.user.name = token.name as string
         }
       }
+      
+      console.log("🔍 Session callback - session after:", session)
       return session
     },
   },
