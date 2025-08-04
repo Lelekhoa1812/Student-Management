@@ -435,7 +435,7 @@ export default function RegistrationManagementPage() {
         </Card>
       </div>
 
-      <CompanyImage position="bottom" />
+      {/* <CompanyImage position="bottom" /> */}
     </div>
   )
 } 

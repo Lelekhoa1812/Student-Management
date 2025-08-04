@@ -128,11 +128,35 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await prisma.$connect()
     console.log("✅ Database connected for GET request")
 
+    const { searchParams } = new URL(request.url)
+    const email = searchParams.get("email")
+
+    if (email) {
+      // Get specific student by email
+      const student = await prisma.student.findUnique({
+        where: { gmail: email },
+        include: {
+          class: true
+        }
+      })
+
+      if (!student) {
+        return NextResponse.json(
+          { error: "Không tìm thấy học viên" },
+          { status: 404 }
+        )
+      }
+
+      console.log("✅ Retrieved student by email:", student.id)
+      return NextResponse.json([student]) // Return as array for consistency
+    }
+
+    // Get all students
     const students = await prisma.student.findMany({
       include: {
         class: true
