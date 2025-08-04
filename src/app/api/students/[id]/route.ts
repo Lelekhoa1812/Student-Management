@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import bcrypt from "bcryptjs"
 
 export async function PUT(
   request: NextRequest,
@@ -44,7 +45,6 @@ export async function PUT(
     // Handle password update if provided
     if (password && currentPassword) {
       console.log("1. Validating current password...")
-      const bcrypt = require('bcryptjs')
       
       const isCurrentPasswordValid = await bcrypt.compare(
         currentPassword,
