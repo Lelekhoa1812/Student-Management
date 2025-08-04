@@ -3,13 +3,53 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 
+interface SessionData {
+  user: {
+    id?: string
+    name?: string | null
+    email?: string | null
+    role?: string
+  }
+  expires: string
+}
+
+interface DatabaseCheck {
+  email: string
+  foundInStudent: boolean
+  foundInStaff: boolean
+  studentData: {
+    id: string
+    name: string
+    role: string
+  } | null
+  staffData: {
+    id: string
+    name: string
+    role: string
+  } | null
+  error?: string
+}
+
+interface GoogleOAuthStatus {
+  clientId: string
+  clientSecret: string
+  nextAuthUrl: string
+  nextAuthSecret: string
+}
+
+interface TestResults {
+  session: SessionData | null
+  databaseCheck: DatabaseCheck | null
+  googleOAuthStatus: GoogleOAuthStatus | string
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const { searchParams } = new URL(request.url)
     const testEmail = searchParams.get('email')
     
-    let testResults = {
+    const testResults: TestResults = {
       session: null,
       databaseCheck: null,
       googleOAuthStatus: "Not tested"
@@ -56,6 +96,11 @@ export async function GET(request: NextRequest) {
         }
       } catch (error) {
         testResults.databaseCheck = {
+          email: testEmail,
+          foundInStudent: false,
+          foundInStaff: false,
+          studentData: null,
+          staffData: null,
           error: error instanceof Error ? error.message : "Unknown error"
         }
       }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
-import { signIn, useSession, getSession } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import { GraduationCap, Mail, ArrowLeft, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 function LoginForm() {
-  const { data: session, status, update } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
@@ -35,9 +35,6 @@ function LoginForm() {
 
   useEffect(() => {
     if (session) {
-      // Force session update to ensure we have the latest user data
-      update()
-      
       // Redirect based on user role
       if (session.user?.role === "staff") {
         router.push("/")
@@ -45,7 +42,7 @@ function LoginForm() {
         router.push("/")
       }
     }
-  }, [session, router, update])
+  }, [session, router])
 
   if (status === "loading") {
     return (
@@ -73,7 +70,7 @@ function LoginForm() {
       if (result?.error) {
         setError("Email hoặc mật khẩu không đúng")
       }
-    } catch (error) {
+    } catch {
       setError("Có lỗi xảy ra, vui lòng thử lại")
     } finally {
       setIsLoading(false)
@@ -96,7 +93,7 @@ function LoginForm() {
         callbackUrl: "/",
         redirect: true 
       })
-    } catch (error) {
+    } catch {
       setError("Có lỗi xảy ra khi đăng nhập với Google")
       setIsLoading(false)
     }
