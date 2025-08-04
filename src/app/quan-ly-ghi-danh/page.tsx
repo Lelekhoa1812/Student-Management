@@ -11,7 +11,6 @@ import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
 import { 
   Search, 
-  Filter, 
   DollarSign, 
   Calendar,
   User,
@@ -56,7 +55,7 @@ export default function RegistrationManagementPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
-  const [paymentFilter, setPaymentFilter] = useState<"all" | "paid" | "unpaid">("all")
+  const [paymentFilter, setPaymentFilter] = useState<"all" | "paid" | "unpaid">("unpaid") // Changed default to unpaid
   const [editingPayment, setEditingPayment] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     have_paid: false,
@@ -183,6 +182,12 @@ export default function RegistrationManagementPage() {
     })
   }
 
+  const getFilterButtonClass = (filter: "all" | "paid" | "unpaid") => {
+    return paymentFilter === filter 
+      ? "bg-blue-600 text-white" 
+      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+  }
+
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-blue-50">
@@ -214,7 +219,7 @@ export default function RegistrationManagementPage() {
         {/* Search and Filter */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="search">Tìm kiếm</Label>
                 <div className="relative">
@@ -229,24 +234,39 @@ export default function RegistrationManagementPage() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="filter">Trạng thái thanh toán</Label>
-                <select
-                  id="filter"
-                  value={paymentFilter}
-                  onChange={(e) => setPaymentFilter(e.target.value as "all" | "paid" | "unpaid")}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="all">Tất cả</option>
-                  <option value="paid">Đã thanh toán</option>
-                  <option value="unpaid">Chưa thanh toán</option>
-                </select>
-              </div>
-
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Label className="text-sm mb-2 block">Trạng thái thanh toán</Label>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`flex-1 ${getFilterButtonClass("unpaid")}`}
+                      onClick={() => setPaymentFilter("unpaid")}
+                    >
+                      Chưa thanh toán
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`flex-1 ${getFilterButtonClass("paid")}`}
+                      onClick={() => setPaymentFilter("paid")}
+                    >
+                      Đã thanh toán
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`flex-1 ${getFilterButtonClass("all")}`}
+                      onClick={() => setPaymentFilter("all")}
+                    >
+                      Tất cả
+                    </Button>
+                  </div>
+                </div>
                 <Button 
                   onClick={fetchPayments}
-                  className="w-full"
+                  size="sm"
                 >
                   Làm mới
                 </Button>
@@ -276,7 +296,9 @@ export default function RegistrationManagementPage() {
               Danh sách thanh toán ({filteredPayments.length})
             </CardTitle>
             <CardDescription>
-              Quản lý trạng thái thanh toán học phí của học viên
+              {paymentFilter === "unpaid" && "Hiển thị học viên chưa thanh toán"}
+              {paymentFilter === "paid" && "Hiển thị học viên đã thanh toán"}
+              {paymentFilter === "all" && "Hiển thị tất cả học viên"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -287,7 +309,9 @@ export default function RegistrationManagementPage() {
               </div>
             ) : filteredPayments.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                Không tìm thấy thanh toán nào
+                {paymentFilter === "unpaid" && "Không có học viên nào chưa thanh toán"}
+                {paymentFilter === "paid" && "Không có học viên nào đã thanh toán"}
+                {paymentFilter === "all" && "Không tìm thấy thanh toán nào"}
               </div>
             ) : (
               <div className="space-y-4">
