@@ -66,24 +66,37 @@ export default function CourseRegistrationPage() {
   const fetchStudentData = useCallback(async () => {
     try {
       setIsLoading(true)
+      console.log("🔍 Debug - Fetching student data for email:", session?.user?.email)
       
       // Fetch student data
       const studentResponse = await fetch(`/api/students?email=${session?.user?.email}`)
+      console.log("🔍 Debug - Student API response status:", studentResponse.status)
+      
       if (studentResponse.ok) {
         const studentData = await studentResponse.json()
+        console.log("🔍 Debug - Student data received:", studentData)
+        
         if (studentData.length > 0) {
           setStudent(studentData[0])
+          console.log("🔍 Debug - Student found, fetching payments for ID:", studentData[0].id)
           
           // Fetch payments for this student
           const paymentsResponse = await fetch(`/api/payments?studentId=${studentData[0].id}`)
+          console.log("🔍 Debug - Payments API response status:", paymentsResponse.status)
+          
           if (paymentsResponse.ok) {
             const paymentsData = await paymentsResponse.json()
+            console.log("🔍 Debug - Payments data received:", paymentsData)
             setPayments(paymentsData)
           } else {
             console.error("Error fetching payments")
           }
+        } else {
+          console.log("🔍 Debug - No student found for email:", session?.user?.email)
+          setError("Không tìm thấy thông tin học viên")
         }
       } else {
+        console.log("🔍 Debug - Student API error:", studentResponse.status)
         setError("Không thể tải thông tin học viên")
       }
     } catch (error) {
@@ -95,18 +108,41 @@ export default function CourseRegistrationPage() {
   }, [session?.user?.email])
 
   useEffect(() => {
-    if (status === "loading") return
+    if (status === "loading") {
+      console.log("🔍 Debug - Session is loading...")
+      return
+    }
+
+    console.log("🔍 Debug - Session status:", status)
+    console.log("🔍 Debug - Session data:", session)
+    console.log("🔍 Debug - User role:", session?.user?.role)
+    console.log("🔍 Debug - User email:", session?.user?.email)
 
     if (!session) {
+      console.log("🔍 Debug - No session, redirecting to login")
       router.push("/dang-nhap")
       return
     }
 
-    if (session.user?.role !== "student") {
+    if (!session.user) {
+      console.log("🔍 Debug - No user in session, redirecting to login")
+      router.push("/dang-nhap")
+      return
+    }
+
+    if (!session.user.role) {
+      console.log("🔍 Debug - No role in session, redirecting to login")
+      router.push("/dang-nhap")
+      return
+    }
+
+    if (session.user.role !== "student") {
+      console.log("🔍 Debug - User role is not student:", session.user.role, "redirecting to dashboard")
       router.push("/")
       return
     }
 
+    console.log("🔍 Debug - User is student, fetching data")
     fetchStudentData()
   }, [session, status, router, fetchStudentData])
 
