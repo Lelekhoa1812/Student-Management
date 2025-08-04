@@ -31,6 +31,7 @@ interface Class {
   level: string
   maxStudents: number
   teacherName?: string
+  payment_amount?: number
   isActive: boolean
   createdAt: string
   _count?: {
@@ -77,7 +78,8 @@ export default function ClassManagementPage() {
     name: "",
     level: "",
     maxStudents: "",
-    teacherName: ""
+    teacherName: "",
+    payment_amount: ""
   })
 
   useEffect(() => {
@@ -98,7 +100,7 @@ export default function ClassManagementPage() {
 
   useEffect(() => {
     if (studentSearchTerm) {
-      const filtered = students.filter(student => 
+      const filtered = students.filter(student =>
         student.name.toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
         student.gmail.toLowerCase().includes(studentSearchTerm.toLowerCase())
       )
@@ -110,22 +112,22 @@ export default function ClassManagementPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch classes
-      const classesResponse = await fetch("/api/classes")
+      const [classesResponse, levelsResponse, studentsResponse] = await Promise.all([
+        fetch("/api/classes"),
+        fetch("/api/level-thresholds"),
+        fetch("/api/students")
+      ])
+
       if (classesResponse.ok) {
         const classesData = await classesResponse.json()
         setClasses(classesData)
       }
 
-      // Fetch levels
-      const levelsResponse = await fetch("/api/level-thresholds")
       if (levelsResponse.ok) {
         const levelsData = await levelsResponse.json()
         setLevels(levelsData)
       }
 
-      // Fetch students
-      const studentsResponse = await fetch("/api/students")
       if (studentsResponse.ok) {
         const studentsData = await studentsResponse.json()
         setStudents(studentsData)
@@ -140,11 +142,14 @@ export default function ClassManagementPage() {
 
   const handleCreate = () => {
     setIsCreating(true)
+    setEditingClass(null)
+    setSelectedClass(null)
     setFormData({
       name: "",
       level: "",
       maxStudents: "",
-      teacherName: ""
+      teacherName: "",
+      payment_amount: ""
     })
     setError("")
   }
@@ -158,7 +163,8 @@ export default function ClassManagementPage() {
       name: "",
       level: "",
       maxStudents: "",
-      teacherName: ""
+      teacherName: "",
+      payment_amount: ""
     })
     setError("")
   }
@@ -176,8 +182,15 @@ export default function ClassManagementPage() {
       const url = editingClass ? `/api/classes` : `/api/classes`
       const method = editingClass ? "PUT" : "POST"
       const body = editingClass 
-        ? { id: editingClass, ...formData }
-        : formData
+        ? { 
+            id: editingClass, 
+            ...formData,
+            payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null
+          }
+        : {
+            ...formData,
+            payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null
+          }
 
       const response = await fetch(url, {
         method,
@@ -209,7 +222,8 @@ export default function ClassManagementPage() {
       name: classData.name,
       level: classData.level,
       maxStudents: classData.maxStudents.toString(),
-      teacherName: classData.teacherName || ""
+      teacherName: classData.teacherName || "",
+      payment_amount: classData.payment_amount?.toString() || ""
     })
     setError("")
   }
@@ -483,6 +497,16 @@ export default function ClassManagementPage() {
                       value={formData.teacherName}
                       onChange={(e) => setFormData({ ...formData, teacherName: e.target.value })}
                       placeholder="Nhập tên giáo viên"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Số tiền thanh toán (tùy chọn)</Label>
+                    <Input
+                      type="number"
+                      value={formData.payment_amount}
+                      onChange={(e) => setFormData({ ...formData, payment_amount: e.target.value })}
+                      placeholder="Nhập số tiền"
                     />
                   </div>
 

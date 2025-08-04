@@ -63,6 +63,7 @@ model Student {
   createdAt      DateTime       @default(now())
   exams          Exam[]
   registrations  Registration[]
+  payments       Payment[]
   accounts       Account[]
   sessions       Session[]
 }
@@ -75,6 +76,7 @@ model Staff {
   password    String
   role        String   @default("staff")
   createdAt   DateTime @default(now())
+  payments    Payment[]
   accounts    Account[]
   sessions    Session[]
 }
@@ -109,12 +111,29 @@ model LevelThreshold {
 }
 
 model Class {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  level        String
-  maxStudents  Int
-  teacherName  String?
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  students     Student[]
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  level          String
+  maxStudents    Int
+  teacherName    String?
+  payment_amount Float?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  students       Student[]
+  payments       Payment[]
+}
+
+model Payment {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  class_id       String   @db.ObjectId
+  class          Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  payment_amount Float
+  user_id        String   @db.ObjectId
+  student        Student  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  datetime       DateTime @default(now())
+  payment_method String
+  staff_assigned String   @db.ObjectId
+  staff          Staff    @relation(fields: [staff_assigned], references: [id])
+  have_paid      Boolean  @default(false)
+  createdAt      DateTime @default(now())
 } 

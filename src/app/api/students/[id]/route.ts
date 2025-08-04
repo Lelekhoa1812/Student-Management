@@ -33,6 +33,21 @@ export async function PUT(
       )
     }
 
+    // Get current student to check if classId is changing
+    const currentStudent = await prisma.student.findUnique({
+      where: { id },
+      include: {
+        class: true
+      }
+    })
+
+    if (!currentStudent) {
+      return NextResponse.json(
+        { error: "Không tìm thấy học viên" },
+        { status: 404 }
+      )
+    }
+
     console.log("1. Updating student record...")
     // Update Student record
     const updatedStudent = await prisma.student.update({
@@ -47,8 +62,64 @@ export async function PUT(
         note: note || null,
         classId: classId || null,
       },
+      include: {
+        class: true
+      }
     })
     console.log("✅ Student updated:", updatedStudent.id)
+
+    // Handle payment creation/deletion based on class assignment changes
+    const oldClassId = currentStudent.classId
+    const newClassId = classId || null
+
+    if (oldClassId !== newClassId) {
+      console.log("2. Class assignment changed, handling payments...")
+      
+      // If student was removed from a class, delete existing payment
+      if (oldClassId) {
+        console.log("Deleting payment for old class:", oldClassId)
+        await prisma.payment.deleteMany({
+          where: {
+            class_id: oldClassId,
+            user_id: id
+          }
+        })
+      }
+
+      // If student was assigned to a new class, create payment
+      if (newClassId) {
+        console.log("Creating payment for new class:", newClassId)
+        
+        // Get class details to check if it has payment_amount
+        const newClass = await prisma.class.findUnique({
+          where: { id: newClassId }
+        })
+
+        if (newClass && newClass.payment_amount) {
+          // Get the first available staff member for the placeholder
+          const firstStaff = await prisma.staff.findFirst()
+          
+          if (firstStaff) {
+            // Create payment record with actual staff ID
+            await prisma.payment.create({
+              data: {
+                class_id: newClassId,
+                payment_amount: newClass.payment_amount,
+                user_id: id,
+                payment_method: "Chưa thanh toán",
+                staff_assigned: firstStaff.id,
+                have_paid: false
+              }
+            })
+            console.log("✅ Payment created for new class with staff:", firstStaff.name)
+          } else {
+            console.log("⚠️ No staff members found, skipping payment creation")
+          }
+        } else {
+          console.log("⚠️ No payment_amount set for class, skipping payment creation")
+        }
+      }
+    }
 
     console.log("=== UPDATE STUDENT SUCCESS ===")
     return NextResponse.json(updatedStudent)

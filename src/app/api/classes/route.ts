@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, level, maxStudents, teacherName } = body
+    const { name, level, maxStudents, teacherName, payment_amount } = body
 
     // Validate required fields
     if (!name || !level || !maxStudents) {
@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
         name,
         level,
         maxStudents: parseInt(maxStudents),
-        teacherName: teacherName || null
+        teacherName: teacherName || null,
+        payment_amount: payment_amount ? parseFloat(payment_amount) : null
       }
     })
 
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, level, maxStudents, teacherName, isActive } = body
+    const { id, name, level, maxStudents, teacherName, payment_amount, isActive } = body
 
     if (!id) {
       return NextResponse.json(
@@ -154,6 +155,7 @@ export async function PUT(request: NextRequest) {
         level: level || existingClass.level,
         maxStudents: maxStudents ? parseInt(maxStudents) : existingClass.maxStudents,
         teacherName: teacherName !== undefined ? teacherName : existingClass.teacherName,
+        payment_amount: payment_amount !== undefined ? (payment_amount ? parseFloat(payment_amount) : null) : existingClass.payment_amount,
         isActive: isActive !== undefined ? isActive : existingClass.isActive
       }
     })
