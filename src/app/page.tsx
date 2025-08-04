@@ -8,9 +8,17 @@ import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
 import { Users, BookOpen, CreditCard, Settings, UserPlus } from "lucide-react"
 import Link from "next/link"
+import { useEffect } from "react"
 
 export default function HomePage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
+
+  // Force session update on component mount to ensure we have the latest data
+  useEffect(() => {
+    if (status === "authenticated") {
+      update()
+    }
+  }, [status, update])
 
   if (status === "loading") {
     return (
@@ -79,6 +87,9 @@ export default function HomePage() {
             </h1>
             <p className="text-lg text-gray-600">
               Xin chào, {session.user?.name}! (Nhân viên)
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              Email: {session.user?.email}
             </p>
           </div>
 
@@ -186,6 +197,9 @@ export default function HomePage() {
           </h1>
           <p className="text-lg text-gray-600">
             Xin chào, {session.user?.name}! (Học viên)
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Email: {session.user?.email}
           </p>
         </div>
 

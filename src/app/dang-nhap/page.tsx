@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
-import { signIn, useSession } from "next-auth/react"
+import { signIn, useSession, getSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import { GraduationCap, Mail, ArrowLeft, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 function LoginForm() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
@@ -35,6 +35,9 @@ function LoginForm() {
 
   useEffect(() => {
     if (session) {
+      // Force session update to ensure we have the latest user data
+      update()
+      
       // Redirect based on user role
       if (session.user?.role === "staff") {
         router.push("/")
@@ -42,7 +45,7 @@ function LoginForm() {
         router.push("/")
       }
     }
-  }, [session, router])
+  }, [session, router, update])
 
   if (status === "loading") {
     return (
@@ -77,8 +80,26 @@ function LoginForm() {
     }
   }
 
-  const handleGoogleLogin = () => {
-    signIn("google", { callbackUrl: "/" })
+  const handleGoogleLogin = async () => {
+    setIsLoading(true)
+    setError("")
+    
+    try {
+      // Clear any existing session data
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('next-auth.session-token')
+        sessionStorage.clear()
+      }
+      
+      // Sign in with Google
+      await signIn("google", { 
+        callbackUrl: "/",
+        redirect: true 
+      })
+    } catch (error) {
+      setError("Có lỗi xảy ra khi đăng nhập với Google")
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -162,6 +183,7 @@ function LoginForm() {
             variant="outline"
             className="w-full"
             onClick={handleGoogleLogin}
+            disabled={isLoading}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -181,7 +203,7 @@ function LoginForm() {
                 fill="#EA4335"
               />
             </svg>
-            Đăng nhập với Google
+            {isLoading ? "Đang đăng nhập..." : "Đăng nhập với Google"}
           </Button>
 
           <div className="text-center text-sm text-gray-600">

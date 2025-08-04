@@ -21,8 +21,25 @@ export function Navbar({ className }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/" })
-    setIsLogoutModalOpen(false)
+    try {
+      // Force complete sign out with redirect to home page
+      await signOut({ 
+        callbackUrl: "/",
+        redirect: true 
+      })
+      
+      // Clear any local storage or session storage
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        sessionStorage.clear()
+      }
+      
+      setIsLogoutModalOpen(false)
+    } catch (error) {
+      console.error("Error during sign out:", error)
+      // Fallback: redirect to home page
+      router.push("/")
+    }
   }
 
   const toggleTheme = () => {
