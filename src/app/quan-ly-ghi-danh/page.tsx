@@ -184,16 +184,16 @@ export default function RegistrationManagementPage() {
 
   const getFilterButtonClass = (filter: "all" | "paid" | "unpaid") => {
     return paymentFilter === filter 
-      ? "bg-blue-600 text-white" 
-      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      ? "bg-blue-600 text-white border-blue-600" 
+      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
   }
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-700">Đang tải...</p>
+          <p className="mt-4 text-lg text-gray-700 dark:text-gray-300">Đang tải...</p>
         </div>
       </div>
     )
@@ -204,14 +204,14 @@ export default function RegistrationManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">
+          <h1 className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
             Quản lý Ghi danh
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-400">
             Quản lý thanh toán học phí của học viên
           </p>
         </div>
@@ -221,22 +221,22 @@ export default function RegistrationManagementPage() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="search">Tìm kiếm</Label>
+                <Label htmlFor="search" className="text-gray-700 dark:text-gray-300">Tìm kiếm</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <Input
                     id="search"
                     placeholder="Tìm theo tên học viên hoặc lớp học"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                   />
                 </div>
               </div>
 
               <div className="flex items-end gap-2">
                 <div className="flex-1">
-                  <Label className="text-sm mb-2 block">Trạng thái thanh toán</Label>
+                  <Label className="text-sm mb-2 block text-gray-700 dark:text-gray-300">Trạng thái thanh toán</Label>
                   <div className="flex gap-1">
                     <Button
                       variant="outline"
@@ -267,6 +267,7 @@ export default function RegistrationManagementPage() {
                 <Button 
                   onClick={fetchPayments}
                   size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Làm mới
                 </Button>
@@ -277,13 +278,13 @@ export default function RegistrationManagementPage() {
 
         {/* Error and Success Messages */}
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
+          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-600 dark:text-red-400">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md text-green-600">
+          <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-green-600 dark:text-green-400">
             {success}
           </div>
         )}
@@ -291,11 +292,11 @@ export default function RegistrationManagementPage() {
         {/* Payments List */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-green-600" />
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
               Danh sách thanh toán ({filteredPayments.length})
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               {paymentFilter === "unpaid" && "Hiển thị học viên chưa thanh toán"}
               {paymentFilter === "paid" && "Hiển thị học viên đã thanh toán"}
               {paymentFilter === "all" && "Hiển thị tất cả học viên"}
@@ -305,10 +306,10 @@ export default function RegistrationManagementPage() {
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Đang tải...</p>
+                <p className="mt-2 text-gray-600 dark:text-gray-400">Đang tải...</p>
               </div>
             ) : filteredPayments.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 {paymentFilter === "unpaid" && "Không có học viên nào chưa thanh toán"}
                 {paymentFilter === "paid" && "Không có học viên nào đã thanh toán"}
                 {paymentFilter === "all" && "Không tìm thấy thanh toán nào"}
@@ -320,30 +321,30 @@ export default function RegistrationManagementPage() {
                     key={payment.id}
                     className={`p-4 border rounded-lg transition-colors ${
                       payment.have_paid 
-                        ? "border-green-200 bg-green-50" 
-                        : "border-red-200 bg-red-50"
+                        ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20" 
+                        : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20"
                     }`}
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       {/* Student and Class Info */}
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-blue-600" />
-                          <span className="font-medium">{payment.student.name}</span>
+                          <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{payment.student.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <BookOpen className="w-4 h-4 text-purple-600" />
-                          <span>{payment.class.name} ({payment.class.level})</span>
+                          <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          <span className="text-gray-700 dark:text-gray-300">{payment.class.name} ({payment.class.level})</span>
                         </div>
                       </div>
 
                       {/* Payment Amount */}
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <DollarSign className="w-4 h-4 text-green-600" />
-                          <span className="font-bold">{formatCurrency(payment.payment_amount)}</span>
+                          <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          <span className="font-bold text-gray-900 dark:text-gray-100">{formatCurrency(payment.payment_amount)}</span>
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
                           Phương thức: {payment.payment_method}
                         </div>
                       </div>
@@ -353,18 +354,18 @@ export default function RegistrationManagementPage() {
                         <div className="flex items-center gap-2">
                           {payment.have_paid ? (
                             <>
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                              <span className="text-green-600 font-medium">Đã thanh toán</span>
+                              <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                              <span className="text-green-600 dark:text-green-400 font-medium">Đã thanh toán</span>
                             </>
                           ) : (
                             <>
-                              <XCircle className="w-4 h-4 text-red-600" />
-                              <span className="text-red-600 font-medium">Chưa thanh toán</span>
+                              <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                              <span className="text-red-600 dark:text-red-400 font-medium">Chưa thanh toán</span>
                             </>
                           )}
                         </div>
                         {payment.have_paid && (
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
                             Nhân viên: {payment.staff.name}
                           </div>
                         )}
@@ -375,12 +376,12 @@ export default function RegistrationManagementPage() {
                         {editingPayment === payment.id ? (
                           <div className="space-y-2 w-full">
                             <div>
-                              <Label className="text-sm">Phương thức thanh toán</Label>
+                              <Label className="text-sm text-gray-700 dark:text-gray-300">Phương thức thanh toán</Label>
                               <Input
                                 value={editForm.payment_method}
                                 onChange={(e) => setEditForm({ ...editForm, payment_method: e.target.value })}
                                 placeholder="Nhập phương thức thanh toán"
-                                className="text-sm"
+                                className="text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                               />
                             </div>
                             <div className="flex items-center gap-2">
@@ -389,17 +390,17 @@ export default function RegistrationManagementPage() {
                                 id={`paid-${payment.id}`}
                                 checked={editForm.have_paid}
                                 onChange={(e) => setEditForm({ ...editForm, have_paid: e.target.checked })}
-                                className="rounded"
+                                className="rounded border-gray-300 dark:border-gray-600"
                               />
-                              <Label htmlFor={`paid-${payment.id}`} className="text-sm">
+                              <Label htmlFor={`paid-${payment.id}`} className="text-sm text-gray-700 dark:text-gray-300">
                                 Đã thanh toán
                               </Label>
                             </div>
                             <div className="flex gap-2">
-                              <Button size="sm" onClick={handleSavePayment}>
+                              <Button size="sm" onClick={handleSavePayment} className="bg-blue-600 hover:bg-blue-700 text-white">
                                 Lưu
                               </Button>
-                              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                              <Button size="sm" variant="outline" onClick={handleCancelEdit} className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                 Hủy
                               </Button>
                             </div>
@@ -409,6 +410,7 @@ export default function RegistrationManagementPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleEditPayment(payment)}
+                            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -418,8 +420,8 @@ export default function RegistrationManagementPage() {
 
                     {/* Payment Date */}
                     {payment.have_paid && payment.datetime && (
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                           <Calendar className="w-4 h-4" />
                           <span>Thanh toán lúc: {formatDate(payment.datetime)}</span>
                         </div>
@@ -433,7 +435,7 @@ export default function RegistrationManagementPage() {
         </Card>
       </div>
 
-      {/* <CompanyImage position="bottom" /> */}
+      <CompanyImage position="bottom" />
     </div>
   )
 } 
