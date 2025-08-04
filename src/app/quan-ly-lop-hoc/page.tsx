@@ -40,6 +40,9 @@ interface Class {
     students: number
   }
   students?: Student[]
+  studentClasses?: {
+    student: Student
+  }[]
 }
 
 interface Student {
@@ -599,7 +602,7 @@ export default function ClassManagementPage() {
                     {selectedClass.name}
                   </CardTitle>
                   <CardDescription>
-                    Level: {selectedClass.level} | Sỉ số: {selectedClass._count?.students || 0}/{selectedClass.maxStudents}
+                    Level: {selectedClass.level} | Sỉ số: {selectedClass.studentClasses?.length || 0}/{selectedClass.maxStudents}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -608,7 +611,7 @@ export default function ClassManagementPage() {
                     <Button
                       onClick={() => setShowAddStudent(true)}
                       className="w-full"
-                      disabled={(selectedClass._count?.students || 0) >= selectedClass.maxStudents}
+                      disabled={(selectedClass.studentClasses?.length || 0) >= selectedClass.maxStudents}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
                       Thêm học viên
@@ -641,9 +644,9 @@ export default function ClassManagementPage() {
                                 <Button
                                   size="sm"
                                   onClick={() => handleAddStudent(student.id)}
-                                  disabled={student.classId === selectedClass.id}
+                                  disabled={selectedClass.studentClasses?.some(sc => sc.student.id === student.id)}
                                 >
-                                  {student.classId === selectedClass.id ? "Đã có" : "Thêm"}
+                                  {selectedClass.studentClasses?.some(sc => sc.student.id === student.id) ? "Đã có" : "Thêm"}
                                 </Button>
                               </div>
                             ))}
@@ -655,21 +658,21 @@ export default function ClassManagementPage() {
                     {/* Student list */}
                     <div className="space-y-2">
                       <h4 className="font-medium">Danh sách học viên:</h4>
-                      {selectedClass.students && selectedClass.students.length > 0 ? (
-                        selectedClass.students.map((student) => (
+                      {selectedClass.studentClasses && selectedClass.studentClasses.length > 0 ? (
+                        selectedClass.studentClasses.map((studentClass) => (
                           <div
-                            key={student.id}
+                            key={studentClass.student.id}
                             className="p-3 border rounded flex justify-between items-center"
                           >
                             <div>
-                              <p className="font-medium">{student.name}</p>
-                              <p className="text-sm text-gray-600">{student.gmail}</p>
-                              <p className="text-sm text-gray-600">{student.phoneNumber}</p>
+                              <p className="font-medium">{studentClass.student.name}</p>
+                              <p className="text-sm text-gray-600">{studentClass.student.gmail}</p>
+                              <p className="text-sm text-gray-600">{studentClass.student.phoneNumber}</p>
                             </div>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleRemoveStudent(student)}
+                              onClick={() => handleRemoveStudent(studentClass.student)}
                             >
                               <UserMinus className="w-4 h-4" />
                             </Button>

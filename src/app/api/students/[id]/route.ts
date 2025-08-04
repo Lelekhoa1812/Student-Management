@@ -18,7 +18,11 @@ export async function DELETE(
     const student = await prisma.student.findUnique({
       where: { id },
       include: {
-        class: true,
+        studentClasses: {
+          include: {
+            class: true
+          }
+        },
         exams: true,
         payments: true
       }
@@ -82,17 +86,20 @@ export async function PUT(
       school,
       platformKnown,
       note,
-      classId,
       classIds,
       password,
       currentPassword
     } = body
 
-    // Get current student to check if classId is changing
+    // Get current student to check class assignments
     const currentStudent = await prisma.student.findUnique({
       where: { id },
       include: {
-        class: true
+        studentClasses: {
+          include: {
+            class: true
+          }
+        }
       }
     })
 
@@ -130,7 +137,11 @@ export async function PUT(
           password: hashedPassword
         },
         include: {
-          class: true
+          studentClasses: {
+            include: {
+              class: true
+            }
+          }
         }
       })
       
@@ -160,10 +171,8 @@ export async function PUT(
         school,
         platformKnown,
         note: note || null,
-        classId: classId || null,
       },
       include: {
-        class: true,
         studentClasses: {
           include: {
             class: true
@@ -254,59 +263,6 @@ export async function PUT(
           }
         }
       }
-    } else if (classId !== undefined) {
-      // Handle single class assignment (backward compatibility)
-      const oldClassId = currentStudent.classId
-      const newClassId = classId || null
-
-      if (oldClassId !== newClassId) {
-        console.log("2. Single class assignment changed, handling payments...")
-        
-        // If student was removed from a class, delete existing payment
-        if (oldClassId) {
-          console.log("Deleting payment for old class:", oldClassId)
-          await prisma.payment.deleteMany({
-            where: {
-              class_id: oldClassId,
-              user_id: id
-            }
-          })
-        }
-
-        // If student was assigned to a new class, create payment
-        if (newClassId) {
-          console.log("Creating payment for new class:", newClassId)
-          
-          // Get class details to check if it has payment_amount
-          const newClass = await prisma.class.findUnique({
-            where: { id: newClassId }
-          })
-
-          if (newClass && newClass.payment_amount) {
-            // Get the first available staff member for the placeholder
-            const firstStaff = await prisma.staff.findFirst()
-            
-            if (firstStaff) {
-              // Create payment record with actual staff ID
-              await prisma.payment.create({
-                data: {
-                  class_id: newClassId,
-                  payment_amount: newClass.payment_amount,
-                  user_id: id,
-                  payment_method: "Chưa thanh toán",
-                  staff_assigned: firstStaff.id,
-                  have_paid: false
-                }
-              })
-              console.log("✅ Payment created for new class with staff:", firstStaff.name)
-            } else {
-              console.log("⚠️ No staff members found, skipping payment creation")
-            }
-          } else {
-            console.log("⚠️ No payment_amount set for class, skipping payment creation")
-          }
-        }
-      }
     }
 
     console.log("=== UPDATE STUDENT SUCCESS ===")
@@ -354,6 +310,13 @@ export async function GET(
 
     const student = await prisma.student.findUnique({
       where: { id: id },
+      include: {
+        studentClasses: {
+          include: {
+            class: true
+          }
+        }
+      }
     })
 
     if (!student) {

@@ -23,9 +23,9 @@ interface Student {
   platformKnown: string
   note?: string
   createdAt: string
-  classId?: string
-  class?: Class
-  classes?: Class[]
+  studentClasses?: {
+    class: Class
+  }[]
   examResult?: {
     score: number
     levelEstimate: string
@@ -148,7 +148,7 @@ export default function StudentManagementPage() {
         school: student.school,
         platformKnown: student.platformKnown,
         note: student.note,
-        classId: student.classId,
+        classIds: student.studentClasses?.map(sc => sc.class.id) || [],
         examResult: student.examResult ? {
           score: student.examResult.score,
           levelEstimate: student.examResult.levelEstimate || "",
@@ -276,7 +276,7 @@ export default function StudentManagementPage() {
         editedData.school !== student.school ||
         editedData.platformKnown !== student.platformKnown ||
         editedData.note !== student.note ||
-        JSON.stringify(editedData.classIds) !== JSON.stringify([student.classId].filter(Boolean))
+        JSON.stringify(editedData.classIds) !== JSON.stringify(student.studentClasses?.map(sc => sc.class.id) || [])
 
       console.log("Has student changes:", hasStudentChanges)
 
@@ -290,7 +290,7 @@ export default function StudentManagementPage() {
           school: editedData.school || student.school,
           platformKnown: editedData.platformKnown || student.platformKnown,
           note: editedData.note !== undefined ? editedData.note : student.note,
-          classIds: editedData.classIds || [student.classId].filter(Boolean)
+          classIds: editedData.classIds || (student.studentClasses?.map(sc => sc.class.id) || [])
         }
 
         console.log("Sending student update data:", studentUpdateData)
@@ -559,7 +559,7 @@ export default function StudentManagementPage() {
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Trường học</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Nền tảng</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ghi chú</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Lớp học</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-48">Lớp học</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Điểm thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ngày thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Level</th>
@@ -645,12 +645,12 @@ export default function StudentManagementPage() {
                           <span className="text-gray-900 dark:text-gray-100">{student.note || "Không có"}</span>
                         )}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-48">
                         {editingStudent === student.id ? (
                           <div className="space-y-2">
                             <select
                               multiple
-                              value={editedData.classIds || [student.classId].filter(Boolean) || []}
+                              value={editedData.classIds || (student.studentClasses?.map(sc => sc.class.id) || [])}
                               onChange={(e) => {
                                 const selectedOptions = Array.from(e.target.selectedOptions, option => option.value)
                                 setEditedData({
@@ -670,11 +670,9 @@ export default function StudentManagementPage() {
                           </div>
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">
-                            {student.classes && student.classes.length > 0 
-                              ? student.classes.map(cls => `${cls.name} (${cls.level})`).join(', ')
-                              : student.class 
-                                ? `${student.class.name} (${student.class.level})`
-                                : "Không có lớp"
+                            {student.studentClasses && student.studentClasses.length > 0 
+                              ? student.studentClasses.map(sc => `${sc.class.name} (${sc.class.level})`).join(', ')
+                              : "Không có lớp"
                             }
                           </span>
                         )}

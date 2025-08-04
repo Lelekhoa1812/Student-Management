@@ -58,8 +58,6 @@ model Student {
   platformKnown  String
   note           String?
   role           String         @default("user")
-  classId        String?        @db.ObjectId
-  class          Class?         @relation(fields: [classId], references: [id])
   createdAt      DateTime       @default(now())
   exams          Exam[]
   registrations  Registration[]
@@ -120,7 +118,6 @@ model Class {
   payment_amount Float?
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
-  students       Student[]
   payments       Payment[]
   studentClasses StudentClass[]
 }
@@ -149,5 +146,5 @@ model StudentClass {
   class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
-  @@unique([studentId, classId])
+  @@unique([studentId, classId], name: "studentId_classId")
 } 

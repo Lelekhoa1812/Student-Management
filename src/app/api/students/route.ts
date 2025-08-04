@@ -141,7 +141,11 @@ export async function GET(request: NextRequest) {
       const student = await prisma.student.findUnique({
         where: { gmail: email },
         include: {
-          class: true
+          studentClasses: {
+            include: {
+              class: true
+            }
+          }
         }
       })
 
@@ -159,7 +163,6 @@ export async function GET(request: NextRequest) {
     // Get all students
     const students = await prisma.student.findMany({
       include: {
-        class: true,
         studentClasses: {
           include: {
             class: true

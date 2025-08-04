@@ -20,7 +20,11 @@ export async function POST(request: NextRequest) {
     const currentStudent = await prisma.student.findUnique({
       where: { id: studentId },
       include: {
-        class: true
+        studentClasses: {
+          include: {
+            class: true
+          }
+        }
       }
     })
 
@@ -30,9 +34,6 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       )
     }
-
-    const oldClassId = currentStudent.classId
-    let newClassId = null
 
     if (action === "add") {
       if (!classId) {
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
         include: {
           _count: {
             select: {
-              students: true
+              studentClasses: true
             }
           }
         }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Check if class is full
-      if (targetClass._count.students >= targetClass.maxStudents) {
+      if (targetClass._count.studentClasses >= targetClass.maxStudents) {
         return NextResponse.json(
           { error: "Lớp học đã đầy" },
           { status: 400 }
@@ -70,64 +71,35 @@ export async function POST(request: NextRequest) {
       }
 
       // Check if student is already in this class
-      if (oldClassId === classId) {
+      const existingClassAssignment = currentStudent.studentClasses.find(
+        sc => sc.classId === classId
+      )
+      
+      if (existingClassAssignment) {
         return NextResponse.json(
           { error: "Học viên đã có trong lớp này" },
           { status: 400 }
         )
       }
 
-      newClassId = classId
-    } else if (action === "remove") {
-      // Remove student from class
-      newClassId = null
-    } else {
-      return NextResponse.json(
-        { error: "Hành động không hợp lệ" },
-        { status: 400 }
-      )
-    }
-
-    // Update student's class
-    const updatedStudent = await prisma.student.update({
-      where: { id: studentId },
-      data: {
-        classId: newClassId
-      },
-      include: {
-        class: true
-      }
-    })
-
-    // Handle payment creation/deletion based on class assignment changes
-    if (oldClassId !== newClassId) {
-      // If student was removed from a class, delete existing payment
-      if (oldClassId) {
-        await prisma.payment.deleteMany({
-          where: {
-            class_id: oldClassId,
-            user_id: studentId
+      // Add student to class using StudentClass model
+      try {
+        await prisma.studentClass.create({
+          data: {
+            studentId,
+            classId
           }
         })
-      }
 
-      // If student was assigned to a new class, create payment
-      if (newClassId) {
-        // Get class details to check if it has payment_amount
-        const newClass = await prisma.class.findUnique({
-          where: { id: newClassId }
-        })
-
-        if (newClass && newClass.payment_amount) {
-          // Get the first available staff member for the placeholder
+        // Create payment if class has payment_amount
+        if (targetClass.payment_amount) {
           const firstStaff = await prisma.staff.findFirst()
           
           if (firstStaff) {
-            // Create payment record with actual staff ID
             await prisma.payment.create({
               data: {
-                class_id: newClassId,
-                payment_amount: newClass.payment_amount,
+                class_id: classId,
+                payment_amount: targetClass.payment_amount,
                 user_id: studentId,
                 payment_method: "Chưa thanh toán",
                 staff_assigned: firstStaff.id,
@@ -136,14 +108,80 @@ export async function POST(request: NextRequest) {
             })
           }
         }
-      }
-    }
 
-    return NextResponse.json({
-      success: true,
-      message: action === "add" ? "Thêm học viên vào lớp thành công" : "Xóa học viên khỏi lớp thành công",
-      student: updatedStudent
-    })
+        // Get updated student data
+        const updatedStudent = await prisma.student.findUnique({
+          where: { id: studentId },
+          include: {
+            studentClasses: {
+              include: {
+                class: true
+              }
+            }
+          }
+        })
+
+        return NextResponse.json({
+          success: true,
+          message: "Thêm học viên vào lớp thành công",
+          student: updatedStudent
+        })
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('Unique constraint')) {
+          return NextResponse.json(
+            { error: "Học viên đã có trong lớp này" },
+            { status: 400 }
+          )
+        }
+        throw error
+      }
+    } else if (action === "remove") {
+      if (!classId) {
+        return NextResponse.json(
+          { error: "Thiếu ID lớp học" },
+          { status: 400 }
+        )
+      }
+
+      // Remove student from specific class
+      await prisma.studentClass.deleteMany({
+        where: {
+          studentId,
+          classId
+        }
+      })
+
+      // Delete payment for this class
+      await prisma.payment.deleteMany({
+        where: {
+          class_id: classId,
+          user_id: studentId
+        }
+      })
+
+      // Get updated student data
+      const updatedStudent = await prisma.student.findUnique({
+        where: { id: studentId },
+        include: {
+          studentClasses: {
+            include: {
+              class: true
+            }
+          }
+        }
+      })
+
+      return NextResponse.json({
+        success: true,
+        message: "Xóa học viên khỏi lớp thành công",
+        student: updatedStudent
+      })
+    } else {
+      return NextResponse.json(
+        { error: "Hành động không hợp lệ" },
+        { status: 400 }
+      )
+    }
   } catch (error) {
     console.error("Error managing class registration:", error)
     return NextResponse.json(
