@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db"
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const body = await request.json()
     const { studentId, classId, action } = body
 
@@ -147,11 +150,16 @@ export async function POST(request: NextRequest) {
       { error: "Có lỗi xảy ra khi quản lý đăng ký lớp học" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function GET() {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const registrations = await prisma.registration.findMany({
       include: {
         student: true,
@@ -168,5 +176,7 @@ export async function GET() {
       { error: "Có lỗi xảy ra khi lấy danh sách đăng ký" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 } 

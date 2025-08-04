@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db"
 
 export async function GET(request: NextRequest) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const { searchParams } = new URL(request.url)
     const email = searchParams.get('email')
 
@@ -42,11 +45,16 @@ export async function GET(request: NextRequest) {
       { error: "Có lỗi xảy ra khi lấy dữ liệu thi" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const body = await request.json()
     const { score, levelEstimate, examDate, studentEmail, notes } = body
 
@@ -129,5 +137,7 @@ export async function POST(request: NextRequest) {
       { error: "Có lỗi xảy ra khi tạo kết quả thi" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 } 

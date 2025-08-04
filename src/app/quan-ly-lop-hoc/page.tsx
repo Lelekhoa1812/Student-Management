@@ -22,7 +22,9 @@ import {
   Search,
   Calendar,
   Phone,
-  Mail
+  Mail,
+  AlertTriangle,
+  CheckCircle
 } from "lucide-react"
 
 interface Class {
@@ -47,6 +49,10 @@ interface Student {
   dob: string
   phoneNumber: string
   classId?: string
+  examResult?: {
+    score: number
+    levelEstimate: string
+  }
 }
 
 interface LevelThreshold {
@@ -73,6 +79,12 @@ export default function ClassManagementPage() {
   const [showAddStudent, setShowAddStudent] = useState(false)
   const [studentSearchTerm, setStudentSearchTerm] = useState("")
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([])
+
+  // Modal states
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
+  const [studentToRemove, setStudentToRemove] = useState<Student | null>(null)
+  const [showGradeCheck, setShowGradeCheck] = useState(false)
+  const [studentToAdd, setStudentToAdd] = useState<Student | null>(null)
 
   const [formData, setFormData] = useState({
     name: "",
@@ -265,13 +277,55 @@ export default function ClassManagementPage() {
   const handleAddStudent = async (studentId: string) => {
     if (!selectedClass) return
 
+    // Find the student to check their grade
+    const student = students.find(s => s.id === studentId)
+    if (!student) return
+
+    // Fetch exam data for this specific student
     try {
-      const response = await fetch(`/api/students/${studentId}`, {
-        method: "PUT",
+      const examResponse = await fetch(`/api/exams?email=${student.gmail}`)
+      if (examResponse.ok) {
+        const exams = await examResponse.json()
+        const latestExam = exams[0] // Get the most recent exam
+        
+        // Check if student has a grade/score
+        if (!latestExam || latestExam.score === 0) {
+          setStudentToAdd(student)
+          setShowGradeCheck(true)
+          return
+        }
+      } else {
+        // If we can't fetch exam data, assume they don't have grades
+        setStudentToAdd(student)
+        setShowGradeCheck(true)
+        return
+      }
+    } catch (error) {
+      console.error("Error fetching exam data:", error)
+      // If there's an error fetching exam data, assume they don't have grades
+      setStudentToAdd(student)
+      setShowGradeCheck(true)
+      return
+    }
+
+    // Proceed with adding student
+    await addStudentToClass(studentId)
+  }
+
+  const addStudentToClass = async (studentId: string) => {
+    if (!selectedClass) return
+
+    try {
+      const response = await fetch("/api/registrations", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ classId: selectedClass.id }),
+        body: JSON.stringify({
+          studentId,
+          classId: selectedClass.id,
+          action: "add"
+        }),
       })
 
       if (response.ok) {
@@ -280,6 +334,8 @@ export default function ClassManagementPage() {
         handleViewStudents(selectedClass)
         setShowAddStudent(false)
         setStudentSearchTerm("")
+        setShowGradeCheck(false)
+        setStudentToAdd(null)
       } else {
         const errorData = await response.json()
         setError(errorData.error || "Có lỗi xảy ra")
@@ -290,22 +346,32 @@ export default function ClassManagementPage() {
     }
   }
 
-  const handleRemoveStudent = async (studentId: string) => {
-    if (!selectedClass) return
+  const handleRemoveStudent = async (student: Student) => {
+    setStudentToRemove(student)
+    setShowRemoveConfirm(true)
+  }
+
+  const confirmRemoveStudent = async () => {
+    if (!selectedClass || !studentToRemove) return
 
     try {
-      const response = await fetch(`/api/students/${studentId}`, {
-        method: "PUT",
+      const response = await fetch("/api/registrations", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ classId: null }),
+        body: JSON.stringify({
+          studentId: studentToRemove.id,
+          action: "remove"
+        }),
       })
 
       if (response.ok) {
         setSuccess("Xóa học viên khỏi lớp thành công!")
         await fetchData()
         handleViewStudents(selectedClass)
+        setShowRemoveConfirm(false)
+        setStudentToRemove(null)
       } else {
         const errorData = await response.json()
         setError(errorData.error || "Có lỗi xảy ra")
@@ -603,7 +669,7 @@ export default function ClassManagementPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleRemoveStudent(student.id)}
+                              onClick={() => handleRemoveStudent(student)}
                             >
                               <UserMinus className="w-4 h-4" />
                             </Button>
@@ -621,6 +687,74 @@ export default function ClassManagementPage() {
         </div>
 
         {/* <CompanyImage position="bottom" /> */}
+
+        {/* Remove Student Confirmation Modal */}
+        {showRemoveConfirm && studentToRemove && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+                <h3 className="text-lg font-semibold text-gray-900">Xác nhận xóa học viên</h3>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn xóa học viên <strong>{studentToRemove.name}</strong> khỏi lớp <strong>{selectedClass?.name}</strong>?
+              </p>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowRemoveConfirm(false)
+                    setStudentToRemove(null)
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmRemoveStudent}
+                >
+                  Xóa
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Grade Check Modal */}
+        {showGradeCheck && studentToAdd && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertTriangle className="w-6 h-6 text-yellow-500" />
+                <h3 className="text-lg font-semibold text-gray-900">Học viên chưa có điểm thi</h3>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Học viên <strong>{studentToAdd.name}</strong> chưa có điểm thi hoặc điểm thi chưa được cập nhật. 
+                Vui lòng kiểm tra thông tin học viên trước khi thêm vào lớp.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowGradeCheck(false)
+                    setStudentToAdd(null)
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowGradeCheck(false)
+                    setStudentToAdd(null)
+                    router.push("/quan-ly-hoc-vien")
+                  }}
+                >
+                  Đi đến quản lý học viên
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

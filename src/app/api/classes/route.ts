@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db"
 
 export async function GET(request: NextRequest) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
     const active = searchParams.get("active")
@@ -62,11 +65,16 @@ export async function GET(request: NextRequest) {
       { error: "Có lỗi xảy ra khi tải danh sách lớp học" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const body = await request.json()
     const { name, level, maxStudents, teacherName, payment_amount } = body
 
@@ -108,11 +116,16 @@ export async function POST(request: NextRequest) {
       { error: "Có lỗi xảy ra khi tạo lớp học" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const body = await request.json()
     const { id, name, level, maxStudents, teacherName, payment_amount, isActive } = body
 
@@ -173,11 +186,16 @@ export async function PUT(request: NextRequest) {
       { error: "Có lỗi xảy ra khi cập nhật lớp học" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Ensure database connection
+    await prisma.$connect()
+    
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
 
@@ -226,5 +244,7 @@ export async function DELETE(request: NextRequest) {
       { error: "Có lỗi xảy ra khi xóa lớp học" },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 } 
