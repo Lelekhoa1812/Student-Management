@@ -211,13 +211,23 @@ export async function PUT(
         console.log("Adding classes:", classesToAdd)
         
         // Create StudentClass records
-        await prisma.studentClass.createMany({
-          data: classesToAdd.map(classId => ({
-            studentId: id,
-            classId
-          })),
-          skipDuplicates: true
-        })
+        for (const classId of classesToAdd) {
+          try {
+            await prisma.studentClass.create({
+              data: {
+                studentId: id,
+                classId
+              }
+            })
+          } catch (error) {
+            // Ignore duplicate key errors
+            if (error instanceof Error && error.message.includes('Unique constraint')) {
+              console.log(`StudentClass already exists for student ${id} and class ${classId}`)
+            } else {
+              throw error
+            }
+          }
+        }
         
         // Create payments for new classes
         for (const classId of classesToAdd) {

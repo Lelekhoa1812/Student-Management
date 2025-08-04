@@ -845,7 +845,7 @@ export default function StudentManagementPage() {
                 size="sm"
                 variant="outline"
                 onClick={handleUndoDelete}
-                className="text-white border-white hover:bg-white hover:text-gray-900"
+                className="text-white border-white hover:bg-white hover:text-gray-900 bg-transparent"
               >
                 <Undo className="w-4 h-4 mr-1" />
                 Hoàn tác
