@@ -21,17 +21,10 @@ export async function PUT(
       school,
       platformKnown,
       note,
-      classId
+      classId,
+      password,
+      currentPassword
     } = body
-
-    // Validate required fields
-    if (!name || !dob || !address || !phoneNumber || !school || !platformKnown) {
-      console.log("❌ Missing required fields")
-      return NextResponse.json(
-        { error: "Thiếu thông tin bắt buộc" },
-        { status: 400 }
-      )
-    }
 
     // Get current student to check if classId is changing
     const currentStudent = await prisma.student.findUnique({
@@ -45,6 +38,52 @@ export async function PUT(
       return NextResponse.json(
         { error: "Không tìm thấy học viên" },
         { status: 404 }
+      )
+    }
+
+    // Handle password update if provided
+    if (password && currentPassword) {
+      console.log("1. Validating current password...")
+      const bcrypt = require('bcryptjs')
+      
+      const isCurrentPasswordValid = await bcrypt.compare(
+        currentPassword,
+        currentStudent.password
+      )
+
+      if (!isCurrentPasswordValid) {
+        console.log("❌ Current password is incorrect")
+        return NextResponse.json(
+          { error: "Mật khẩu hiện tại không đúng" },
+          { status: 400 }
+        )
+      }
+
+      console.log("✅ Current password validated, hashing new password...")
+      const hashedPassword = await bcrypt.hash(password, 12)
+      
+      // Update only password
+      const updatedStudent = await prisma.student.update({
+        where: { id: id },
+        data: {
+          password: hashedPassword
+        },
+        include: {
+          class: true
+        }
+      })
+      
+      console.log("✅ Password updated successfully")
+      return NextResponse.json(updatedStudent)
+    }
+
+    // Handle regular profile update
+    // Validate required fields
+    if (!name || !dob || !address || !phoneNumber || !school || !platformKnown) {
+      console.log("❌ Missing required fields")
+      return NextResponse.json(
+        { error: "Thiếu thông tin bắt buộc" },
+        { status: 400 }
       )
     }
 

@@ -136,7 +136,7 @@ export default function CourseRegistrationPage() {
       return
     }
 
-    if (session.user.role !== "student") {
+    if (session.user.role !== "user") {
       console.log("🔍 Debug - User role is not student:", session.user.role, "but allowing access for testing")
       // Temporarily allow access for debugging
       // router.push("/")

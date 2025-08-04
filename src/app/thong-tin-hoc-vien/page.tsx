@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, GraduationCap, Calendar, MessageSquare } from "lucide-react"
+import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, GraduationCap, Calendar, MessageSquare, Lock, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 
 interface StudentData {
@@ -33,7 +33,21 @@ export default function StudentInfoPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
   const [editedData, setEditedData] = useState<Partial<StudentData>>({})
+  
+  // Password change states
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  })
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  })
 
   useEffect(() => {
     if (status === "loading") return
@@ -82,6 +96,7 @@ export default function StudentInfoPage() {
   const handleEdit = () => {
     setIsEditing(true)
     setError("")
+    setSuccess("")
   }
 
   const handleCancel = () => {
@@ -96,6 +111,8 @@ export default function StudentInfoPage() {
       platformKnown: studentData?.platformKnown || "",
       note: studentData?.note || ""
     })
+    setError("")
+    setSuccess("")
   }
 
   const handleSave = async () => {
@@ -103,6 +120,7 @@ export default function StudentInfoPage() {
 
     setIsSaving(true)
     setError("")
+    setSuccess("")
 
     try {
       const response = await fetch(`/api/students/${studentData.id}`, {
@@ -117,7 +135,7 @@ export default function StudentInfoPage() {
         const updatedStudent = await response.json()
         setStudentData(updatedStudent)
         setIsEditing(false)
-        alert("Cập nhật thông tin thành công!")
+        setSuccess("Cập nhật thông tin thành công!")
       } else {
         const errorData = await response.json()
         setError(errorData.error || "Có lỗi xảy ra khi cập nhật")
@@ -135,6 +153,81 @@ export default function StudentInfoPage() {
       ...prev,
       [field]: value
     }))
+  }
+
+  const handlePasswordChange = (field: keyof typeof passwordData, value: string) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handlePasswordToggle = (field: keyof typeof showPasswords) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }))
+  }
+
+  const handlePasswordSave = async () => {
+    if (!studentData) return
+
+    // Validate passwords
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setError("Mật khẩu mới và xác nhận mật khẩu không khớp")
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setError("Mật khẩu mới phải có ít nhất 6 ký tự")
+      return
+    }
+
+    setIsSaving(true)
+    setError("")
+    setSuccess("")
+
+    try {
+      const response = await fetch(`/api/students/${studentData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: passwordData.newPassword,
+          currentPassword: passwordData.currentPassword
+        }),
+      })
+
+      if (response.ok) {
+        setSuccess("Đổi mật khẩu thành công!")
+        setIsChangingPassword(false)
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: ""
+        })
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Có lỗi xảy ra khi đổi mật khẩu")
+      }
+    } catch (error) {
+      console.error("Error updating password:", error)
+      setError("Có lỗi xảy ra khi đổi mật khẩu")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handlePasswordCancel = () => {
+    setIsChangingPassword(false)
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    })
+    setError("")
+    setSuccess("")
   }
 
   if (status === "loading" || isLoading) {
@@ -186,6 +279,11 @@ export default function StudentInfoPage() {
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-green-600 text-sm">{success}</p>
               </div>
             )}
 
@@ -344,6 +442,120 @@ export default function StudentInfoPage() {
               )}
             </div>
 
+            {/* Password Change Section */}
+            <div className="mt-8 border-t pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Đổi mật khẩu</h3>
+                </div>
+                {!isChangingPassword && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsChangingPassword(true)}
+                    disabled={isEditing}
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Đổi mật khẩu
+                  </Button>
+                )}
+              </div>
+
+              {isChangingPassword && (
+                <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                  {/* Current Password */}
+                  <div className="space-y-2">
+                    <Label>Mật khẩu hiện tại</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPasswords.current ? "text" : "password"}
+                        value={passwordData.currentPassword}
+                        onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
+                        placeholder="Nhập mật khẩu hiện tại"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => handlePasswordToggle("current")}
+                      >
+                        {showPasswords.current ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* New Password */}
+                  <div className="space-y-2">
+                    <Label>Mật khẩu mới</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPasswords.new ? "text" : "password"}
+                        value={passwordData.newPassword}
+                        onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
+                        placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => handlePasswordToggle("new")}
+                      >
+                        {showPasswords.new ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-2">
+                    <Label>Xác nhận mật khẩu mới</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPasswords.confirm ? "text" : "password"}
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
+                        placeholder="Nhập lại mật khẩu mới"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => handlePasswordToggle("confirm")}
+                      >
+                        {showPasswords.confirm ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Password Change Action Buttons */}
+                  <div className="flex justify-end space-x-4 pt-2">
+                    <Button variant="outline" onClick={handlePasswordCancel} disabled={isSaving}>
+                      <X className="w-4 h-4 mr-2" />
+                      Hủy
+                    </Button>
+                    <Button onClick={handlePasswordSave} disabled={isSaving}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {isSaving ? "Đang lưu..." : "Lưu mật khẩu"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Action buttons */}
             {isEditing ? (
               <div className="flex justify-end space-x-4 mt-6">
@@ -358,7 +570,7 @@ export default function StudentInfoPage() {
               </div>
             ) : (
               <div className="flex justify-end mt-6">
-                <Button onClick={handleEdit}>
+                <Button onClick={handleEdit} disabled={isChangingPassword}>
                   <Edit className="w-4 h-4 mr-2" />
                   Chỉnh sửa thông tin
                 </Button>
