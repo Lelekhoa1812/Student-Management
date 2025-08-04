@@ -37,7 +37,7 @@ interface Class {
   isActive: boolean
   createdAt: string
   _count?: {
-    students: number
+    studentClasses: number
   }
   students?: Student[]
   studentClasses?: {
@@ -478,7 +478,7 @@ export default function ClassManagementPage() {
                           <h3 className="font-semibold text-lg">{classItem.name}</h3>
                           <p className="text-gray-600">Level: {classItem.level}</p>
                           <p className="text-gray-600">
-                            Sỉ số: {classItem._count?.students || 0}/{classItem.maxStudents}
+                            Sỉ số: {classItem._count?.studentClasses || 0}/{classItem.maxStudents}
                           </p>
                           {classItem.teacherName && (
                             <p className="text-gray-600">GV: {classItem.teacherName}</p>

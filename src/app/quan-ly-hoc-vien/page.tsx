@@ -556,11 +556,11 @@ export default function StudentManagementPage() {
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Họ tên</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Email</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">SĐT</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Trường học</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Nền tảng</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ghi chú</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-48">Lớp học</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Điểm thi</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-40">Trường học</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-32">Nền tảng</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-40">Ghi chú</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-56">Lớp học</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-24">Điểm thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ngày thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Level</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Thao tác</th>
@@ -600,7 +600,7 @@ export default function StudentManagementPage() {
                           <span className="text-gray-900 dark:text-gray-100">{student.phoneNumber}</span>
                         )}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-40">
                         {editingStudent === student.id ? (
                           <Input
                             type="text"
@@ -609,13 +609,13 @@ export default function StudentManagementPage() {
                               ...editedData,
                               school: e.target.value
                             })}
-                            className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                            className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           />
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">{student.school}</span>
                         )}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-32">
                         {editingStudent === student.id ? (
                           <Input
                             type="text"
@@ -624,13 +624,13 @@ export default function StudentManagementPage() {
                               ...editedData,
                               platformKnown: e.target.value
                             })}
-                            className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                            className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           />
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">{student.platformKnown}</span>
                         )}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-40">
                         {editingStudent === student.id ? (
                           <Input
                             type="text"
@@ -639,13 +639,13 @@ export default function StudentManagementPage() {
                               ...editedData,
                               note: e.target.value
                             })}
-                            className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                            className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           />
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">{student.note || "Không có"}</span>
                         )}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-48">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-56">
                         {editingStudent === student.id ? (
                           <div className="space-y-2">
                             <select
@@ -677,7 +677,7 @@ export default function StudentManagementPage() {
                           </span>
                         )}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-24">
                         {editingStudent === student.id ? (
                           <Input
                             type="number"
@@ -691,7 +691,7 @@ export default function StudentManagementPage() {
                                 score: parseFloat(e.target.value) || 0
                               }
                             })}
-                            className="w-20 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                            className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                           />
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">

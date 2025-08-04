@@ -234,14 +234,14 @@ export default function RegistrationManagementPage() {
                 </div>
               </div>
 
-              <div className="flex items-end gap-2">
-                <div className="flex-1">
+              <div className="flex flex-col gap-4">
+                <div className="w-full">
                   <Label className="text-sm mb-2 block text-gray-700 dark:text-gray-300">Trạng thái thanh toán</Label>
-                  <div className="flex gap-1">
+                  <div className="grid grid-cols-3 gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`flex-1 ${getFilterButtonClass("unpaid")}`}
+                      className={`${getFilterButtonClass("unpaid")}`}
                       onClick={() => setPaymentFilter("unpaid")}
                     >
                       Chưa thanh toán
@@ -249,7 +249,7 @@ export default function RegistrationManagementPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`flex-1 ${getFilterButtonClass("paid")}`}
+                      className={`${getFilterButtonClass("paid")}`}
                       onClick={() => setPaymentFilter("paid")}
                     >
                       Đã thanh toán
@@ -257,20 +257,22 @@ export default function RegistrationManagementPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`flex-1 ${getFilterButtonClass("all")}`}
+                      className={`${getFilterButtonClass("all")}`}
                       onClick={() => setPaymentFilter("all")}
                     >
                       Tất cả
                     </Button>
                   </div>
                 </div>
-                <Button 
-                  onClick={fetchPayments}
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Làm mới
-                </Button>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={fetchPayments}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                  >
+                    Làm mới
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
