@@ -108,15 +108,15 @@ export default function CourseRegistrationPage() {
   }, [session?.user?.email])
 
   useEffect(() => {
-    if (status === "loading") {
-      console.log("🔍 Debug - Session is loading...")
-      return
-    }
+    console.log("🔍 Debug - Payments state updated:", payments.length, payments)
+  }, [payments])
+
+  useEffect(() => {
+    if (status === "loading") return
 
     console.log("🔍 Debug - Session status:", status)
     console.log("🔍 Debug - Session data:", session)
     console.log("🔍 Debug - User role:", session?.user?.role)
-    console.log("🔍 Debug - User email:", session?.user?.email)
 
     if (!session) {
       console.log("🔍 Debug - No session, redirecting to login")
@@ -165,6 +165,7 @@ export default function CourseRegistrationPage() {
   }
 
   if (status === "loading" || isLoading) {
+    console.log("🔍 Debug - Loading state:", { status, isLoading })
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
@@ -176,8 +177,15 @@ export default function CourseRegistrationPage() {
   }
 
   if (!session || session.user?.role !== "student") {
+    console.log("🔍 Debug - Session check failed:", { session: !!session, role: session?.user?.role })
     return null
   }
+
+  console.log("🔍 Debug - Rendering component:", { 
+    student: !!student, 
+    paymentsLength: payments.length, 
+    payments: payments 
+  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
