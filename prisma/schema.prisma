@@ -67,6 +67,7 @@ model Student {
   accounts       Account[]
   sessions       Session[]
   studentClasses StudentClass[]
+  reminders      Reminder[]
 }
 
 model Staff {
@@ -80,6 +81,7 @@ model Staff {
   payments    Payment[]
   accounts    Account[]
   sessions    Session[]
+  reminders   Reminder[]
 }
 
 model Manager {
@@ -161,4 +163,17 @@ model StudentClass {
   createdAt DateTime @default(now())
 
   @@unique([studentId, classId], name: "studentId_classId")
+}
+
+model Reminder {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  staffId   String   @db.ObjectId
+  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  type      String   // "payment" or "examination"
+  platform  String   // "call", "email", "sms"
+  studentId String   @db.ObjectId
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 } 

@@ -142,6 +142,23 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-green-600" />
+                  Hẹn lịch nhắc
+                </CardTitle>
+                <CardDescription>
+                  Quản lý lời nhắc và theo dõi học viên
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/hen-lich-nhac">
+                  <Button className="w-full">Quản lý</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-gray-600" />
                   Cài đặt level
                 </CardTitle>

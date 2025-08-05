@@ -47,11 +47,44 @@ export async function GET() {
           }
         })
 
+        // Count reminders for today
+        const todayReminderCount = await prisma.reminder.count({
+          where: {
+            staffId: staff.id,
+            createdAt: {
+              gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
+            }
+          }
+        })
+
+        // Count reminders for last 7 days
+        const weekReminderCount = await prisma.reminder.count({
+          where: {
+            staffId: staff.id,
+            createdAt: {
+              gte: weekAgo
+            }
+          }
+        })
+
+        // Count reminders for last 30 days
+        const monthReminderCount = await prisma.reminder.count({
+          where: {
+            staffId: staff.id,
+            createdAt: {
+              gte: monthAgo
+            }
+          }
+        })
+
         return {
           staffName: staff.name,
           todayCount,
           weekCount,
-          monthCount
+          monthCount,
+          todayReminderCount,
+          weekReminderCount,
+          monthReminderCount
         }
       })
     )

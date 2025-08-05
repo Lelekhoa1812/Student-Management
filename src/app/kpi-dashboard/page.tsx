@@ -15,6 +15,9 @@ interface KPIData {
   todayCount: number
   weekCount: number
   monthCount: number
+  todayReminderCount: number
+  weekReminderCount: number
+  monthReminderCount: number
 }
 
 export default function KPIDashboardPage() {
@@ -57,9 +60,12 @@ export default function KPIDashboardPage() {
   const getChartData = () => {
     return kpiData.map(item => ({
       name: item.staffName,
-      [timeFilter === 'today' ? 'Hôm nay' : timeFilter === 'week' ? 'Tuần này' : 'Tháng này']: 
+      [timeFilter === 'today' ? 'Giao dịch hôm nay' : timeFilter === 'week' ? 'Giao dịch tuần này' : 'Giao dịch tháng này']: 
         timeFilter === 'today' ? item.todayCount : 
-        timeFilter === 'week' ? item.weekCount : item.monthCount
+        timeFilter === 'week' ? item.weekCount : item.monthCount,
+      [timeFilter === 'today' ? 'Lời nhắc hôm nay' : timeFilter === 'week' ? 'Lời nhắc tuần này' : 'Lời nhắc tháng này']: 
+        timeFilter === 'today' ? item.todayReminderCount : 
+        timeFilter === 'week' ? item.weekReminderCount : item.monthReminderCount
     }))
   }
 
@@ -97,43 +103,66 @@ export default function KPIDashboardPage() {
 
         {/* Filter Buttons */}
         <div className="flex justify-center mb-8">
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-2 justify-center">
             <Button
               variant={timeFilter === 'today' ? 'default' : 'outline'}
               onClick={() => setTimeFilter('today')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs sm:text-sm"
             >
               <Calendar className="w-4 h-4" />
-              Hôm nay
+              <span className="hidden sm:inline">Hôm nay</span>
+              <span className="sm:hidden">Hôm nay</span>
             </Button>
             <Button
               variant={timeFilter === 'week' ? 'default' : 'outline'}
               onClick={() => setTimeFilter('week')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs sm:text-sm"
             >
               <TrendingUp className="w-4 h-4" />
-              Tuần này (7 ngày)
+              <span className="hidden sm:inline">Tuần này (7 ngày)</span>
+              <span className="sm:hidden">Tuần này</span>
             </Button>
             <Button
               variant={timeFilter === 'month' ? 'default' : 'outline'}
               onClick={() => setTimeFilter('month')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs sm:text-sm"
             >
               <Users className="w-4 h-4" />
-              Tháng này (30 ngày)
+              <span className="hidden sm:inline">Tháng này (30 ngày)</span>
+              <span className="sm:hidden">Tháng này</span>
             </Button>
           </div>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tổng số giao dịch</CardTitle>
+              <CardTitle className="text-sm font-medium">Tổng giao dịch</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{getTotalCount()}</div>
+              <p className="text-xs text-muted-foreground">
+                {timeFilter === 'today' ? 'Hôm nay' : 
+                 timeFilter === 'week' ? '7 ngày qua' : '30 ngày qua'}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tổng lời nhắc</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {kpiData.reduce((total, item) => {
+                  const count = timeFilter === 'today' ? item.todayReminderCount : 
+                               timeFilter === 'week' ? item.weekReminderCount : item.monthReminderCount
+                  return total + count
+                }, 0)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {timeFilter === 'today' ? 'Hôm nay' : 
                  timeFilter === 'week' ? '7 ngày qua' : '30 ngày qua'}
@@ -156,7 +185,7 @@ export default function KPIDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Trung bình/NV</CardTitle>
+              <CardTitle className="text-sm font-medium">TB giao dịch/NV</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -178,25 +207,39 @@ export default function KPIDashboardPage() {
               Biểu đồ KPI theo nhân viên
             </CardTitle>
             <CardDescription>
-              Số lượng giao dịch được xử lý bởi từng nhân viên
+              Số lượng giao dịch và lời nhắc được xử lý bởi từng nhân viên
             </CardDescription>
           </CardHeader>
           <CardContent>
             {kpiData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={getChartData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar 
-                    dataKey={timeFilter === 'today' ? 'Hôm nay' : 
-                             timeFilter === 'week' ? 'Tuần này' : 'Tháng này'} 
-                    fill="#8b5cf6" 
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="w-full overflow-x-auto">
+                <ResponsiveContainer width="100%" height={400} minWidth={300}>
+                  <BarChart data={getChartData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar 
+                      dataKey={timeFilter === 'today' ? 'Giao dịch hôm nay' : 
+                               timeFilter === 'week' ? 'Giao dịch tuần này' : 'Giao dịch tháng này'} 
+                      fill="#8b5cf6" 
+                    />
+                    <Bar 
+                      dataKey={timeFilter === 'today' ? 'Lời nhắc hôm nay' : 
+                               timeFilter === 'week' ? 'Lời nhắc tuần này' : 'Lời nhắc tháng này'} 
+                      fill="#f97316" 
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <div className="flex items-center justify-center h-64">
                 <p className="text-gray-500">Không có dữ liệu KPI</p>
