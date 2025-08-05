@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, Calendar, MessageSquare, Users } from "lucide-react"
+import { Edit, Save, X, User, Mail, Phone, Calendar, Users } from "lucide-react"
 import Link from "next/link"
 
 interface ManagerData {

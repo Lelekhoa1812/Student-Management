@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const today = new Date()
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)

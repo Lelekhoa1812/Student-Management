@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { PasswordInput } from "@/components/ui/password-input"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { UserPlus, ArrowLeft, AlertCircle } from "lucide-react"
+import { UserPlus, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 export default function ManagerRegistrationPage() {
