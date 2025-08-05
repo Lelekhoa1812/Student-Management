@@ -708,7 +708,7 @@ export default function StudentManagementPage() {
                               }
                             })}
                             className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-                            style={{ minWidth: '50px' }}
+                            style={{ minWidth: '70px' }}
                           />
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">
