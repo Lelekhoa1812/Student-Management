@@ -70,7 +70,7 @@ export default function RegistrationManagementPage() {
       return
     }
 
-    if (session.user?.role !== "staff") {
+    if (session.user?.role !== "staff" && session.user?.role !== "manager") {
       router.push("/")
       return
     }
@@ -199,7 +199,7 @@ export default function RegistrationManagementPage() {
     )
   }
 
-  if (!session || session.user?.role !== "staff") {
+  if (!session || (session.user?.role !== "staff" && session.user?.role !== "manager")) {
     return null
   }
 
@@ -214,6 +214,13 @@ export default function RegistrationManagementPage() {
           <p className="text-lg text-gray-600 dark:text-gray-400">
             Quản lý thanh toán học phí của học viên
           </p>
+          {session.user?.role === "manager" && (
+            <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-md">
+              <p className="text-purple-700 dark:text-purple-300 text-sm">
+                <strong>Chế độ xem:</strong> Bạn đang xem dữ liệu ở chế độ chỉ đọc. Chỉ nhân viên mới có thể chỉnh sửa thanh toán.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Search and Filter */}
@@ -408,14 +415,18 @@ export default function RegistrationManagementPage() {
                             </div>
                           </div>
                         ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditPayment(payment)}
-                            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
+                          session.user?.role === "staff" ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditPayment(payment)}
+                              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          ) : (
+                            <span className="text-sm text-gray-500 dark:text-gray-400">Chỉ xem</span>
+                          )
                         )}
                       </div>
                     </div>
