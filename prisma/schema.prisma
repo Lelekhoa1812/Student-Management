@@ -26,6 +26,7 @@ model Account {
 
   student Student? @relation(fields: [userId], references: [id], onDelete: Cascade)
   staff   Staff?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  manager Manager? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
@@ -35,6 +36,7 @@ model Session {
   expires      DateTime
   student      Student? @relation(fields: [userId], references: [id], onDelete: Cascade)
   staff        Staff?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  manager      Manager? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -76,6 +78,18 @@ model Staff {
   role        String   @default("staff")
   createdAt   DateTime @default(now())
   payments    Payment[]
+  accounts    Account[]
+  sessions    Session[]
+}
+
+model Manager {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String   @unique
+  phoneNumber String
+  password    String
+  role        String   @default("manager")
+  createdAt   DateTime @default(now())
   accounts    Account[]
   sessions    Session[]
 }

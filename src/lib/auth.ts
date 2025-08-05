@@ -72,6 +72,30 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
+          // Check in Manager collection if not found in Staff
+          const manager = await prisma.manager.findUnique({
+            where: { email: credentials.email }
+          })
+
+          if (manager) {
+            const isPasswordValid = await bcrypt.compare(
+              credentials.password,
+              manager.password
+            )
+
+            if (isPasswordValid) {
+              console.log("✅ Manager login successful:", manager.email)
+              return {
+                id: manager.id,
+                email: manager.email,
+                name: manager.name,
+                role: manager.role,
+              }
+            } else {
+              console.log("❌ Invalid password for manager:", manager.email)
+            }
+          }
+
           console.log("❌ User not found:", credentials.email)
           return null
         } catch (error) {
@@ -113,6 +137,20 @@ export const authOptions: NextAuthOptions = {
             user.id = staff.id
             user.role = staff.role
             user.name = staff.name
+            return true
+          }
+
+          // Check if user exists in Manager collection
+          const manager = await prisma.manager.findUnique({
+            where: { email: profile.email }
+          })
+
+          if (manager) {
+            console.log("✅ Google OAuth: Existing manager found:", manager.name)
+            // Update the user object with database info
+            user.id = manager.id
+            user.role = manager.role
+            user.name = manager.name
             return true
           }
 
@@ -159,6 +197,19 @@ export const authOptions: NextAuthOptions = {
             token.email = staff.email
             token.name = staff.name
             console.log("✅ JWT: Staff data set for:", staff.email, "role:", staff.role)
+            return token
+          }
+
+          const manager = await prisma.manager.findUnique({
+            where: { email: profile.email }
+          })
+
+          if (manager) {
+            token.uid = manager.id
+            token.role = manager.role
+            token.email = manager.email
+            token.name = manager.name
+            console.log("✅ JWT: Manager data set for:", manager.email, "role:", manager.role)
             return token
           }
         } catch (error) {

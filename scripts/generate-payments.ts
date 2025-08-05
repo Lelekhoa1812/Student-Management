@@ -9,12 +9,16 @@ async function generatePaymentRecords() {
     // Get all students who are assigned to classes
     const studentsWithClasses = await prisma.student.findMany({
       where: {
-        classId: {
-          not: null
+        studentClasses: {
+          some: {}
         }
       },
       include: {
-        class: true,
+        studentClasses: {
+          include: {
+            class: true
+          }
+        },
         payments: true
       }
     })
@@ -25,54 +29,62 @@ async function generatePaymentRecords() {
     let skippedCount = 0
 
     for (const student of studentsWithClasses) {
-      if (!student.class) {
-        console.log(`⚠️ Student ${student.name} has classId but no class found, skipping`)
+      if (!student.studentClasses || student.studentClasses.length === 0) {
+        console.log(`⚠️ Student ${student.name} has no classes assigned, skipping`)
         continue
       }
 
-      // Check if payment record already exists for this student-class combination
-      const existingPayment = await prisma.payment.findFirst({
-        where: {
-          class_id: student.classId!,
-          user_id: student.id
+      // Process each class assignment for the student
+      for (const studentClass of student.studentClasses) {
+        if (!studentClass.class) {
+          console.log(`⚠️ Student ${student.name} has invalid class assignment, skipping`)
+          continue
         }
-      })
 
-      if (existingPayment) {
-        console.log(`⏭️ Payment record already exists for ${student.name} in ${student.class.name}, skipping`)
-        skippedCount++
-        continue
-      }
+        // Check if payment record already exists for this student-class combination
+        const existingPayment = await prisma.payment.findFirst({
+          where: {
+            class_id: studentClass.classId,
+            user_id: student.id
+          }
+        })
 
-      // Check if class has payment_amount set
-      if (!student.class.payment_amount) {
-        console.log(`⚠️ Class ${student.class.name} has no payment_amount set, skipping payment creation for ${student.name}`)
-        skippedCount++
-        continue
-      }
-
-      // Get the first available staff member
-      const firstStaff = await prisma.staff.findFirst()
-      if (!firstStaff) {
-        console.log(`❌ No staff members found, cannot create payment for ${student.name}`)
-        skippedCount++
-        continue
-      }
-
-      // Create payment record
-      await prisma.payment.create({
-        data: {
-          class_id: student.classId!,
-          payment_amount: student.class.payment_amount,
-          user_id: student.id,
-          payment_method: "Chưa thanh toán",
-          staff_assigned: firstStaff.id,
-          have_paid: false
+        if (existingPayment) {
+          console.log(`⏭️ Payment record already exists for ${student.name} in ${studentClass.class.name}, skipping`)
+          skippedCount++
+          continue
         }
-      })
 
-      console.log(`✅ Created payment record for ${student.name} in ${student.class.name} (${student.class.payment_amount.toLocaleString('vi-VN')} VND)`)
-      createdCount++
+        // Check if class has payment_amount set
+        if (!studentClass.class.payment_amount) {
+          console.log(`⚠️ Class ${studentClass.class.name} has no payment_amount set, skipping payment creation for ${student.name}`)
+          skippedCount++
+          continue
+        }
+
+        // Get the first available staff member
+        const firstStaff = await prisma.staff.findFirst()
+        if (!firstStaff) {
+          console.log(`❌ No staff members found, cannot create payment for ${student.name}`)
+          skippedCount++
+          continue
+        }
+
+        // Create payment record
+        await prisma.payment.create({
+          data: {
+            class_id: studentClass.classId,
+            payment_amount: studentClass.class.payment_amount,
+            user_id: student.id,
+            payment_method: "Chưa thanh toán",
+            staff_assigned: firstStaff.id,
+            have_paid: false
+          }
+        })
+
+        console.log(`✅ Created payment record for ${student.name} in ${studentClass.class.name} (${studentClass.class.payment_amount.toLocaleString('vi-VN')} VND)`)
+        createdCount++
+      }
     }
 
     console.log('\n📈 Summary:')

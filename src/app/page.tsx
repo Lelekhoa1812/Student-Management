@@ -1,3 +1,4 @@
+// src/app/page.tsx
 "use client"
 
 import { useSession } from "next-auth/react"
@@ -66,6 +67,7 @@ export default function HomePage() {
   }
 
   const isStaff = session.user?.role === "staff"
+  const isManager = session.user?.role === "manager"
 
   // Redirect based on user role
   if (isStaff) {
@@ -167,6 +169,50 @@ export default function HomePage() {
               <CardContent>
                 <Link href="/thong-tin-staff">
                   <Button className="w-full">Xem thông tin</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <CompanyImage position="bottom" />
+      </div>
+    )
+  }
+
+  // Manager dashboard
+  if (isManager) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-purple-600 mb-2">
+              Hệ thống Quản lý Học viên
+            </h1>
+            <p className="text-lg text-gray-600">
+              Xin chào, {session.user?.name}! (Quản lý)
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-purple-600">
+                  Bảng điều khiển KPI
+                </CardTitle>
+                <CardDescription>
+                  Theo dõi hiệu suất của nhân viên thông qua biểu đồ và thống kê
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-gray-600 mb-6">
+                  Xem biểu đồ KPI với các bộ lọc: Hôm nay, Tuần này (7 ngày), Tháng này (30 ngày)
+                </p>
+                <Link href="/kpi-dashboard">
+                  <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
+                    Xem Bảng điều khiển KPI
+                  </Button>
                 </Link>
               </CardContent>
             </Card>
