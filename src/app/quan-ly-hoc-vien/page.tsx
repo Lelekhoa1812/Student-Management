@@ -77,6 +77,10 @@ export default function StudentManagementPage() {
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const studentsPerPage = 10
+
   useEffect(() => {
     if (status === "loading") return
 
@@ -441,6 +445,17 @@ export default function StudentManagementPage() {
     return true
   })
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage)
+  const startIndex = (currentPage - 1) * studentsPerPage
+  const endIndex = startIndex + studentsPerPage
+  const currentStudents = filteredStudents.slice(startIndex, endIndex)
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [examStatusFilter, levelFilter, startDate, endDate])
+
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-gray-900">
@@ -567,7 +582,7 @@ export default function StudentManagementPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredStudents.map((student) => (
+                  {currentStudents.map((student) => (
                     <tr key={student.id} className={getStatusColor(student)}>
                       <td className="border border-gray-300 dark:border-gray-600 p-2">
                         {editingStudent === student.id ? (
@@ -791,8 +806,60 @@ export default function StudentManagementPage() {
               </table>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-              Tổng số học viên: {filteredStudents.length}
+            {/* Pagination */}
+            <div className="mt-6 flex items-center justify-between">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Hiển thị {startIndex + 1}-{Math.min(endIndex, filteredStudents.length)} trong tổng số {filteredStudents.length} học viên
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Trước
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i
+                      } else {
+                        pageNumber = currentPage - 2 + i
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNumber}
+                          variant={currentPage === pageNumber ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className="w-8 h-8 p-0"
+                        >
+                          {pageNumber}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

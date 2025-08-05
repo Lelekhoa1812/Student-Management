@@ -57,16 +57,34 @@ export default function KPIDashboardPage() {
     }
   }
 
-  const getChartData = () => {
-    return kpiData.map(item => ({
-      name: item.staffName,
-      [timeFilter === 'today' ? 'Giao dịch hôm nay' : timeFilter === 'week' ? 'Giao dịch tuần này' : 'Giao dịch tháng này']: 
-        timeFilter === 'today' ? item.todayCount : 
-        timeFilter === 'week' ? item.weekCount : item.monthCount,
-      [timeFilter === 'today' ? 'Lời nhắc hôm nay' : timeFilter === 'week' ? 'Lời nhắc tuần này' : 'Lời nhắc tháng này']: 
-        timeFilter === 'today' ? item.todayReminderCount : 
-        timeFilter === 'week' ? item.weekReminderCount : item.monthReminderCount
-    }))
+  const getPaymentChartData = () => {
+    return kpiData
+      .filter(item => {
+        const count = timeFilter === 'today' ? item.todayCount : 
+                     timeFilter === 'week' ? item.weekCount : item.monthCount
+        return count > 0
+      })
+      .map(item => ({
+        name: item.staffName,
+        [timeFilter === 'today' ? 'Giao dịch hôm nay' : timeFilter === 'week' ? 'Giao dịch tuần này' : 'Giao dịch tháng này']: 
+          timeFilter === 'today' ? item.todayCount : 
+          timeFilter === 'week' ? item.weekCount : item.monthCount
+      }))
+  }
+
+  const getReminderChartData = () => {
+    return kpiData
+      .filter(item => {
+        const count = timeFilter === 'today' ? item.todayReminderCount : 
+                     timeFilter === 'week' ? item.weekReminderCount : item.monthReminderCount
+        return count > 0
+      })
+      .map(item => ({
+        name: item.staffName,
+        [timeFilter === 'today' ? 'Lời nhắc hôm nay' : timeFilter === 'week' ? 'Lời nhắc tuần này' : 'Lời nhắc tháng này']: 
+          timeFilter === 'today' ? item.todayReminderCount : 
+          timeFilter === 'week' ? item.weekReminderCount : item.monthReminderCount
+      }))
   }
 
   const getTotalCount = () => {
@@ -199,22 +217,22 @@ export default function KPIDashboardPage() {
           </Card>
         </div>
 
-        {/* KPI Chart */}
-        <Card>
+        {/* Payment KPI Chart */}
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart className="w-5 h-5 text-purple-600" />
-              Biểu đồ KPI theo nhân viên
+              Biểu đồ KPI Giao dịch
             </CardTitle>
             <CardDescription>
-              Số lượng giao dịch và lời nhắc được xử lý bởi từng nhân viên
+              Số lượng giao dịch được xử lý bởi từng nhân viên
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {kpiData.length > 0 ? (
+            {getPaymentChartData().length > 0 ? (
               <div className="w-full overflow-x-auto">
                 <ResponsiveContainer width="100%" height={400} minWidth={300}>
-                  <BarChart data={getChartData()}>
+                  <BarChart data={getPaymentChartData()}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="name" 
@@ -232,6 +250,45 @@ export default function KPIDashboardPage() {
                                timeFilter === 'week' ? 'Giao dịch tuần này' : 'Giao dịch tháng này'} 
                       fill="#8b5cf6" 
                     />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-64">
+                <p className="text-gray-500">Không có dữ liệu giao dịch</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Reminder KPI Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart className="w-5 h-5 text-orange-600" />
+              Biểu đồ KPI Lời nhắc
+            </CardTitle>
+            <CardDescription>
+              Số lượng lời nhắc được tạo bởi từng nhân viên
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {getReminderChartData().length > 0 ? (
+              <div className="w-full overflow-x-auto">
+                <ResponsiveContainer width="100%" height={400} minWidth={300}>
+                  <BarChart data={getReminderChartData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
                     <Bar 
                       dataKey={timeFilter === 'today' ? 'Lời nhắc hôm nay' : 
                                timeFilter === 'week' ? 'Lời nhắc tuần này' : 'Lời nhắc tháng này'} 
@@ -242,7 +299,7 @@ export default function KPIDashboardPage() {
               </div>
             ) : (
               <div className="flex items-center justify-center h-64">
-                <p className="text-gray-500">Không có dữ liệu KPI</p>
+                <p className="text-gray-500">Không có dữ liệu lời nhắc</p>
               </div>
             )}
           </CardContent>
