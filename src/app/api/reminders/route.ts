@@ -15,6 +15,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const staffEmail = session.user.email
+    if (!staffEmail) {
+      return NextResponse.json({ error: "Staff email not found" }, { status: 400 })
+    }
 
     // Get staff ID
     const staff = await prisma.staff.findUnique({
@@ -63,6 +66,9 @@ export async function POST(request: NextRequest) {
     }
 
     const staffEmail = session.user.email
+    if (!staffEmail) {
+      return NextResponse.json({ error: "Staff email not found" }, { status: 400 })
+    }
     const staff = await prisma.staff.findUnique({
       where: { email: staffEmail }
     })

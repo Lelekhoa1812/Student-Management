@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { prisma } from "@/lib/db"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
+  if (!id) {
+    return NextResponse.json({ error: "Missing reminder ID" }, { status: 400 })
+  }
   try {
     const session = await getServerSession(authOptions)
     
@@ -24,6 +26,9 @@ export async function PUT(
     }
 
     const staffEmail = session.user.email
+    if (!staffEmail) {
+      return NextResponse.json({ error: "Staff email not found" }, { status: 400 })
+    }
     const staff = await prisma.staff.findUnique({
       where: { email: staffEmail }
     })
@@ -35,7 +40,7 @@ export async function PUT(
     // Verify the reminder belongs to this staff
     const existingReminder = await prisma.reminder.findFirst({
       where: {
-        id: params.id,
+        id: id,
         staffId: staff.id
       }
     })
@@ -45,7 +50,7 @@ export async function PUT(
     }
 
     const updatedReminder = await prisma.reminder.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         type,
         platform,
@@ -72,8 +77,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -82,6 +88,9 @@ export async function DELETE(
     }
 
     const staffEmail = session.user.email
+    if (!staffEmail) {
+      return NextResponse.json({ error: "Staff email not found" }, { status: 400 })
+    }
     const staff = await prisma.staff.findUnique({
       where: { email: staffEmail }
     })
@@ -93,7 +102,7 @@ export async function DELETE(
     // Verify the reminder belongs to this staff
     const existingReminder = await prisma.reminder.findFirst({
       where: {
-        id: params.id,
+        id: id,
         staffId: staff.id
       }
     })
@@ -103,7 +112,7 @@ export async function DELETE(
     }
 
     await prisma.reminder.delete({
-      where: { id: params.id }
+      where: { id: id }
     })
 
     return NextResponse.json({ message: "Reminder deleted successfully" })

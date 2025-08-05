@@ -1,16 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, Calendar, MessageSquare, Users } from "lucide-react"
-import Link from "next/link"
+import { Edit, Save, X, User, Mail, Phone, Calendar, Users } from "lucide-react"
 
 interface StaffData {
   id: string
@@ -31,23 +29,7 @@ export default function StaffInfoPage() {
   const [error, setError] = useState("")
   const [editedData, setEditedData] = useState<Partial<StaffData>>({})
 
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/dang-nhap")
-      return
-    }
-
-    if (session.user?.role !== "staff") {
-      router.push("/")
-      return
-    }
-
-    fetchStaffData()
-  }, [session, status, router])
-
-  const fetchStaffData = async () => {
+  const fetchStaffData = useCallback(async () => {
     try {
       const response = await fetch(`/api/staff?email=${session?.user?.email}`)
       if (response.ok) {
@@ -68,7 +50,23 @@ export default function StaffInfoPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [session?.user?.email])
+
+  useEffect(() => {
+    if (status === "loading") return
+
+    if (!session) {
+      router.push("/dang-nhap")
+      return
+    }
+
+    if (session.user?.role !== "staff") {
+      router.push("/")
+      return
+    }
+
+    fetchStaffData()
+  }, [session, status, router, fetchStaffData])
 
   const handleEdit = () => {
     setIsEditing(true)

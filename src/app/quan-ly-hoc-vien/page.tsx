@@ -574,7 +574,7 @@ export default function StudentManagementPage() {
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-40">Trường học</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-32">Nền tảng</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-40">Ghi chú</th>
-                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-56">Lớp học</th>
+                    <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-80">Lớp học</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100 w-24">Điểm thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Ngày thi</th>
                     <th className="border border-gray-300 dark:border-gray-600 p-2 text-left text-gray-900 dark:text-gray-100">Level</th>
@@ -660,7 +660,7 @@ export default function StudentManagementPage() {
                           <span className="text-gray-900 dark:text-gray-100">{student.note || "Không có"}</span>
                         )}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-56">
+                      <td className="border border-gray-300 dark:border-gray-600 p-2 w-80">
                         {editingStudent === student.id ? (
                           <div className="space-y-2">
                             <select
@@ -673,7 +673,8 @@ export default function StudentManagementPage() {
                                   classIds: selectedOptions
                                 })
                               }}
-                              className="w-full p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 min-h-[80px]"
+                              className="w-full p-1 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 min-h-[80px] text-sm"
+                              style={{ minWidth: '170px' }}
                             >
                               {classes.map((cls) => (
                                 <option key={cls.id} value={cls.id}>
@@ -707,6 +708,7 @@ export default function StudentManagementPage() {
                               }
                             })}
                             className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                            style={{ minWidth: '50px' }}
                           />
                         ) : (
                           <span className="text-gray-900 dark:text-gray-100">
