@@ -441,7 +441,7 @@ export default function ReminderPage() {
         </Card>
       </div>
 
-      <CompanyImage position="bottom" />
+      {/* <CompanyImage position="bottom" /> */}
     </div>
   )
 } 
