@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, BookOpen, CreditCard, Settings, UserPlus } from "lucide-react"
+import { Users, BookOpen, CreditCard, Settings, UserPlus, Calendar } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
