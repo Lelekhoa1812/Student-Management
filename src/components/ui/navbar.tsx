@@ -55,7 +55,7 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/quan-ly-lop-hoc", label: "Quản lý lớp học" },
         { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
         { href: "/hen-lich-nhac", label: "Hẹn lịch nhắc" },
-        { href: "/cai-dat-nguong", label: "Cài đặt level" },
+        { href: "/feedback-khach-hang", label: "Phản hồi khách hàng" },
       ]
     : isManager
     ? [

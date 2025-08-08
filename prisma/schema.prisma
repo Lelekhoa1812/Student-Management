@@ -176,4 +176,17 @@ model Reminder {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Feedback {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  userRole    String   // "user", "staff", "manager"
+  type        String   // "bug", "feature", "complaint", "suggestion", "other"
+  title       String
+  description String
+  screenshot  String?  // URL to uploaded screenshot
+  status      String   @default("pending") // "pending", "in_progress", "resolved", "closed"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 } 

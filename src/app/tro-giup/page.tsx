@@ -1,15 +1,18 @@
 "use client"
 
+import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { ArrowLeft, HelpCircle, Users, UserCheck, UserCog } from "lucide-react"
+import { ArrowLeft, HelpCircle, Users, UserCheck, UserCog, MessageSquare } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { FeedbackModal } from "@/components/ui/feedback-modal"
 
 export default function HelpPage() {
   const { data: session } = useSession()
   const userRole = session?.user?.role || "user"
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
   
   // Map 'user' role to 'student' for display purposes
   const displayRole = userRole === "user" ? "student" : userRole
@@ -675,27 +678,38 @@ export default function HelpPage() {
           </div>
         )}
 
-        {/* Contact Support */}
+        {/* Feedback Section */}
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>📞 Cần hỗ trợ thêm?</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <MessageSquare className="h-5 w-5" />
+              <span>Cần hỗ trợ thêm?</span>
+            </CardTitle>
             <CardDescription>
-              Nếu bạn cần hỗ trợ thêm hoặc gặp vấn đề khi sử dụng hệ thống
+              Gửi phản hồi về hệ thống, báo lỗi hoặc đề xuất cải tiến
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <p className="text-gray-600 dark:text-gray-300">
-                Vui lòng liên hệ:
+                Chúng tôi luôn sẵn sàng lắng nghe ý kiến của bạn để cải thiện hệ thống.
               </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
-                <li><strong>Email:</strong> support@haiauacademy.com</li>
-                <li><strong>Điện thoại:</strong> 0123-456-789</li>
-                <li><strong>Giờ làm việc:</strong> 8:00 - 17:00 (Thứ 2 - Thứ 6)</li>
-              </ul>
+              <Button
+                onClick={() => setIsFeedbackModalOpen(true)}
+                className="flex items-center space-x-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span>Gửi phản hồi</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Feedback Modal */}
+        <FeedbackModal
+          isOpen={isFeedbackModalOpen}
+          onClose={() => setIsFeedbackModalOpen(false)}
+        />
       </div>
     </div>
   )
