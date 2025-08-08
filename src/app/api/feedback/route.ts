@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db"
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const feedback = await prisma.feedback.create({
       data: {
         userId: session.user.id,
-        userRole: session.user.role,
+        userRole: session.user.role || "user",
         type,
         title,
         description,
