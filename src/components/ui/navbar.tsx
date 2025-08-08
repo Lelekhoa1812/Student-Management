@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun, LogOut, Menu, X } from "lucide-react"
+import { Moon, Sun, LogOut, Menu, X, HelpCircle } from "lucide-react"
 import { useTheme } from "next-themes"
 
 interface NavbarProps {
@@ -106,7 +106,7 @@ export function Navbar({ className }: NavbarProps) {
               ))}
             </div>
 
-            {/* Right side - Theme Toggle and Logout */}
+            {/* Right side - Theme Toggle, Help, and Logout */}
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
@@ -120,6 +120,17 @@ export function Navbar({ className }: NavbarProps) {
                   <Moon className="h-5 w-5" />
                 )}
               </Button>
+
+              <Link href="/tro-giup">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2"
+                  title="Trợ giúp"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </Button>
+              </Link>
 
               <Button
                 variant="ghost"
