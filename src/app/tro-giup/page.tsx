@@ -360,54 +360,127 @@ export default function HelpPage() {
                     </div>
                   </div>
 
-                  {/* Quản lý ghi danh */}
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      📝 Quản lý ghi danh
-                    </h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Image
-                          src="/imgsrc/staff/quan-ly-ghi-danh/paid.png"
-                          alt="Thanh toán đã hoàn thành"
-                          width={600}
-                          height={400}
-                          className="rounded-lg border shadow-sm"
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-gray-600 dark:text-gray-300">
-                          <strong>Thanh toán đã hoàn thành:</strong>
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
-                          <li>Xem danh sách học viên đã thanh toán</li>
-                          <li>Chi tiết khóa học và số tiền</li>
-                          <li>Ngày thanh toán và phương thức</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Image
-                          src="/imgsrc/staff/quan-ly-ghi-danh/unpaid.png"
-                          alt="Thanh toán chưa hoàn thành"
-                          width={600}
-                          height={400}
-                          className="rounded-lg border shadow-sm"
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-gray-600 dark:text-gray-300">
-                          <strong>Thanh toán chưa hoàn thành:</strong>
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
-                          <li>Xem danh sách học viên chưa thanh toán</li>
-                          <li>Thông tin khóa học và số tiền cần thanh toán</li>
-                          <li>Tạo nhắc nhở thanh toán</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+                                     {/* Quản lý ghi danh */}
+                   <div className="space-y-4">
+                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                       📝 Quản lý ghi danh
+                     </h3>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/staff/quan-ly-ghi-danh/paid.png"
+                           alt="Thanh toán đã hoàn thành"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Thanh toán đã hoàn thành:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Xem danh sách học viên đã thanh toán</li>
+                           <li>Chi tiết khóa học và số tiền</li>
+                           <li>Ngày thanh toán và phương thức</li>
+                         </ul>
+                       </div>
+                     </div>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/staff/quan-ly-ghi-danh/unpaid.png"
+                           alt="Thanh toán chưa hoàn thành"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Thanh toán chưa hoàn thành:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Xem danh sách học viên chưa thanh toán</li>
+                           <li>Thông tin khóa học và số tiền cần thanh toán</li>
+                           <li>Tạo nhắc nhở thanh toán</li>
+                         </ul>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Quản lý lớp học */}
+                   <div className="space-y-4">
+                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                       🎓 Quản lý lớp học
+                     </h3>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/staff/quan-ly-lop-hoc/add-class.png"
+                           alt="Thêm lớp học mới"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Tạo lớp học mới:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Nhập thông tin chi tiết lớp học</li>
+                           <li>Chọn giáo viên phụ trách</li>
+                           <li>Thiết lập lịch học và sĩ số tối đa</li>
+                           <li>Kích hoạt lớp học</li>
+                         </ul>
+                       </div>
+                     </div>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/staff/quan-ly-lop-hoc/edit-class.png"
+                           alt="Chỉnh sửa lớp học"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Chỉnh sửa lớp học:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Cập nhật thông tin lớp học</li>
+                           <li>Thay đổi giáo viên phụ trách</li>
+                           <li>Điều chỉnh lịch học và sĩ số</li>
+                           <li>Vô hiệu hóa lớp học nếu cần</li>
+                         </ul>
+                       </div>
+                     </div>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/staff/quan-ly-lop-hoc/edit-student.png"
+                           alt="Chỉnh sửa học viên trong lớp"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Quản lý học viên trong lớp:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Xem danh sách học viên trong lớp</li>
+                           <li>Thêm/xóa học viên khỏi lớp</li>
+                           <li>Cập nhật thông tin học viên</li>
+                           <li>Theo dõi trạng thái học tập</li>
+                         </ul>
+                       </div>
+                     </div>
+                   </div>
                 </CardContent>
               </Card>
             </div>
@@ -507,34 +580,107 @@ export default function HelpPage() {
                     </div>
                   </div>
 
-                  {/* Quản lý ghi danh */}
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      📝 Quản lý ghi danh
-                    </h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Image
-                          src="/imgsrc/manager/quan-ly-ghi-danh.png"
-                          alt="Quản lý ghi danh"
-                          width={600}
-                          height={400}
-                          className="rounded-lg border shadow-sm"
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-gray-600 dark:text-gray-300">
-                          <strong>Quản lý ghi danh tổng thể:</strong>
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
-                          <li>Xem toàn bộ quá trình ghi danh</li>
-                          <li>Thống kê theo lớp học và nhân viên</li>
-                          <li>Theo dõi trạng thái đăng ký</li>
-                          <li>Phân tích hiệu quả ghi danh</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+                                     {/* Quản lý ghi danh */}
+                   <div className="space-y-4">
+                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                       📝 Quản lý ghi danh
+                     </h3>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/manager/quan-ly-ghi-danh.png"
+                           alt="Quản lý ghi danh"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Quản lý ghi danh tổng thể:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Xem toàn bộ quá trình ghi danh</li>
+                           <li>Thống kê theo lớp học và nhân viên</li>
+                           <li>Theo dõi trạng thái đăng ký</li>
+                           <li>Phân tích hiệu quả ghi danh</li>
+                         </ul>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Quản lý lớp học */}
+                   <div className="space-y-4">
+                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                       🎓 Quản lý lớp học
+                     </h3>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/manager/quan-ly-lop-hoc/add-class.png"
+                           alt="Thêm lớp học mới"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Tạo lớp học mới:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Nhập thông tin chi tiết lớp học</li>
+                           <li>Chọn giáo viên phụ trách</li>
+                           <li>Thiết lập lịch học và sĩ số tối đa</li>
+                           <li>Kích hoạt lớp học</li>
+                         </ul>
+                       </div>
+                     </div>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/manager/quan-ly-lop-hoc/edit-class.png"
+                           alt="Chỉnh sửa lớp học"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Chỉnh sửa lớp học:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Cập nhật thông tin lớp học</li>
+                           <li>Thay đổi giáo viên phụ trách</li>
+                           <li>Điều chỉnh lịch học và sĩ số</li>
+                           <li>Vô hiệu hóa lớp học nếu cần</li>
+                         </ul>
+                       </div>
+                     </div>
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <Image
+                           src="/imgsrc/manager/quan-ly-lop-hoc/edit-student.png"
+                           alt="Chỉnh sửa học viên trong lớp"
+                           width={600}
+                           height={400}
+                           className="rounded-lg border shadow-sm"
+                         />
+                       </div>
+                       <div className="space-y-3">
+                         <p className="text-gray-600 dark:text-gray-300">
+                           <strong>Quản lý học viên trong lớp:</strong>
+                         </p>
+                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                           <li>Xem danh sách học viên trong lớp</li>
+                           <li>Thêm/xóa học viên khỏi lớp</li>
+                           <li>Cập nhật thông tin học viên</li>
+                           <li>Theo dõi trạng thái học tập</li>
+                         </ul>
+                       </div>
+                     </div>
+                   </div>
                 </CardContent>
               </Card>
             </div>
