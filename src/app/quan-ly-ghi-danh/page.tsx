@@ -63,6 +63,7 @@ export default function RegistrationManagementPage() {
     have_paid: false,
     payment_method: ""
   })
+  const [exportingPaymentId, setExportingPaymentId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === "loading") return
@@ -185,18 +186,25 @@ export default function RegistrationManagementPage() {
   }
 
   // Export payment to PDF
-  const handleExportPayment = (payment: Payment) => {
-    const paymentData: PaymentData = {
-      studentName: payment.student.name,
-      className: payment.class.name,
-      amount: payment.payment_amount,
-      paymentMethod: payment.payment_method,
-      staffName: payment.staff.name,
-      isPaid: payment.have_paid,
-      paymentDate: payment.have_paid ? formatDate(payment.datetime) : formatDate(new Date().toISOString())
-    }
+  const handleExportPayment = async (payment: Payment) => {
+    setExportingPaymentId(payment.id)
+    try {
+      const paymentData: PaymentData = {
+        studentName: payment.student.name,
+        className: payment.class.name,
+        amount: payment.payment_amount,
+        paymentMethod: payment.payment_method,
+        staffName: payment.staff.name,
+        isPaid: payment.have_paid,
+        paymentDate: payment.have_paid ? formatDate(payment.datetime) : formatDate(new Date().toISOString())
+      }
 
-    exportSinglePaymentToPDF(paymentData)
+      exportSinglePaymentToPDF(paymentData)
+    } catch (error) {
+      console.error('Error exporting PDF:', error)
+    } finally {
+      setExportingPaymentId(null)
+    }
   }
 
   const getFilterButtonClass = (filter: "all" | "paid" | "unpaid") => {
@@ -438,20 +446,40 @@ export default function RegistrationManagementPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleExportPayment(payment)}
-                                className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+                                disabled={exportingPaymentId === payment.id}
+                                className="bg-green-600 hover:bg-green-700 text-white border-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                <FileText className="w-4 h-4 mr-1" />
-                                Xuất hoá đơn
+                                {exportingPaymentId === payment.id ? (
+                                  <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                                    Đang xuất...
+                                  </>
+                                ) : (
+                                  <>
+                                    <FileText className="w-4 h-4 mr-1" />
+                                    Xuất hoá đơn
+                                  </>
+                                )}
                               </Button>
                             ) : (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleExportPayment(payment)}
-                                className="bg-red-600 hover:bg-red-700 text-white border-red-600"
+                                disabled={exportingPaymentId === payment.id}
+                                className="bg-red-600 hover:bg-red-700 text-white border-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                <FileText className="w-4 h-4 mr-1" />
-                                Xuất lời nhắc
+                                {exportingPaymentId === payment.id ? (
+                                  <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                                    Đang xuất...
+                                  </>
+                                ) : (
+                                  <>
+                                    <FileText className="w-4 h-4 mr-1" />
+                                    Xuất lời nhắc
+                                  </>
+                                )}
                               </Button>
                             )}
                             {session.user?.role === "staff" && (

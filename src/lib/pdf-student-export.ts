@@ -8,8 +8,7 @@ import {
   setupVietnameseFonts,
   processVietnameseText,
   addFooterAfterTable,
-  addSafeText,
-  toSafeFileName
+  addSafeText
 } from './pdf-utils-base'
 
 // Export all students to PDF with improved layout

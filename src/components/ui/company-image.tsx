@@ -33,23 +33,29 @@ export function CompanyImage({ className, position = "top" }: CompanyImageProps)
   }
 
   // Footer version - full width banner
+  // Fixed: Changed from object-cover to object-contain to prevent image cropping
+  // Added responsive design and proper height constraints
   return (
     <div className={cn(
-      "w-full mt-8",
+      "w-full mt-8 flex justify-center px-4", // Added padding for mobile
       className
     )}>
-      <div className="relative group">
+      <div className="relative group w-full max-w-6xl">
         <Image
           src="/company.JPG"
           alt="Company Information"
           width={1920}
           height={400}
-          className="w-full h-auto object-cover transition-all duration-300 group-hover:scale-105 shadow-lg"
+          className="w-full h-auto object-contain transition-all duration-300 group-hover:scale-105 shadow-lg rounded-lg" // Added rounded corners
           style={{
-            minHeight: '150px',
-            maxHeight: '300px'
+            maxHeight: '400px', // Allow natural height, just set a reasonable maximum
+            objectFit: 'contain', // Ensure the entire image is visible
+            objectPosition: 'center', // Center the image within its container
+            minHeight: 'auto' // Remove any minimum height constraints
           }}
           priority
+          onLoad={() => console.log('✅ Company image loaded successfully in footer')}
+          onError={(e) => console.error('❌ Company image failed to load:', e)}
         />
       </div>
     </div>

@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, GraduationCap, Calendar, MessageSquare, Lock, Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, Edit, Save, X, User, Mail, Phone, MapPin, GraduationCap, Calendar, MessageSquare, Lock, Eye, EyeOff, FileText } from "lucide-react"
 import Link from "next/link"
+import { exportStudentsToPDF, StudentData as PDFStudentData } from "@/lib/pdf-utils"
 
 interface StudentData {
   id: string
@@ -32,6 +33,7 @@ export default function StudentInfoPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isExportingPDF, setIsExportingPDF] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [editedData, setEditedData] = useState<Partial<StudentData>>({})
@@ -228,6 +230,33 @@ export default function StudentInfoPage() {
     })
     setError("")
     setSuccess("")
+  }
+
+  // Export student info to PDF
+  const handleExportToPDF = async () => {
+    if (!studentData) return
+    
+    setIsExportingPDF(true)
+    try {
+      const studentDataForPDF: PDFStudentData[] = [{
+        name: studentData.name,
+        email: studentData.gmail,
+        phone: studentData.phoneNumber,
+        school: studentData.school,
+        platform: studentData.platformKnown,
+        note: studentData.note || '',
+        classes: 'Không có lớp học', // Students can't see their classes on this page
+        examScore: 'Chưa có',
+        examDate: 'Chưa có',
+        level: 'Chưa có'
+      }]
+
+      exportStudentsToPDF(studentDataForPDF, 'Thông tin cá nhân học viên')
+    } catch (error) {
+      console.error('Error exporting PDF:', error)
+    } finally {
+      setIsExportingPDF(false)
+    }
   }
 
   if (status === "loading" || isLoading) {
@@ -569,7 +598,24 @@ export default function StudentInfoPage() {
                 </Button>
               </div>
             ) : (
-              <div className="flex justify-end mt-6">
+              <div className="flex justify-between items-center mt-6">
+                <Button
+                  onClick={handleExportToPDF}
+                  disabled={isExportingPDF}
+                  className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isExportingPDF ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Đang xuất PDF...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Xuất PDF thông tin
+                    </>
+                  )}
+                </Button>
                 <Button onClick={handleEdit} disabled={isChangingPassword}>
                   <Edit className="w-4 h-4 mr-2" />
                   Chỉnh sửa thông tin

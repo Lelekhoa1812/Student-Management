@@ -17,7 +17,6 @@ export { exportPaymentToPDF, exportSinglePaymentToPDF } from './pdf-payment-expo
 export { 
   addSafeText, 
   addCompanyFooter, 
-  addPageHeader,
   addHeader,
   setupVietnameseFonts
 } from './pdf-utils-base'

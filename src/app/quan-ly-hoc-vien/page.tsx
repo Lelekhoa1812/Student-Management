@@ -57,6 +57,7 @@ export default function StudentManagementPage() {
   const [classes, setClasses] = useState<Class[]>([])
   const [levelThresholds, setLevelThresholds] = useState<LevelThreshold[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isExportingPDF, setIsExportingPDF] = useState(false)
   const [editingStudent, setEditingStudent] = useState<string | null>(null)
   const [editedData, setEditedData] = useState<Partial<Student> & { classIds?: string[] }>({})
   const [isSaving, setIsSaving] = useState(false)
@@ -458,34 +459,41 @@ export default function StudentManagementPage() {
   }, [examStatusFilter, levelFilter, startDate, endDate])
 
   // Export students to PDF
-  const handleExportToPDF = () => {
-    const studentData: StudentData[] = filteredStudents.map(student => ({
-      name: student.name,
-      email: student.gmail,
-      phone: student.phoneNumber,
-      school: student.school,
-      platform: student.platformKnown,
-      note: student.note || '',
-      classes: student.studentClasses && student.studentClasses.length > 0 
-        ? student.studentClasses.map(sc => `${sc.class.name} (${sc.class.level})`).join(', ')
-        : 'Khong co lop',
-      examScore: student.examResult?.score?.toString() || 'Chua co',
-      examDate: student.examResult?.examDate 
-        ? new Date(student.examResult.examDate).toLocaleDateString('vi-VN')
-        : 'Chua co',
-      level: student.examResult?.levelEstimate || 'Chua co'
-    }))
+  const handleExportToPDF = async () => {
+    setIsExportingPDF(true)
+    try {
+      const studentData: StudentData[] = filteredStudents.map(student => ({
+        name: student.name,
+        email: student.gmail,
+        phone: student.phoneNumber,
+        school: student.school,
+        platform: student.platformKnown,
+        note: student.note || '',
+        classes: student.studentClasses && student.studentClasses.length > 0 
+          ? student.studentClasses.map(sc => `${sc.class.name} (${sc.class.level})`).join(', ')
+          : 'Khong co lop',
+        examScore: student.examResult?.score?.toString() || 'Chua co',
+        examDate: student.examResult?.examDate 
+          ? new Date(student.examResult.examDate).toLocaleDateString('vi-VN')
+          : 'Chua co',
+        level: student.examResult?.levelEstimate || 'Chua co'
+      }))
 
-    // Build filters description
-    const filters = []
-    if (examStatusFilter !== 'all') filters.push(`Trang thai thi: ${examStatusFilter}`)
-    if (levelFilter !== 'all') filters.push(`Level: ${levelFilter}`)
-    if (startDate) filters.push(`Tu ngay: ${startDate}`)
-    if (endDate) filters.push(`Den ngay: ${endDate}`)
-    
-    const filtersText = filters.length > 0 ? filters.join(', ') : ''
+      // Build filters description
+      const filters = []
+      if (examStatusFilter !== 'all') filters.push(`Trang thai thi: ${examStatusFilter}`)
+      if (levelFilter !== 'all') filters.push(`Level: ${levelFilter}`)
+      if (startDate) filters.push(`Tu ngay: ${startDate}`)
+      if (endDate) filters.push(`Den ngay: ${endDate}`)
+      
+      const filtersText = filters.length > 0 ? filters.join(', ') : ''
 
-    exportStudentsToPDF(studentData, filtersText)
+      exportStudentsToPDF(studentData, filtersText)
+    } catch (error) {
+      console.error('Error exporting PDF:', error)
+    } finally {
+      setIsExportingPDF(false)
+    }
   }
 
   if (status === "loading" || isLoading) {
@@ -549,10 +557,20 @@ export default function StudentManagementPage() {
                 </div>
                 <Button
                   onClick={handleExportToPDF}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={isExportingPDF}
+                  className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Xuất PDF học viên
+                  {isExportingPDF ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Đang xuất PDF...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Xuất PDF học viên
+                    </>
+                  )}
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

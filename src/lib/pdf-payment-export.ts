@@ -27,8 +27,8 @@ export const exportSinglePaymentToPDF = (paymentData: PaymentData) => {
     addHeader(doc, paymentData.isPaid ? 'HOÁ ĐƠN THANH TOÁN' : 'LỜI NHẮC THANH TOÁN')
     
     // Add company info with better spacing from title
-    doc.setFontSize(14) // Increased font size for better readability
-    doc.setTextColor(100, 100, 100)
+    doc.setFontSize(30) // Increased font size for better readability
+    doc.setTextColor(255, 165, 0)
     addSafeText(doc, 'Hải Âu Academy', 105, 55, { align: 'center' }) // Increased Y position for better spacing
     
     // Add payment details with better spacing
