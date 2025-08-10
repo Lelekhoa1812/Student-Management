@@ -20,7 +20,7 @@ import {
   Edit,
   FileText
 } from "lucide-react"
-import { exportPaymentToPDF, PaymentData } from "@/lib/pdf-utils"
+import { exportSinglePaymentToPDF, PaymentData } from "@/lib/pdf-utils"
 
 interface Payment {
   id: string
@@ -196,7 +196,7 @@ export default function RegistrationManagementPage() {
       paymentDate: payment.have_paid ? formatDate(payment.datetime) : formatDate(new Date().toISOString())
     }
 
-    exportPaymentToPDF(paymentData)
+    exportSinglePaymentToPDF(paymentData)
   }
 
   const getFilterButtonClass = (filter: "all" | "paid" | "unpaid") => {
@@ -451,7 +451,7 @@ export default function RegistrationManagementPage() {
                                 className="bg-red-600 hover:bg-red-700 text-white border-red-600"
                               >
                                 <FileText className="w-4 h-4 mr-1" />
-                                Xuất lời nhắc thanh toán
+                                Xuất lời nhắc
                               </Button>
                             )}
                             {session.user?.role === "staff" && (

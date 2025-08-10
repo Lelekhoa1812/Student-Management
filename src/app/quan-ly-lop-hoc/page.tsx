@@ -296,7 +296,7 @@ export default function ClassManagementPage() {
           maxStudents: classWithStudents.maxStudents,
           paymentAmount: classWithStudents.payment_amount || 0,
           teacherName: classWithStudents.teacherName || 'Chua phan cong',
-          students: classWithStudents.studentClasses?.map((studentClass: any) => ({
+          students: classWithStudents.studentClasses?.map((studentClass: { student: Student }) => ({
             name: studentClass.student.name,
             examScore: 'Chua co', // We'll need to fetch this separately
             paymentStatus: 'Da thanh toan' // This would need to be fetched from payments API

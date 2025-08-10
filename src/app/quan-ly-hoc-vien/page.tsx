@@ -552,7 +552,7 @@ export default function StudentManagementPage() {
                   className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   <FileText className="w-4 h-4 mr-2" />
-                  Xuất PDF tất cả học viên
+                  Xuất PDF học viên
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
