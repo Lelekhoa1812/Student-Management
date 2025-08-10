@@ -1,3 +1,4 @@
+// src/lib/pdf-utils.ts
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -46,34 +47,73 @@ const addCompanyFooter = (doc: jsPDF, pageNumber: number) => {
   const pageWidth = doc.internal.pageSize.width
   const pageHeight = doc.internal.pageSize.height
   
-  // Add company logo at bottom left
+  // Define image dimensions
+  const imageHeight = 60 // Fixed height for footer banner
+  const imageWidth = pageWidth - 20 // Full width minus margins
+  
+  // Add company banner image spanning full width at bottom
   try {
-    doc.addImage(COMPANY_LOGO, 'JPEG', 10, pageHeight - 30, 20, 20)
+    doc.addImage(COMPANY_LOGO, 'JPEG', 10, pageHeight - imageHeight - 10, imageWidth, imageHeight)
   } catch (error) {
     console.warn('Could not load company logo:', error)
   }
   
-  // Add company name and page info at bottom right
+  // Add company name and page info at bottom right, above the image
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)
-  doc.text(`${COMPANY_NAME} - Trang ${pageNumber}`, pageWidth - 20, pageHeight - 15, { align: 'right' })
-  doc.text(`Xuất bản: ${new Date().toLocaleDateString('vi-VN')}`, pageWidth - 20, pageHeight - 10, { align: 'right' })
+  doc.text(`${COMPANY_NAME} - Trang ${pageNumber}`, pageWidth - 20, pageHeight - imageHeight - 20, { align: 'right' })
+  doc.text(`Xuat ban: ${new Date().toLocaleDateString('vi-VN')}`, pageWidth - 20, pageHeight - imageHeight - 15, { align: 'right' })
 }
 
 // Helper function to add Vietnamese text with proper encoding
 const addVietnameseText = (doc: jsPDF, text: string, x: number, y: number, options?: any) => {
-  // Use a font that supports Vietnamese characters better
-  doc.setFont('helvetica')
-  
-  // For better Vietnamese support, we'll use the default text method
-  // but ensure proper font loading
   try {
+    // Set font to helvetica which has better support for extended characters
+    doc.setFont('helvetica')
+    
+    // Try to add the text as-is first - this should work for most Vietnamese characters
     doc.text(text, x, y, options)
   } catch (error) {
     console.warn('Error adding Vietnamese text:', error, 'Text:', text)
-    // Fallback: try to add text without special characters
-    const fallbackText = text.replace(/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/g, 'a')
-    doc.text(fallbackText, x, y, options)
+    
+    // If that fails, try with a simplified version that removes problematic characters
+    try {
+      // Remove only the most problematic characters that might cause issues
+      const simplifiedText = text
+        .replace(/[^\x00-\x7F\u00A0-\u00FF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF\u2C60-\u2C7F\uA720-\uA7FF]/g, '')
+        .trim()
+      
+      if (simplifiedText && simplifiedText.length > 0) {
+        doc.text(simplifiedText, x, y, options)
+      } else {
+        // If simplified text is empty, use the original text with basic fallback
+        const fallbackText = text
+          .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+          .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+          .replace(/[ìíịỉĩ]/g, 'i')
+          .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+          .replace(/[ùúụủũưừứựửữ]/g, 'u')
+          .replace(/[ỳýỵỷỹ]/g, 'y')
+          .replace(/[đ]/g, 'd')
+          .replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, 'A')
+          .replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, 'E')
+          .replace(/[ÌÍỊỈĨ]/g, 'I')
+          .replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, 'O')
+          .replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, 'U')
+          .replace(/[ỲÝỴỶỸ]/g, 'Y')
+          .replace(/[Đ]/g, 'D')
+        
+        doc.text(fallbackText, x, y, options)
+      }
+    } catch (fallbackError) {
+      console.error('All fallback methods failed for text:', text)
+      // Last resort: try to add empty string or basic text
+      try {
+        doc.text('', x, y, options)
+      } catch (finalError) {
+        console.error('Final fallback also failed:', finalError)
+      }
+    }
   }
 }
 
@@ -87,20 +127,20 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
     // Add header
     doc.setFontSize(20)
     doc.setTextColor(59, 130, 246) // Blue color
-    addVietnameseText(doc, 'DANH SÁCH HỌC VIÊN', 105, 20, { align: 'center' })
+    addVietnameseText(doc, 'DANH SACH HOC VIEN', 105, 20, { align: 'center' })
     
     // Add subtitle with filters if any
     if (filters) {
       doc.setFontSize(12)
       doc.setTextColor(100, 100, 100)
-      addVietnameseText(doc, `Bộ lọc: ${filters}`, 105, 30, { align: 'center' })
+      addVietnameseText(doc, `Bo loc: ${filters}`, 105, 30, { align: 'center' })
     }
     
     // Add export info
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
-    addVietnameseText(doc, `Tổng số học viên: ${students.length}`, 20, 40)
-    addVietnameseText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 45)
+    addVietnameseText(doc, `Tong so hoc vien: ${students.length}`, 20, 40)
+    addVietnameseText(doc, `Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}`, 20, 45)
     
     // Prepare table data
     const tableData = students.map(student => [
@@ -109,11 +149,11 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
       student.phone,
       student.school,
       student.platform,
-      student.note || 'Không có',
-      student.classes || 'Không có lớp',
-      student.examScore || 'Chưa có',
-      student.examDate || 'Chưa có',
-      student.level || 'Chưa có'
+      student.note || 'Khong co',
+      student.classes || 'Khong co lop',
+      student.examScore || 'Chua co',
+      student.examDate || 'Chua co',
+      student.level || 'Chua co'
     ])
     
     console.log('Table data prepared:', tableData) // Debug log
@@ -122,15 +162,15 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
     try {
       autoTable(doc, {
         head: [[
-          'Họ tên',
+          'Ho ten',
           'Email', 
-          'SĐT',
-          'Trường học',
-          'Nền tảng',
-          'Ghi chú',
-          'Lớp học',
-          'Điểm thi',
-          'Ngày thi',
+          'SDT',
+          'Truong hoc',
+          'Nen tang',
+          'Ghi chu',
+          'Lop hoc',
+          'Diem thi',
+          'Ngay thi',
           'Level'
         ]],
         body: tableData,
@@ -170,7 +210,7 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
       // Fallback: add text manually if table fails
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
-      addVietnameseText(doc, 'Lỗi khi tạo bảng dữ liệu', 20, 60)
+      addVietnameseText(doc, 'Loi khi tao bang du lieu', 20, 60)
     }
     
     // Save PDF
@@ -180,7 +220,7 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
     
   } catch (error) {
     console.error('Error in exportStudentsToPDF:', error)
-    alert('Có lỗi xảy ra khi xuất PDF. Vui lòng kiểm tra console để biết thêm chi tiết.')
+    alert('Co loi xay ra khi xuat PDF. Vui long kiem tra console de biet them chi tiet.')
   }
 }
 
@@ -193,16 +233,16 @@ export const exportClassToPDF = (classData: ClassData) => {
   // Add header
   doc.setFontSize(20)
   doc.setTextColor(59, 130, 246)
-  addVietnameseText(doc, 'THÔNG TIN LỚP HỌC', 105, 20, { align: 'center' })
+  addVietnameseText(doc, 'THONG TIN LOP HOC', 105, 20, { align: 'center' })
   
   // Add class details with better spacing
   doc.setFontSize(14)
   doc.setTextColor(0, 0, 0)
-  addVietnameseText(doc, `Tên lớp: ${classData.name}`, 20, 40)
+  addVietnameseText(doc, `Ten lop: ${classData.name}`, 20, 40)
   addVietnameseText(doc, `Level: ${classData.level}`, 20, 55)
-  addVietnameseText(doc, `Số học viên tối đa: ${classData.maxStudents}`, 20, 70)
-  addVietnameseText(doc, `Học phí: ${classData.paymentAmount.toLocaleString('vi-VN')} VNĐ`, 20, 85)
-  addVietnameseText(doc, `Giáo viên: ${classData.teacherName || 'Chưa phân công'}`, 20, 100)
+  addVietnameseText(doc, `So hoc vien toi da: ${classData.maxStudents}`, 20, 70)
+  addVietnameseText(doc, `Hoc phi: ${classData.paymentAmount.toLocaleString('vi-VN')} VND`, 20, 85)
+  addVietnameseText(doc, `Giao vien: ${classData.teacherName || 'Chua phan cong'}`, 20, 100)
   
   // Add student table
   if (classData.students && classData.students.length > 0) {
@@ -210,11 +250,11 @@ export const exportClassToPDF = (classData: ClassData) => {
     
     doc.setFontSize(12)
     doc.setTextColor(59, 130, 246)
-    addVietnameseText(doc, 'Danh sách học viên:', 20, 120)
+    addVietnameseText(doc, 'Danh sach hoc vien:', 20, 120)
     
     const tableData = classData.students.map(student => [
       student.name,
-      student.examScore || 'Chưa có',
+      student.examScore || 'Chua co',
       student.paymentStatus
     ])
     
@@ -222,7 +262,7 @@ export const exportClassToPDF = (classData: ClassData) => {
     
     try {
       autoTable(doc, {
-        head: [['Họ tên', 'Điểm thi', 'Trạng thái thanh toán']],
+        head: [['Ho ten', 'Diem thi', 'Trang thai thanh toan']],
         body: tableData,
         startY: 130,
         styles: {
@@ -251,13 +291,13 @@ export const exportClassToPDF = (classData: ClassData) => {
       // Fallback: add text manually if table fails
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
-      addVietnameseText(doc, 'Lỗi khi tạo bảng học viên', 20, 140)
+      addVietnameseText(doc, 'Loi khi tao bang hoc vien', 20, 140)
     }
   } else {
     console.log('No students found in class data') // Debug log
     doc.setFontSize(12)
     doc.setTextColor(100, 100, 100)
-    addVietnameseText(doc, 'Chưa có học viên nào trong lớp', 20, 120)
+    addVietnameseText(doc, 'Chua co hoc vien nao trong lop', 20, 120)
   }
   
   // Save PDF
@@ -271,7 +311,7 @@ export const exportPaymentToPDF = (paymentData: PaymentData) => {
   // Add header
   doc.setFontSize(20)
   doc.setTextColor(59, 130, 246)
-  addVietnameseText(doc, paymentData.isPaid ? 'HOÁ ĐƠN THANH TOÁN' : 'LỜI NHẮC THANH TOÁN', 105, 20, { align: 'center' })
+  addVietnameseText(doc, paymentData.isPaid ? 'HOA DON THANH TOAN' : 'LOI NHAC THANH TOAN', 105, 20, { align: 'center' })
   
   // Add company info
   doc.setFontSize(12)
@@ -281,27 +321,27 @@ export const exportPaymentToPDF = (paymentData: PaymentData) => {
   // Add payment details with better spacing
   doc.setFontSize(14)
   doc.setTextColor(0, 0, 0)
-  addVietnameseText(doc, `Học viên: ${paymentData.studentName}`, 20, 50)
-  addVietnameseText(doc, `Lớp học: ${paymentData.className}`, 20, 65)
-  addVietnameseText(doc, `Số tiền: ${paymentData.amount.toLocaleString('vi-VN')} VNĐ`, 20, 80)
+  addVietnameseText(doc, `Hoc vien: ${paymentData.studentName}`, 20, 50)
+  addVietnameseText(doc, `Lop hoc: ${paymentData.className}`, 20, 65)
+  addVietnameseText(doc, `So tien: ${paymentData.amount.toLocaleString('vi-VN')} VND`, 20, 80)
   
   if (paymentData.isPaid) {
-    addVietnameseText(doc, `Phương thức thanh toán: ${paymentData.paymentMethod}`, 20, 95)
-    addVietnameseText(doc, `Ngày thanh toán: ${paymentData.paymentDate}`, 20, 110)
-    addVietnameseText(doc, `Nhân viên xử lý: ${paymentData.staffName}`, 20, 125)
+    addVietnameseText(doc, `Phuong thuc thanh toan: ${paymentData.paymentMethod}`, 20, 95)
+    addVietnameseText(doc, `Ngay thanh toan: ${paymentData.paymentDate}`, 20, 110)
+    addVietnameseText(doc, `Nhan vien xu ly: ${paymentData.staffName}`, 20, 125)
     
     // Add success message
     doc.setFontSize(16)
     doc.setTextColor(34, 197, 94) // Green color
-    addVietnameseText(doc, '✓ Đã thanh toán thành công', 105, 150, { align: 'center' })
+    addVietnameseText(doc, '✓ Da thanh toan thanh cong', 105, 150, { align: 'center' })
   } else {
-    addVietnameseText(doc, `Ngày nhắc nhở: ${paymentData.paymentDate}`, 20, 95)
-    addVietnameseText(doc, `Nhân viên phụ trách: ${paymentData.staffName}`, 20, 110)
+    addVietnameseText(doc, `Ngay nhac nho: ${paymentData.paymentDate}`, 20, 95)
+    addVietnameseText(doc, `Nhan vien phu trach: ${paymentData.staffName}`, 20, 110)
     
     // Add reminder message
     doc.setFontSize(16)
     doc.setTextColor(239, 68, 68) // Red color
-    addVietnameseText(doc, '⚠ Cần thanh toán gấp', 105, 140, { align: 'center' })
+    addVietnameseText(doc, '⚠ Can thanh toan gap', 105, 140, { align: 'center' })
   }
   
   // Add footer

@@ -468,20 +468,20 @@ export default function StudentManagementPage() {
       note: student.note || '',
       classes: student.studentClasses && student.studentClasses.length > 0 
         ? student.studentClasses.map(sc => `${sc.class.name} (${sc.class.level})`).join(', ')
-        : 'Không có lớp',
-      examScore: student.examResult?.score?.toString() || 'Chưa có',
+        : 'Khong co lop',
+      examScore: student.examResult?.score?.toString() || 'Chua co',
       examDate: student.examResult?.examDate 
         ? new Date(student.examResult.examDate).toLocaleDateString('vi-VN')
-        : 'Chưa có',
-      level: student.examResult?.levelEstimate || 'Chưa có'
+        : 'Chua co',
+      level: student.examResult?.levelEstimate || 'Chua co'
     }))
 
     // Build filters description
     const filters = []
-    if (examStatusFilter !== 'all') filters.push(`Trạng thái thi: ${examStatusFilter}`)
+    if (examStatusFilter !== 'all') filters.push(`Trang thai thi: ${examStatusFilter}`)
     if (levelFilter !== 'all') filters.push(`Level: ${levelFilter}`)
-    if (startDate) filters.push(`Từ ngày: ${startDate}`)
-    if (endDate) filters.push(`Đến ngày: ${endDate}`)
+    if (startDate) filters.push(`Tu ngay: ${startDate}`)
+    if (endDate) filters.push(`Den ngay: ${endDate}`)
     
     const filtersText = filters.length > 0 ? filters.join(', ') : ''
 

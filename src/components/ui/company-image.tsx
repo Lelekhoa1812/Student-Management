@@ -32,7 +32,7 @@ export function CompanyImage({ className, position = "top" }: CompanyImageProps)
     )
   }
 
-  // Footer version - full width
+  // Footer version - full width banner
   return (
     <div className={cn(
       "w-full mt-8",
@@ -42,13 +42,14 @@ export function CompanyImage({ className, position = "top" }: CompanyImageProps)
         <Image
           src="/company.JPG"
           alt="Company Information"
-          width={1200}
+          width={1920}
           height={400}
-          className="w-full h-auto object-contain transition-all duration-300 group-hover:scale-105 shadow-lg"
+          className="w-full h-auto object-cover transition-all duration-300 group-hover:scale-105 shadow-lg"
           style={{
-            minHeight: '200px',
-            maxHeight: '400px'
+            minHeight: '150px',
+            maxHeight: '300px'
           }}
+          priority
         />
       </div>
     </div>

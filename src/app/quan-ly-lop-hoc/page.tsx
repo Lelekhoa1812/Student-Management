@@ -295,11 +295,11 @@ export default function ClassManagementPage() {
           level: classWithStudents.level,
           maxStudents: classWithStudents.maxStudents,
           paymentAmount: classWithStudents.payment_amount || 0,
-          teacherName: classWithStudents.teacherName || 'Chưa phân công',
+          teacherName: classWithStudents.teacherName || 'Chua phan cong',
           students: classWithStudents.studentClasses?.map((studentClass: any) => ({
             name: studentClass.student.name,
-            examScore: 'Chưa có', // We'll need to fetch this separately
-            paymentStatus: 'Đã thanh toán' // This would need to be fetched from payments API
+            examScore: 'Chua co', // We'll need to fetch this separately
+            paymentStatus: 'Da thanh toan' // This would need to be fetched from payments API
           })) || []
         }
         
