@@ -8,7 +8,8 @@ import {
   setupVietnameseFonts,
   processVietnameseText,
   addFooterAfterTable,
-  addSafeText
+  addSafeText,
+  toSafeFileName
 } from './pdf-utils-base'
 
 // Export class details to PDF
@@ -43,12 +44,12 @@ export const exportClassToPDF = (classData: ClassData) => {
       
       autoTable(doc, {
         head: [[
-          'Họ tên học viên',
-          'Điểm thi',
-          'Trạng thái thanh toán'
+          'Student Name',
+          'Test Result',
+          'Payment Status'
         ]],
         body: tableData,
-        ...getOptimizedTableStyles(35), // Start table at Y=35 (after header with proper spacing)
+        ...getOptimizedTableStyles(25), // Start table at Y=25 (reduced from 50 for better space usage)
         columnStyles: {
           0: { cellWidth: 70 }, // Student Name - wider for better fit
           1: { cellWidth: 50 }, // Exam Score - wider for better fit
@@ -57,7 +58,7 @@ export const exportClassToPDF = (classData: ClassData) => {
         // Additional settings for better table layout - force Vietnamese font
         styles: {
           fontSize: 9, // Appropriate font size for portrait layout
-          cellPadding: 3, // Comfortable padding for portrait layout
+          cellPadding: 2, // Reduced padding for more compact layout
           overflow: 'linebreak' as const,
           halign: 'left' as const,
           lineWidth: 0.1,
@@ -69,7 +70,7 @@ export const exportClassToPDF = (classData: ClassData) => {
           textColor: [255, 255, 255],
           fontSize: 10,
           fontStyle: 'bold' as const,
-          cellPadding: 4,
+          cellPadding: 3, // Reduced from 4 to 3
           font: 'VNPro' // Force Vietnamese font
         },
         bodyStyles: {
@@ -77,16 +78,12 @@ export const exportClassToPDF = (classData: ClassData) => {
           fontStyle: 'normal' as const
         },
         // Ensure proper pagination and prevent table splitting
-        pageBreak: 'auto',
+        pageBreak: 'avoid', // Changed from 'auto' to 'avoid' to prevent row splitting
         showFoot: 'lastPage',
-        // Custom page break logic
-        didDrawPage: (data) => {
-          // This will be handled by getOptimizedTableStyles
-        },
         // Custom row height calculation for better spacing
         didDrawCell: (data) => {
           // Ensure consistent row height for better pagination
-          data.cell.height = 11
+          data.cell.height = 8 // Reduced from 11 to 8 for more compact layout
         }
       })
       
@@ -104,8 +101,8 @@ export const exportClassToPDF = (classData: ClassData) => {
       addSafeText(doc, 'Lỗi khi tạo bảng danh sách học viên', 20, 100)
     }
     
-    // Save PDF
-    const fileName = `thong-tin-lop-${classData.name.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
+    // Save PDF with safe filename
+    const fileName = `thong-tin-lop-${toSafeFileName(classData.name)}-${new Date().toISOString().split('T')[0]}.pdf`
     doc.save(fileName)
     console.log('PDF saved successfully:', fileName)
     

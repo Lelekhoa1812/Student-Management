@@ -131,20 +131,6 @@ export const createClassInfoCoverPage = (doc: jsPDF, classData: ClassData) => {
   addSafeText(doc, 'Hệ thống quản lý học viên', pageWidth / 2, pageHeight - 20, { align: 'center' })
 }
 
-// Add page header with pagination (only on data pages, not cover page)
-export const addPageHeader = (doc: jsPDF, pageNumber: number, isCoverPage: boolean = false) => {
-  try {
-    // Removed top-right pagination and header line to save space
-    // Pagination will now be shown in the footer of all pages
-    if (!isCoverPage) {
-      console.log(`📄 Page ${pageNumber} header added (no pagination - moved to footer)`)
-    }
-    
-  } catch (error) {
-    console.error('Error adding page header:', error)
-  }
-}
-
 // Enhanced company footer that shows pagination on all pages, but logo only on last page
 export const addCompanyFooter = (doc: jsPDF, pageNumber: number, isLastPage: boolean = false) => {
   console.log(`✅ Adding footer on page ${pageNumber} (isLastPage: ${isLastPage})`)
@@ -163,9 +149,10 @@ export const addCompanyFooter = (doc: jsPDF, pageNumber: number, isLastPage: boo
       console.log(`🖼️ Adding company logo on last page ${pageNumber}`)
       
       // Calculate safe position for footer - ensure it doesn't overlap content
-      const imageHeight = 40
+      // Reduced image height and adjusted positioning for better fit with reduced margins
+      const imageHeight = 30 // Reduced from 40 to 30 for better fit
       const imageWidth = pageWidth - 30
-      const imageY = pageHeight - imageHeight - 25 // Moved up to make room for pagination text
+      const imageY = pageHeight - imageHeight - 20 // Adjusted positioning for reduced margins
       
       // Add company banner image
       doc.addImage(COMPANY_LOGO, 'JPEG', 15, imageY, imageWidth, imageHeight)
@@ -187,23 +174,36 @@ export const addCompanyFooter = (doc: jsPDF, pageNumber: number, isLastPage: boo
 }
 
 // New function to get optimized table styles for maximum space usage with proper margins
-export const getOptimizedTableStyles = (startY: number = 30): Partial<UserOptions> => {
+export const getOptimizedTableStyles = (startY: number = 20): Partial<UserOptions> => {
   return {
-    // Start table at specified Y position (after header)
+    // Start table at specified Y position (reduced from 30 to 20 for better space usage)
     startY: startY,
     
-    // Optimized margins: small header margin, smaller footer margin for pagination only
-    // Company logo only appears on last page, so we can use smaller margins
-    margin: { top: 0, right: 15, bottom: 30, left: 15 },
+    // Optimized margins: minimal margins for maximum content space
+    // Reduced margins to eliminate excessive empty spaces
+    margin: { top: 5, right: 15, bottom: 25, left: 15 },
     
-    // Table layout settings
+    // Table layout settings - center the table horizontally
     tableWidth: 'auto',
     showFoot: 'lastPage',
+    
+    // Center the table horizontally on the page
+    didDrawPage: (data) => {
+      if (data.doc) {
+        console.log('📄 Setting font in didDrawPage for page:', data.pageNumber)
+        setupVietnameseFonts(data.doc)
+                
+        // Add footer to all pages (pagination + logo only on last page)
+        const totalPages = data.doc.getNumberOfPages()
+        const isLastPage = data.pageNumber === totalPages
+        addCompanyFooter(data.doc, data.pageNumber, isLastPage)
+      }
+    },
     
     // Styles for table cells - force Vietnamese font
     styles: {
       fontSize: 9,
-      cellPadding: 3, // Comfortable padding
+      cellPadding: 2, // Reduced padding for more compact layout
       overflow: 'linebreak' as const,
       halign: 'left' as const,
       font: 'VNPro',
@@ -219,7 +219,7 @@ export const getOptimizedTableStyles = (startY: number = 30): Partial<UserOption
       fontSize: 10,
       fontStyle: 'bold' as const,
       font: 'VNPro',
-      cellPadding: 4
+      cellPadding: 3 // Reduced from 4 to 3 for more compact header
     },
     
     // Body styles - force Vietnamese font
@@ -271,31 +271,17 @@ export const getOptimizedTableStyles = (startY: number = 30): Partial<UserOption
           }
         }
         
-        // Ensure consistent cell height for better table layout
-        if (data.row.index < 50) { // Apply to most rows
-          data.cell.height = 10
-        }
+        // Ensure consistent cell height for better table layout and prevent row splitting
+        // Reduced height for more compact rows and better page utilization
+        data.cell.height = 8 // Reduced from 10 to 8 for more compact layout
       }
     },
     
-    // Page drawing logic with proper header and footer spacing
-    didDrawPage: (data) => {
-      if (data.doc) {
-        console.log('📄 Setting font in didDrawPage for page:', data.pageNumber)
-        setupVietnameseFonts(data.doc)
-        // Add page header (not on cover page)
-        const isCoverPage = data.pageNumber === 1
-        addPageHeader(data.doc, data.pageNumber, isCoverPage)
-        
-        // Add footer to all pages (pagination + logo only on last page)
-        const totalPages = data.doc.getNumberOfPages()
-        const isLastPage = data.pageNumber === totalPages
-        addCompanyFooter(data.doc, data.pageNumber, isLastPage)
-      }
-    },
+    // Prevent table splitting across pages - ensure rows stay together
+    pageBreak: 'avoid' as const,
     
-    // Prevent table splitting across pages
-    pageBreak: 'avoid' as const
+    // Additional settings to prevent row splitting
+    rowPageBreak: 'avoid' as const
   }
 }
 
@@ -329,4 +315,62 @@ export const addHeader = (doc: jsPDF, title: string, subtitle?: string) => {
     doc.setTextColor(100, 100, 100)
     addSafeText(doc, subtitle, 105, 40, { align: 'center' })
   }
+}
+
+// Convert Vietnamese text to ASCII-safe characters for file naming
+export const toSafeFileName = (text: string): string => {
+  if (!text) return 'unknown'
+  
+  // Vietnamese character mapping to ASCII
+  const vietnameseMap: { [key: string]: string } = {
+    'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+    'ă': 'a', 'ằ': 'a', 'ắ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+    'â': 'a', 'ầ': 'a', 'ấ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+    'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+    'ê': 'e', 'ề': 'e', 'ế': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+    'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+    'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+    'ô': 'o', 'ồ': 'o', 'ố': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+    'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+    'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+    'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+    'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+    'đ': 'd',
+    'À': 'A', 'Á': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A',
+    'Ă': 'A', 'Ằ': 'A', 'Ắ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
+    'Â': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
+    'È': 'E', 'É': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E',
+    'Ê': 'E', 'Ề': 'E', 'Ế': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
+    'Ì': 'I', 'Í': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
+    'Ò': 'O', 'Ó': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O',
+    'Ô': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
+    'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
+    'Ù': 'U', 'Ú': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U',
+    'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
+    'Ỳ': 'Y', 'Ý': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y',
+    'Đ': 'D'
+  }
+  
+  let result = text
+  
+  // Replace Vietnamese characters
+  for (const [vietnamese, ascii] of Object.entries(vietnameseMap)) {
+    result = result.replace(new RegExp(vietnamese, 'g'), ascii)
+  }
+  
+  // Replace other special characters and spaces with hyphens
+  result = result.replace(/[^a-zA-Z0-9]/g, '-')
+  
+  // Remove multiple consecutive hyphens
+  result = result.replace(/-+/g, '-')
+  
+  // Remove leading and trailing hyphens
+  result = result.replace(/^-+|-+$/g, '')
+  
+  // Limit length and ensure it's not empty
+  if (result.length > 50) {
+    result = result.substring(0, 50)
+  }
+  
+  return result || 'file'
 }

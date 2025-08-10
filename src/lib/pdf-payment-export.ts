@@ -9,7 +9,8 @@ import {
   setupVietnameseFonts,
   addFooterAfterTable,
   getOptimizedTableStyles,
-  processVietnameseText
+  processVietnameseText,
+  toSafeFileName
 } from './pdf-utils-base'
 
 // Export single payment receipt/invoice to PDF
@@ -61,8 +62,8 @@ export const exportSinglePaymentToPDF = (paymentData: PaymentData) => {
     // Add company footer
     addCompanyFooter(doc, 1, true) // Single page document, so this is the last page
     
-    // Save PDF
-    const fileName = `hoa-don-${paymentData.studentName.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
+    // Save PDF with safe filename
+    const fileName = `hoa-don-${toSafeFileName(paymentData.studentName)}-${new Date().toISOString().split('T')[0]}.pdf`
     doc.save(fileName)
     console.log('PDF saved successfully:', fileName)
     
@@ -132,7 +133,7 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
           'Ngày thanh toán'
         ]],
         body: tableData,
-        ...getOptimizedTableStyles(200), // Use optimized styles starting at Y=200
+        ...getOptimizedTableStyles(180), // Use optimized styles starting at Y=180 (reduced from 220 for better space usage)
         columnStyles: {
           0: { cellWidth: 32 }, // Student Name - adjusted for better fit
           1: { cellWidth: 24 }, // Class Name - adjusted for better fit
@@ -145,15 +146,28 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
         // Force Vietnamese font in all table styles
         styles: {
           font: 'VNPro', // Force Vietnamese font
-          fontStyle: 'normal' as const
+          fontStyle: 'normal' as const,
+          cellPadding: 2, // Reduced padding for more compact layout
+          fontSize: 9 // Consistent font size
         },
         headStyles: {
           font: 'VNPro', // Force Vietnamese font
-          fontStyle: 'bold' as const
+          fontStyle: 'bold' as const,
+          cellPadding: 3, // Reduced padding for more compact header
+          fontSize: 10 // Consistent header font size
         },
         bodyStyles: {
           font: 'VNPro', // Force Vietnamese font
-          fontStyle: 'normal' as const
+          fontStyle: 'normal' as const,
+          fontSize: 9 // Consistent body font size
+        },
+        // Ensure proper pagination and prevent table splitting
+        pageBreak: 'avoid', // Prevent row splitting
+        showFoot: 'lastPage',
+        // Custom row height for better spacing
+        didDrawCell: (data) => {
+          // Ensure consistent row height for better pagination
+          data.cell.height = 8 // Compact row height
         }
       })
       

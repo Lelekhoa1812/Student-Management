@@ -8,7 +8,8 @@ import {
   setupVietnameseFonts,
   processVietnameseText,
   addFooterAfterTable,
-  addSafeText
+  addSafeText,
+  toSafeFileName
 } from './pdf-utils-base'
 
 // Export all students to PDF with improved layout
@@ -24,8 +25,7 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
     // Create beautiful cover page
     createStudentListCoverPage(doc, students, filters)
     
-    // Add a new page for the data table
-    doc.addPage()
+    // Start table on the same page after cover content
     
     // Prepare table data - process Vietnamese text to ensure proper encoding
     const tableData = students.map(student => [
@@ -50,19 +50,19 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
       
       autoTable(doc, {
         head: [[
-          'Name',
+          'Student Name',
           'Email',
           'SDT',
           'School',
           'Platform',
           'Note',
           'Classes',
-          'Test Score',
+          'Ex Score',
           'Test Date',
           'Level'
         ]],
         body: tableData,
-        ...getOptimizedTableStyles(35), // Start table at Y=35 (after header with proper spacing)
+        ...getOptimizedTableStyles(100), // Start table at Y=100 to avoid overlap with cover content
         columnStyles: {
           0: { cellWidth: 35 }, // Student Name - wider for better fit
           1: { cellWidth: 30 }, // Email - wider for better fit
@@ -71,7 +71,7 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
           4: { cellWidth: 22 }, // Platform - adjusted for better fit
           5: { cellWidth: 22 }, // Note - adjusted for better fit
           6: { cellWidth: 22 }, // Classes - adjusted for better fit
-          7: { cellWidth: 18 }, // Exam Score - adjusted for better fit
+          7: { cellWidth: 20 }, // Exam Score - adjusted for better fit
           8: { cellWidth: 22 }, // Exam Date - adjusted for better fit
           9: { cellWidth: 18 }  // Level - adjusted for better fit
         },
@@ -98,16 +98,12 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
           fontStyle: 'normal' as const
         },
         // Ensure proper pagination and prevent table splitting
-        pageBreak: 'auto',
+        pageBreak: 'avoid', // Changed from 'auto' to 'avoid' to prevent row splitting
         showFoot: 'lastPage',
-        // Custom page break logic to ensure proper row distribution
-        didDrawPage: (data) => {
-          // This will be handled by getOptimizedTableStyles
-        },
         // Custom row height calculation for better spacing
         didDrawCell: (data) => {
           // Ensure consistent row height for better pagination
-          data.cell.height = 9
+          data.cell.height = 8 // Reduced from 9 to 8 for more compact layout
         }
       })
       
@@ -125,7 +121,7 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
       addSafeText(doc, 'Lỗi khi tạo bảng dữ liệu', 20, 100)
     }
     
-    // Save PDF
+    // Save PDF with safe filename
     const fileName = `danh-sach-hoc-vien-${new Date().toISOString().split('T')[0]}.pdf`
     doc.save(fileName)
     console.log('PDF saved successfully:', fileName)
