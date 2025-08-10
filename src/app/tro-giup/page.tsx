@@ -1,5 +1,5 @@
+// src/app/tro-giup/page.tsx
 "use client"
-
 import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -60,7 +60,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/student/dashboard.png"
+                          src="/helper/student/dashboard.png"
                           alt="Student Dashboard"
                           width={600}
                           height={400}
@@ -89,28 +89,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/student/thi-xep-lop/get-result.png"
-                          alt="Thi xếp lớp - Có kết quả"
-                          width={600}
-                          height={400}
-                          className="rounded-lg border shadow-sm"
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-gray-600 dark:text-gray-300">
-                          <strong>Khi có kết quả thi:</strong>
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
-                          <li>Xem điểm thi và level được xếp</li>
-                          <li>Thông tin chi tiết về kỳ thi</li>
-                          <li>Hướng dẫn đăng ký khóa học phù hợp</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Image
-                          src="/imgsrc/student/thi-xep-lop/no-result.png"
+                          src="/helper/student/thi-xep-lop/no-result.png"
                           alt="Thi xếp lớp - Chưa có kết quả"
                           width={600}
                           height={400}
@@ -128,6 +107,27 @@ export default function HelpPage() {
                         </ul>
                       </div>
                     </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/thi-xep-lop/get-result.png"
+                          alt="Thi xếp lớp - Có kết quả"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Khi có kết quả thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem điểm thi và level được xếp</li>
+                          <li>Thông tin chi tiết về kỳ thi</li>
+                          <li>Hướng dẫn đăng ký khóa học phù hợp</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Đăng ký khóa học */}
@@ -138,7 +138,28 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/student/dang-ky-khoa-hoc/get-result.png"
+                          src="/helper/student/dang-ky-khoa-hoc/no-result.png"
+                          alt="Đăng ký khóa học - Không có kết quả"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Khi không có khóa học phù hợp:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Thông báo chưa có khóa học phù hợp</li>
+                          <li>Hướng dẫn liên hệ nhân viên để được tư vấn</li>
+                          <li>Thông tin về lịch khai giảng khóa học</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/dang-ky-khoa-hoc/get-result.png"
                           alt="Đăng ký khóa học - Có kết quả"
                           width={600}
                           height={400}
@@ -156,24 +177,47 @@ export default function HelpPage() {
                         </ul>
                       </div>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Image
-                          src="/imgsrc/student/dang-ky-khoa-hoc/no-result.png"
-                          alt="Đăng ký khóa học - Không có kết quả"
-                          width={600}
-                          height={400}
-                          className="rounded-lg border shadow-sm"
-                        />
+                  </div>
+
+                  {/* Hướng dẫn sử dụng hệ thống trợ giúp */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      ❓ Hướng dẫn sử dụng hệ thống trợ giúp
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                          🎯 Cách sử dụng trang trợ giúp:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-blue-700 dark:text-blue-300">
+                          <li><strong>Xem hướng dẫn:</strong> Cuộn xuống để xem hướng dẫn chi tiết cho từng tính năng</li>
+                          <li><strong>Hình ảnh minh họa:</strong> Mỗi tính năng đều có hình ảnh minh họa để dễ hiểu</li>
+                          <li><strong>Gửi phản hồi:</strong> Nếu cần hỗ trợ thêm, nhấn nút &quot;Gửi phản hồi&quot; ở cuối trang</li>
+                          <li><strong>Quay lại trang chủ:</strong> Nhấn &quot;Quay lại trang chủ&quot; để trở về dashboard</li>
+                        </ul>
                       </div>
-                      <div className="space-y-3">
-                        <p className="text-gray-600 dark:text-gray-300">
-                          <strong>Khi không có khóa học phù hợp:</strong>
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
-                          <li>Thông báo chưa có khóa học phù hợp</li>
-                          <li>Hướng dẫn liên hệ nhân viên để được tư vấn</li>
-                          <li>Thông tin về lịch khai giảng khóa học</li>
+                      
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+                          💡 Mẹo sử dụng hiệu quả:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-green-700 dark:text-green-300">
+                          <li>Đọc kỹ hướng dẫn trước khi sử dụng tính năng mới</li>
+                          <li>Lưu ý các biểu tượng và màu sắc để nhận biết trạng thái</li>
+                          <li>Nếu gặp lỗi, hãy chụp màn hình và gửi phản hồi</li>
+                          <li>Thường xuyên kiểm tra thông báo và nhắc nhở</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                          ⚠️ Lưu ý quan trọng:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-yellow-700 dark:text-yellow-300">
+                          <li>Đảm bảo đã đăng nhập trước khi sử dụng các tính năng</li>
+                          <li>Lưu dữ liệu thường xuyên để tránh mất thông tin</li>
+                          <li>Liên hệ nhân viên hỗ trợ nếu cần hỗ trợ khẩn cấp</li>
+                          <li>Không chia sẻ thông tin đăng nhập với người khác</li>
                         </ul>
                       </div>
                     </div>
@@ -206,7 +250,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/dashboard.png"
+                          src="/helper/staff/dashboard.png"
                           alt="Staff Dashboard"
                           width={600}
                           height={400}
@@ -235,7 +279,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/quan-ly-hoc-vien/view.png"
+                          src="/helper/staff/quan-ly-hoc-vien/view.png"
                           alt="Xem thông tin học viên"
                           width={600}
                           height={400}
@@ -257,7 +301,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/quan-ly-hoc-vien/edit.png"
+                          src="/helper/staff/quan-ly-hoc-vien/edit.png"
                           alt="Chỉnh sửa thông tin học viên"
                           width={600}
                           height={400}
@@ -286,7 +330,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/hen-lich-nhac/notice.png"
+                          src="/helper/staff/hen-lich-nhac/notice.png"
                           alt="Tạo nhắc nhở"
                           width={600}
                           height={400}
@@ -308,7 +352,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/hen-lich-nhac/edit.png"
+                          src="/helper/staff/hen-lich-nhac/edit.png"
                           alt="Chỉnh sửa nhắc nhở"
                           width={600}
                           height={400}
@@ -330,7 +374,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/hen-lich-nhac/done.png"
+                          src="/helper/staff/hen-lich-nhac/done.png"
                           alt="Nhắc nhở hoàn thành"
                           width={600}
                           height={400}
@@ -358,7 +402,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/quan-ly-ghi-danh/paid.png"
+                          src="/helper/staff/quan-ly-ghi-danh/paid.png"
                           alt="Thanh toán đã hoàn thành"
                           width={600}
                           height={400}
@@ -379,7 +423,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/quan-ly-ghi-danh/unpaid.png"
+                          src="/helper/staff/quan-ly-ghi-danh/unpaid.png"
                           alt="Thanh toán chưa hoàn thành"
                           width={600}
                           height={400}
@@ -407,7 +451,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/quan-ly-lop-hoc/add-class.png"
+                          src="/helper/staff/quan-ly-lop-hoc/add-class.png"
                           alt="Thêm lớp học mới"
                           width={600}
                           height={400}
@@ -429,7 +473,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/quan-ly-lop-hoc/edit-class.png"
+                          src="/helper/staff/quan-ly-lop-hoc/edit-class.png"
                           alt="Chỉnh sửa lớp học"
                           width={600}
                           height={400}
@@ -451,7 +495,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/staff/quan-ly-lop-hoc/edit-student.png"
+                          src="/helper/staff/quan-ly-lop-hoc/edit-student.png"
                           alt="Chỉnh sửa học viên trong lớp"
                           width={600}
                           height={400}
@@ -467,6 +511,105 @@ export default function HelpPage() {
                           <li>Thêm/xóa học viên khỏi lớp</li>
                           <li>Cập nhật thông tin học viên</li>
                           <li>Theo dõi trạng thái học tập</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phản hồi khách hàng */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      💬 Phản hồi khách hàng
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/staff/feedback-khach-hang/no-data.png"
+                          alt="Không có phản hồi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Khi không có phản hồi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Hiển thị thông báo &quot;Không có phản hồi nào&quot;</li>
+                          <li>Khuyến khích khách hàng gửi phản hồi</li>
+                          <li>Kiểm tra lại sau hoặc tạo phản hồi mẫu</li>
+                          <li>Đảm bảo hệ thống phản hồi hoạt động tốt</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/staff/feedback-khach-hang/obtain-feedback.png"
+                          alt="Xem phản hồi khách hàng"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Xem và quản lý phản hồi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem danh sách tất cả phản hồi từ khách hàng</li>
+                          <li>Phân loại theo vai trò (học viên, nhân viên, quản lý)</li>
+                          <li>Xem thời gian gửi phản hồi và nội dung chi tiết</li>
+                          <li>Xem ảnh chụp màn hình nếu có</li>
+                          <li>Xử lý và phản hồi kịp thời</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hướng dẫn sử dụng hệ thống trợ giúp */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      ❓ Hướng dẫn sử dụng hệ thống trợ giúp
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                          🎯 Cách sử dụng trang trợ giúp:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-blue-700 dark:text-blue-300">
+                          <li><strong>Xem hướng dẫn:</strong> Cuộn xuống để xem hướng dẫn chi tiết cho từng tính năng</li>
+                          <li><strong>Hình ảnh minh họa:</strong> Mỗi tính năng đều có hình ảnh minh họa để dễ hiểu</li>
+                          <li><strong>Gửi phản hồi:</strong> Nếu cần hỗ trợ thêm, nhấn nút &quot;Gửi phản hồi&quot; ở cuối trang</li>
+                          <li><strong>Quản lý phản hồi:</strong> Truy cập &quot;Phản hồi khách hàng&quot; từ navbar để xem và xử lý phản hồi</li>
+                          <li><strong>Quay lại trang chủ:</strong> Nhấn &quot;Quay lại trang chủ&quot; để trở về dashboard</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+                          💡 Mẹo sử dụng hiệu quả:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-green-700 dark:text-green-300">
+                          <li>Đọc kỹ hướng dẫn trước khi sử dụng tính năng mới</li>
+                          <li>Lưu ý các biểu tượng và màu sắc để nhận biết trạng thái</li>
+                          <li>Nếu gặp lỗi, hãy chụp màn hình và gửi phản hồi</li>
+                          <li>Thường xuyên kiểm tra thông báo và nhắc nhở</li>
+                          <li>Xử lý phản hồi khách hàng kịp thời để cải thiện dịch vụ</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                          ⚠️ Lưu ý quan trọng:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-yellow-700 dark:text-yellow-300">
+                          <li>Đảm bảo đã đăng nhập trước khi sử dụng các tính năng</li>
+                          <li>Lưu dữ liệu thường xuyên để tránh mất thông tin</li>
+                          <li>Liên hệ quản lý nếu cần hỗ trợ khẩn cấp</li>
+                          <li>Không chia sẻ thông tin đăng nhập với người khác</li>
+                          <li>Xử lý phản hồi khách hàng một cách chuyên nghiệp</li>
                         </ul>
                       </div>
                     </div>
@@ -499,7 +642,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/manager/dashboard.png"
+                          src="/helper/manager/dashboard.png"
                           alt="Manager Dashboard"
                           width={600}
                           height={400}
@@ -528,7 +671,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/manager/kpi/payment-today.png"
+                          src="/helper/manager/kpi/payment-today.png"
                           alt="KPI Thanh toán hôm nay"
                           width={600}
                           height={400}
@@ -550,7 +693,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/manager/kpi/reminder-month.png"
+                          src="/helper/manager/kpi/reminder-month.png"
                           alt="KPI Nhắc nhở tháng"
                           width={600}
                           height={400}
@@ -579,7 +722,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/manager/quan-ly-ghi-danh.png"
+                          src="/helper/manager/quan-ly-ghi-danh.png"
                           alt="Quản lý ghi danh"
                           width={600}
                           height={400}
@@ -608,7 +751,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/manager/quan-ly-lop-hoc/add-class.png"
+                          src="/helper/manager/quan-ly-lop-hoc/add-class.png"
                           alt="Thêm lớp học mới"
                           width={600}
                           height={400}
@@ -630,7 +773,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/manager/quan-ly-lop-hoc/edit-class.png"
+                          src="/helper/manager/quan-ly-lop-hoc/edit-class.png"
                           alt="Chỉnh sửa lớp học"
                           width={600}
                           height={400}
@@ -652,7 +795,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/imgsrc/manager/quan-ly-lop-hoc/edit-student.png"
+                          src="/helper/manager/quan-ly-lop-hoc/edit-student.png"
                           alt="Chỉnh sửa học viên trong lớp"
                           width={600}
                           height={400}
@@ -668,6 +811,54 @@ export default function HelpPage() {
                           <li>Thêm/xóa học viên khỏi lớp</li>
                           <li>Cập nhật thông tin học viên</li>
                           <li>Theo dõi trạng thái học tập</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hướng dẫn sử dụng hệ thống trợ giúp */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      ❓ Hướng dẫn sử dụng hệ thống trợ giúp
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                          🎯 Cách sử dụng trang trợ giúp:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-blue-700 dark:text-blue-300">
+                          <li><strong>Xem hướng dẫn:</strong> Cuộn xuống để xem hướng dẫn chi tiết cho từng tính năng</li>
+                          <li><strong>Hình ảnh minh họa:</strong> Mỗi tính năng đều có hình ảnh minh họa để dễ hiểu</li>
+                          <li><strong>Gửi phản hồi:</strong> Nếu cần hỗ trợ thêm, nhấn nút &quot;Gửi phản hồi&quot; ở cuối trang</li>
+                          <li><strong>Quản lý phản hồi:</strong> Truy cập &quot;Phản hồi khách hàng&quot; từ navbar để xem và xử lý phản hồi</li>
+                          <li><strong>Quay lại trang chủ:</strong> Nhấn &quot;Quay lại trang chủ&quot; để trở về dashboard</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+                          💡 Mẹo sử dụng hiệu quả:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-green-700 dark:text-green-300">
+                          <li>Đọc kỹ hướng dẫn trước khi sử dụng tính năng mới</li>
+                          <li>Lưu ý các biểu tượng và màu sắc để nhận biết trạng thái</li>
+                          <li>Nếu gặp lỗi, hãy chụp màn hình và gửi phản hồi</li>
+                          <li>Thường xuyên kiểm tra thông báo và nhắc nhở</li>
+                          <li>Xử lý phản hồi khách hàng kịp thời để cải thiện dịch vụ</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                          ⚠️ Lưu ý quan trọng:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-yellow-700 dark:text-yellow-300">
+                          <li>Đảm bảo đã đăng nhập trước khi sử dụng các tính năng</li>
+                          <li>Lưu dữ liệu thường xuyên để tránh mất thông tin</li>
+                          <li>Liên hệ đội kỹ thuật nếu cần hỗ trợ khẩn cấp</li>
+                          <li>Không chia sẻ thông tin đăng nhập với người khác</li>
+                          <li>Xử lý phản hồi khách hàng một cách chuyên nghiệp</li>
+                          <li>Đảm bảo bảo mật thông tin nhân viên và học viên</li>
                         </ul>
                       </div>
                     </div>

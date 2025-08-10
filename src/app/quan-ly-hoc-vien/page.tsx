@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { GraduationCap, Edit, Save, X, Filter, CheckCircle, AlertCircle, Trash2, AlertTriangle, Undo } from "lucide-react"
+import { GraduationCap, Edit, Save, X, Filter, CheckCircle, AlertCircle, Trash2, AlertTriangle, Undo, FileText } from "lucide-react"
 import React from "react"
+import { exportStudentsToPDF, StudentData } from "@/lib/pdf-utils"
 
 interface Student {
   id: string
@@ -456,6 +457,37 @@ export default function StudentManagementPage() {
     setCurrentPage(1)
   }, [examStatusFilter, levelFilter, startDate, endDate])
 
+  // Export students to PDF
+  const handleExportToPDF = () => {
+    const studentData: StudentData[] = filteredStudents.map(student => ({
+      name: student.name,
+      email: student.gmail,
+      phone: student.phoneNumber,
+      school: student.school,
+      platform: student.platformKnown,
+      note: student.note || '',
+      classes: student.studentClasses && student.studentClasses.length > 0 
+        ? student.studentClasses.map(sc => `${sc.class.name} (${sc.class.level})`).join(', ')
+        : 'Không có lớp',
+      examScore: student.examResult?.score?.toString() || 'Chưa có',
+      examDate: student.examResult?.examDate 
+        ? new Date(student.examResult.examDate).toLocaleDateString('vi-VN')
+        : 'Chưa có',
+      level: student.examResult?.levelEstimate || 'Chưa có'
+    }))
+
+    // Build filters description
+    const filters = []
+    if (examStatusFilter !== 'all') filters.push(`Trạng thái thi: ${examStatusFilter}`)
+    if (levelFilter !== 'all') filters.push(`Level: ${levelFilter}`)
+    if (startDate) filters.push(`Từ ngày: ${startDate}`)
+    if (endDate) filters.push(`Đến ngày: ${endDate}`)
+    
+    const filtersText = filters.length > 0 ? filters.join(', ') : ''
+
+    exportStudentsToPDF(studentData, filtersText)
+  }
+
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-gray-900">
@@ -508,11 +540,20 @@ export default function StudentManagementPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Filters */}
+            {/* Filters and Export */}
             <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Bộ lọc</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">Bộ lọc</h3>
+                </div>
+                <Button
+                  onClick={handleExportToPDF}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Xuất PDF tất cả học viên
+                </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>

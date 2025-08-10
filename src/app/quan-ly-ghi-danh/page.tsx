@@ -17,8 +17,10 @@ import {
   BookOpen,
   CheckCircle,
   XCircle,
-  Edit
+  Edit,
+  FileText
 } from "lucide-react"
+import { exportPaymentToPDF, PaymentData } from "@/lib/pdf-utils"
 
 interface Payment {
   id: string
@@ -180,6 +182,21 @@ export default function RegistrationManagementPage() {
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  // Export payment to PDF
+  const handleExportPayment = (payment: Payment) => {
+    const paymentData: PaymentData = {
+      studentName: payment.student.name,
+      className: payment.class.name,
+      amount: payment.payment_amount,
+      paymentMethod: payment.payment_method,
+      staffName: payment.staff.name,
+      isPaid: payment.have_paid,
+      paymentDate: payment.have_paid ? formatDate(payment.datetime) : formatDate(new Date().toISOString())
+    }
+
+    exportPaymentToPDF(paymentData)
   }
 
   const getFilterButtonClass = (filter: "all" | "paid" | "unpaid") => {
@@ -415,18 +432,39 @@ export default function RegistrationManagementPage() {
                             </div>
                           </div>
                         ) : (
-                          session.user?.role === "staff" ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditPayment(payment)}
-                              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          ) : (
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Chỉ xem</span>
-                          )
+                          <div className="flex gap-2">
+                            {payment.have_paid ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleExportPayment(payment)}
+                                className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+                              >
+                                <FileText className="w-4 h-4 mr-1" />
+                                Xuất hoá đơn
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleExportPayment(payment)}
+                                className="bg-red-600 hover:bg-red-700 text-white border-red-600"
+                              >
+                                <FileText className="w-4 h-4 mr-1" />
+                                Xuất lời nhắc thanh toán
+                              </Button>
+                            )}
+                            {session.user?.role === "staff" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEditPayment(payment)}
+                                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

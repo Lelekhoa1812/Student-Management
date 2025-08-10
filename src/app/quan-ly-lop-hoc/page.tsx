@@ -24,8 +24,10 @@ import {
   Phone,
   Mail,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  FileText
 } from "lucide-react"
+import { exportClassToPDF, ClassData } from "@/lib/pdf-utils"
 
 interface Class {
   id: string
@@ -76,6 +78,7 @@ export default function ClassManagementPage() {
   const [editingClass, setEditingClass] = useState<string | null>(null)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
@@ -274,6 +277,44 @@ export default function ClassManagementPage() {
     } catch (error) {
       console.error("Error fetching class students:", error)
       setError("Không thể tải danh sách học viên")
+    }
+  }
+
+  // Export class information to PDF
+  const handleExportClassToPDF = async (classData: Class) => {
+    setIsExporting(true)
+    try {
+      // First fetch the class data with students
+      const response = await fetch(`/api/classes?id=${classData.id}`)
+      if (response.ok) {
+        const classWithStudents = await response.json()
+        console.log('Class data for PDF export:', classWithStudents) // Debug log
+        
+        const classInfo: ClassData = {
+          name: classWithStudents.name,
+          level: classWithStudents.level,
+          maxStudents: classWithStudents.maxStudents,
+          paymentAmount: classWithStudents.payment_amount || 0,
+          teacherName: classWithStudents.teacherName || 'Chưa phân công',
+          students: classWithStudents.studentClasses?.map((studentClass: any) => ({
+            name: studentClass.student.name,
+            examScore: 'Chưa có', // We'll need to fetch this separately
+            paymentStatus: 'Đã thanh toán' // This would need to be fetched from payments API
+          })) || []
+        }
+        
+        console.log('Processed class info for PDF:', classInfo) // Debug log
+
+        exportClassToPDF(classInfo)
+        setSuccess("Xuất PDF thành công!")
+      } else {
+        setError("Không thể tải thông tin lớp học để xuất PDF")
+      }
+    } catch (error) {
+      console.error("Error exporting class to PDF:", error)
+      setError("Có lỗi xảy ra khi xuất PDF")
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -485,6 +526,23 @@ export default function ClassManagementPage() {
                           )}
                         </div>
                         <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleExportClassToPDF(classItem)
+                            }}
+                            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+                            title="Xuất PDF thông tin lớp học"
+                            disabled={isExporting}
+                          >
+                            {isExporting ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <FileText className="w-4 h-4" />
+                            )}
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
