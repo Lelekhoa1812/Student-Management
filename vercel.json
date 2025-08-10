@@ -9,5 +9,16 @@
   },
   "env": {
     "PRISMA_GENERATE_DATAPROXY": "true"
-  }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
 } 

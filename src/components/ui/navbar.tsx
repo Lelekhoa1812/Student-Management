@@ -62,7 +62,7 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/quan-ly-hoc-vien", label: "Quản lý học viên" },
         { href: "/quan-ly-lop-hoc", label: "Quản lý lớp học" },
         { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
-        { href: "/kpi-dashboard", label: "Bảng điều khiển KPI" },
+        { href: "/kpi-dashboard", label: "Bảng giám sát KPI" },
         { href: "/thong-tin-manager", label: "Thông tin manager" },
       ]
     : [

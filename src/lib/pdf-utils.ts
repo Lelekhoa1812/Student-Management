@@ -18,8 +18,6 @@ export {
   addSafeText, 
   addCompanyFooter, 
   addPageHeader,
-  getCommonTableStyles,
-  getTableStylesWithFooter,
   addHeader,
   setupVietnameseFonts
 } from './pdf-utils-base'

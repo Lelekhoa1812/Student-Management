@@ -3,11 +3,12 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { 
   ClassData, 
-  addSafeText, 
-  addHeader,
+  createClassInfoCoverPage,
+  getOptimizedTableStyles,
   setupVietnameseFonts,
+  processVietnameseText,
   addFooterAfterTable,
-  getTableStylesWithFooter
+  addSafeText
 } from './pdf-utils-base'
 
 // Export class details to PDF
@@ -20,34 +21,26 @@ export const exportClassToPDF = (classData: ClassData) => {
     // Setup Vietnamese fonts first
     setupVietnameseFonts(doc)
     
-    // Add header
-    addHeader(doc, 'THÔNG TIN LỚP HỌC', classData.name)
+    // Create beautiful cover page
+    createClassInfoCoverPage(doc, classData)
     
-    // Add class information
-    doc.setFontSize(12)
-    doc.setTextColor(59, 130, 246)
-    addSafeText(doc, `Lớp: ${classData.name}`, 20, 110) // Reduced from 115 to 110
-    addSafeText(doc, `Level: ${classData.level}`, 20, 120) // Reduced from 125 to 120
-    addSafeText(doc, `Số học viên tối đa: ${classData.maxStudents}`, 20, 130) // Reduced from 135 to 130
-    addSafeText(doc, `Học phí: ${classData.paymentAmount.toLocaleString('vi-VN')} VNĐ`, 20, 140) // Reduced from 145 to 140
-    addSafeText(doc, `Giáo viên: ${classData.teacherName}`, 20, 150) // Reduced from 155 to 150
+    // Add a new page for the student table
+    doc.addPage()
     
-    // Add export info
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    addSafeText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 160) // Reduced from 165 to 160
-    
-    // Prepare student table data
+    // Prepare student table data - process Vietnamese text to ensure proper encoding
     const tableData = classData.students.map(student => [
-      student.name,
-      student.examScore || 'Chưa có',
-      student.paymentStatus || 'Chưa thanh toán'
+      processVietnameseText(student.name),
+      processVietnameseText(student.examScore || 'Chưa có'),
+      processVietnameseText(student.paymentStatus || 'Chưa thanh toán')
     ])
     
     console.log('Student table data prepared:', tableData)
     
-    // Create table with better formatting and improved footer positioning
+    // Create table with optimized layout for maximum space usage
     try {
+      // Ensure Vietnamese fonts are set up before creating the table
+      setupVietnameseFonts(doc)
+      
       autoTable(doc, {
         head: [[
           'Họ tên học viên',
@@ -55,21 +48,52 @@ export const exportClassToPDF = (classData: ClassData) => {
           'Trạng thái thanh toán'
         ]],
         body: tableData,
-        startY: 180, // Space in-between title and table
-        ...getTableStylesWithFooter(), // Use the improved table styles with footer
+        ...getOptimizedTableStyles(35), // Start table at Y=35 (after header with proper spacing)
         columnStyles: {
-          0: { cellWidth: 75 }, // Student Name - adjusted for better fit
-          1: { cellWidth: 30 }, // Exam Score
-          2: { cellWidth: 45 }  // Payment Status - adjusted for better fit
+          0: { cellWidth: 70 }, // Student Name - wider for better fit
+          1: { cellWidth: 50 }, // Exam Score - wider for better fit
+          2: { cellWidth: 70 }  // Payment Status - wider for better fit
         },
-        // Improved spacing and table layout
-        margin: { top: 180, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
+        // Additional settings for better table layout - force Vietnamese font
+        styles: {
+          fontSize: 9, // Appropriate font size for portrait layout
+          cellPadding: 3, // Comfortable padding for portrait layout
+          overflow: 'linebreak' as const,
+          halign: 'left' as const,
+          lineWidth: 0.1,
+          font: 'VNPro', // Force Vietnamese font
+          fontStyle: 'normal' as const
+        },
+        headStyles: {
+          fillColor: [59, 130, 246],
+          textColor: [255, 255, 255],
+          fontSize: 10,
+          fontStyle: 'bold' as const,
+          cellPadding: 4,
+          font: 'VNPro' // Force Vietnamese font
+        },
+        bodyStyles: {
+          font: 'VNPro', // Force Vietnamese font
+          fontStyle: 'normal' as const
+        },
+        // Ensure proper pagination and prevent table splitting
         pageBreak: 'auto',
         showFoot: 'lastPage',
-        tableWidth: 'auto' // Let table use available width efficiently
+        // Custom page break logic
+        didDrawPage: (data) => {
+          // This will be handled by getOptimizedTableStyles
+        },
+        // Custom row height calculation for better spacing
+        didDrawCell: (data) => {
+          // Ensure consistent row height for better pagination
+          data.cell.height = 11
+        }
       })
       
-      // Add footer after table is completely drawn
+      // Re-apply Vietnamese fonts after table creation to ensure consistency
+      setupVietnameseFonts(doc)
+      
+      // Add footer after table is completed
       addFooterAfterTable(doc)
       
     } catch (error) {
@@ -77,10 +101,7 @@ export const exportClassToPDF = (classData: ClassData) => {
       // Fallback: add text manually if table fails
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
-      addSafeText(doc, 'Lỗi khi tạo bảng danh sách học viên', 20, 150)
-      
-      // Still add footer even if table fails
-      addFooterAfterTable(doc)
+      addSafeText(doc, 'Lỗi khi tạo bảng danh sách học viên', 20, 100)
     }
     
     // Save PDF

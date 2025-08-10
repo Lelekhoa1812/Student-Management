@@ -3,11 +3,12 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { 
   StudentData, 
-  addSafeText, 
-  getTableStylesWithFooter,
-  addHeader,
+  createStudentListCoverPage,
+  getOptimizedTableStyles,
   setupVietnameseFonts,
-  addFooterAfterTable
+  processVietnameseText,
+  addFooterAfterTable,
+  addSafeText
 } from './pdf-utils-base'
 
 // Export all students to PDF with improved layout
@@ -20,57 +21,100 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
     // Setup Vietnamese fonts first
     setupVietnameseFonts(doc)
     
-    // Add header
-    addHeader(doc, 'DANH SÁCH HỌC VIÊN', filters ? `Bộ lọc: ${filters}` : undefined)
+    // Create beautiful cover page
+    createStudentListCoverPage(doc, students, filters)
     
-    // Add export info
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    addSafeText(doc, `Tổng số học viên: ${students.length}`, 20, 40) // Reduced from 45 to 40
-    addSafeText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 45) // Reduced from 50 to 45
+    // Add a new page for the data table
+    doc.addPage()
     
-    // Prepare table data - keep original Vietnamese text
+    // Prepare table data - process Vietnamese text to ensure proper encoding
     const tableData = students.map(student => [
-      student.name,
-      student.email,
-      student.phone,
-      student.school,
-      student.platform,
-      student.note || 'Không có',
-      student.classes || 'Không có lớp',
-      student.examScore || 'Chưa có',
-      student.examDate || 'Chưa có',
-      student.level || 'Chưa có'
+      processVietnameseText(student.name),
+      processVietnameseText(student.email),
+      processVietnameseText(student.phone),
+      processVietnameseText(student.school),
+      processVietnameseText(student.platform),
+      processVietnameseText(student.note || 'Không có'),
+      processVietnameseText(student.classes || 'Không có lớp'),
+      processVietnameseText(student.examScore || 'Chưa có'),
+      processVietnameseText(student.examDate || 'Chưa có'),
+      processVietnameseText(student.level || 'Chưa có')
     ])
     
     console.log('Table data prepared:', tableData)
     
-    // Create table with better formatting and improved footer positioning
+    // Create table with optimized layout for maximum space usage
     try {
+      // Ensure Vietnamese fonts are set up before creating the table
+      setupVietnameseFonts(doc)
+      
       autoTable(doc, {
         head: [[
-          'Họ tên',
-          'Email', 
-          'SĐT',
-          'Trường học',
-          'Nền tảng',
-          'Ghi chú',
-          'Lớp học',
-          'Điểm thi',
-          'Ngày thi',
+          'Name',
+          'Email',
+          'SDT',
+          'School',
+          'Platform',
+          'Note',
+          'Classes',
+          'Test Score',
+          'Test Date',
           'Level'
         ]],
         body: tableData,
-        startY: 70, // Space in-between title and table
-        ...getTableStylesWithFooter(), // Use the improved table styles with footer
-        // Improved spacing and table layout
-        margin: { top: 70, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
+        ...getOptimizedTableStyles(35), // Start table at Y=35 (after header with proper spacing)
+        columnStyles: {
+          0: { cellWidth: 35 }, // Student Name - wider for better fit
+          1: { cellWidth: 30 }, // Email - wider for better fit
+          2: { cellWidth: 22 }, // Phone - adjusted for better fit
+          3: { cellWidth: 26 }, // School - wider for better fit
+          4: { cellWidth: 22 }, // Platform - adjusted for better fit
+          5: { cellWidth: 22 }, // Note - adjusted for better fit
+          6: { cellWidth: 22 }, // Classes - adjusted for better fit
+          7: { cellWidth: 18 }, // Exam Score - adjusted for better fit
+          8: { cellWidth: 22 }, // Exam Date - adjusted for better fit
+          9: { cellWidth: 18 }  // Level - adjusted for better fit
+        },
+        // Additional settings for better table layout - force Vietnamese font
+        styles: {
+          fontSize: 8, // Slightly smaller font to fit more content
+          cellPadding: 2, // Minimal padding to maximize space
+          overflow: 'linebreak' as const,
+          halign: 'left' as const,
+          lineWidth: 0.1,
+          font: 'VNPro', // Force Vietnamese font
+          fontStyle: 'normal' as const
+        },
+        headStyles: {
+          fillColor: [59, 130, 246],
+          textColor: [255, 255, 255],
+          fontSize: 9,
+          fontStyle: 'bold' as const,
+          cellPadding: 3,
+          font: 'VNPro' // Force Vietnamese font
+        },
+        bodyStyles: {
+          font: 'VNPro', // Force Vietnamese font
+          fontStyle: 'normal' as const
+        },
+        // Ensure proper pagination and prevent table splitting
         pageBreak: 'auto',
         showFoot: 'lastPage',
-        tableWidth: 'auto' // Let table use available width efficiently
+        // Custom page break logic to ensure proper row distribution
+        didDrawPage: (data) => {
+          // This will be handled by getOptimizedTableStyles
+        },
+        // Custom row height calculation for better spacing
+        didDrawCell: (data) => {
+          // Ensure consistent row height for better pagination
+          data.cell.height = 9
+        }
       })
       
-      // Add footer after table is completely drawn
+      // Re-apply Vietnamese fonts after table creation to ensure consistency
+      setupVietnameseFonts(doc)
+      
+      // Add footer after table is completed
       addFooterAfterTable(doc)
       
     } catch (error) {
@@ -78,10 +122,7 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
       // Fallback: add text manually if table fails
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
-      addSafeText(doc, 'Lỗi khi tạo bảng dữ liệu', 20, 70)
-      
-      // Still add footer even if table fails
-      addFooterAfterTable(doc)
+      addSafeText(doc, 'Lỗi khi tạo bảng dữ liệu', 20, 100)
     }
     
     // Save PDF

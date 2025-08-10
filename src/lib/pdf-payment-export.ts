@@ -8,7 +8,8 @@ import {
   addHeader,
   setupVietnameseFonts,
   addFooterAfterTable,
-  getTableStylesWithFooter
+  getOptimizedTableStyles,
+  processVietnameseText
 } from './pdf-utils-base'
 
 // Export single payment receipt/invoice to PDF
@@ -21,48 +22,47 @@ export const exportSinglePaymentToPDF = (paymentData: PaymentData) => {
     // Setup Vietnamese fonts first
     setupVietnameseFonts(doc)
     
-    // Add header
+    // Add header with improved positioning and spacing
     addHeader(doc, paymentData.isPaid ? 'HOÁ ĐƠN THANH TOÁN' : 'LỜI NHẮC THANH TOÁN')
     
-    // Add company info
-    doc.setFontSize(12)
+    // Add company info with better spacing from title
+    doc.setFontSize(14) // Increased font size for better readability
     doc.setTextColor(100, 100, 100)
-    addSafeText(doc, 'Hải Âu Academy', 105, 35, { align: 'center' })
+    addSafeText(doc, 'Hải Âu Academy', 105, 55, { align: 'center' }) // Increased Y position for better spacing
     
     // Add payment details with better spacing
-    doc.setFontSize(14)
+    doc.setFontSize(16) // Increased font size for better readability
     doc.setTextColor(0, 0, 0)
-    addSafeText(doc, `Học viên: ${paymentData.studentName}`, 20, 55)
-    addSafeText(doc, `Lớp học: ${paymentData.className}`, 20, 70)
-    addSafeText(doc, `Số tiền: ${paymentData.amount.toLocaleString('vi-VN')} VND`, 20, 85)
+    addSafeText(doc, `Học viên: ${paymentData.studentName}`, 20, 85) // Increased Y position for better spacing
+    addSafeText(doc, `Lớp học: ${paymentData.className}`, 20, 105) // Increased Y position for better spacing
+    addSafeText(doc, `Số tiền: ${paymentData.amount.toLocaleString('vi-VN')} VND`, 20, 125) // Increased Y position for better spacing
     
-    if (paymentData.isPaid) {
-      addSafeText(doc, `Phương thức thanh toán: ${paymentData.paymentMethod}`, 20, 100)
-      addSafeText(doc, `Ngày thanh toán: ${paymentData.paymentDate}`, 20, 115)
-      addSafeText(doc, `Nhân viên xử lý: ${paymentData.staffName}`, 20, 130)
-      
-      // Add success message
-      doc.setFontSize(16)
-      doc.setTextColor(34, 197, 94) // Green color
-      addSafeText(doc, 'Đã thanh toán thành công', 105, 160, { align: 'center' })
-    } else {
-      addSafeText(doc, `Ngày nhắc nhở: ${paymentData.paymentDate}`, 20, 100)
-      addSafeText(doc, `Nhân viên phụ trách: ${paymentData.staffName}`, 20, 115)
-      
-      // Add reminder message
-      doc.setFontSize(16)
-      doc.setTextColor(239, 68, 68) // Red color
-      addSafeText(doc, 'Quý khách hàng cần thanh toán hoá đơn', 105, 150, { align: 'center' })
+    // Add payment status
+    doc.setFontSize(18) // Increased font size for better visibility
+    doc.setTextColor(paymentData.isPaid ? 34 : 220, paymentData.isPaid ? 197 : 53, 94)
+    addSafeText(doc, paymentData.isPaid ? 'ĐÃ THANH TOÁN' : 'CHƯA THANH TOÁN', 105, 145, { align: 'center' }) // Increased Y position for better spacing
+    
+    // Add payment method and staff info
+    doc.setFontSize(14) // Increased font size for better readability
+    doc.setTextColor(100, 100, 100)
+    addSafeText(doc, `Phương thức: ${paymentData.paymentMethod}`, 20, 165) // Increased Y position for better spacing
+    addSafeText(doc, `Nhân viên: ${paymentData.staffName}`, 20, 185) // Increased Y position for better spacing
+    
+    // Add payment date if available
+    if (paymentData.paymentDate) {
+      addSafeText(doc, `Ngày thanh toán: ${paymentData.paymentDate}`, 20, 205) // Increased Y position for better spacing
     }
     
-    // Add footer (this is a single page document, so always show footer)
-    addCompanyFooter(doc, 1, true)
+    // Add export info with better spacing
+    doc.setFontSize(12) // Increased font size for better readability
+    doc.setTextColor(100, 100, 100)
+    addSafeText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 225) // Increased Y position for better spacing
+    
+    // Add company footer
+    addCompanyFooter(doc, 1, true) // Single page document, so this is the last page
     
     // Save PDF
-    const fileName = paymentData.isPaid 
-      ? `hoa-don-${paymentData.studentName.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
-      : `loi-nhac-thanh-toan-${paymentData.studentName.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
-    
+    const fileName = `hoa-don-${paymentData.studentName.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
     doc.save(fileName)
     console.log('PDF saved successfully:', fileName)
     
@@ -82,7 +82,7 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
     // Setup Vietnamese fonts first
     setupVietnameseFonts(doc)
     
-    // Add header
+    // Add header with improved positioning and spacing
     addHeader(doc, 'DANH SÁCH THANH TOÁN', `Tổng số: ${payments.length} giao dịch`)
     
     // Calculate totals
@@ -90,34 +90,37 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
     const paidCount = payments.filter(payment => payment.isPaid).length
     const unpaidCount = payments.length - paidCount
     
-    // Add payment details
-    doc.setFontSize(12)
+    // Add payment details with better spacing from title
+    doc.setFontSize(14) // Increased font size for better readability
     doc.setTextColor(59, 130, 246)
-    addSafeText(doc, `Tổng số thanh toán: ${payments.length}`, 20, 100) // Reduced from 105 to 100
-    addSafeText(doc, `Tổng tiền: ${totalAmount.toLocaleString('vi-VN')} VNĐ`, 20, 110) // Reduced from 115 to 110
-    addSafeText(doc, `Đã thanh toán: ${paidCount}`, 20, 120) // Reduced from 125 to 120
-    addSafeText(doc, `Chưa thanh toán: ${unpaidCount}`, 20, 130) // Reduced from 135 to 130
+    addSafeText(doc, `Tổng số thanh toán: ${payments.length}`, 20, 120) // Increased Y position for better spacing
+    addSafeText(doc, `Tổng tiền: ${totalAmount.toLocaleString('vi-VN')} VNĐ`, 20, 135) // Increased Y position for better spacing
+    addSafeText(doc, `Đã thanh toán: ${paidCount}`, 20, 150) // Increased Y position for better spacing
+    addSafeText(doc, `Chưa thanh toán: ${unpaidCount}`, 20, 165) // Increased Y position for better spacing
     
-    // Add export info
-    doc.setFontSize(10)
+    // Add export info with better spacing
+    doc.setFontSize(12) // Increased font size for better readability
     doc.setTextColor(100, 100, 100)
-    addSafeText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 140) // Reduced from 145 to 140
+    addSafeText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 180) // Increased Y position for better spacing
     
-    // Prepare payment table data
+    // Prepare payment table data - process Vietnamese text to ensure proper encoding
     const tableData = payments.map(payment => [
-      payment.studentName,
-      payment.className,
+      processVietnameseText(payment.studentName),
+      processVietnameseText(payment.className),
       payment.amount.toLocaleString('vi-VN'),
-      payment.paymentMethod,
-      payment.staffName,
+      processVietnameseText(payment.paymentMethod),
+      processVietnameseText(payment.staffName),
       payment.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
-      payment.paymentDate || 'Chưa có'
+      processVietnameseText(payment.paymentDate || 'Chưa có')
     ])
     
     console.log('Payment table data prepared:', tableData)
     
-    // Create table with better formatting and improved footer positioning
+    // Create table with better formatting and improved spacing
     try {
+      // Ensure Vietnamese fonts are set up before creating the table
+      setupVietnameseFonts(doc)
+      
       autoTable(doc, {
         head: [[
           'Họ tên học viên',
@@ -129,8 +132,7 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
           'Ngày thanh toán'
         ]],
         body: tableData,
-        startY: 150, // Increased from 120 to 150 to create more space
-        ...getTableStylesWithFooter(), // Use the improved table styles with footer
+        ...getOptimizedTableStyles(200), // Use optimized styles starting at Y=200
         columnStyles: {
           0: { cellWidth: 32 }, // Student Name - adjusted for better fit
           1: { cellWidth: 24 }, // Class Name - adjusted for better fit
@@ -140,12 +142,23 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
           5: { cellWidth: 20 }, // Payment Status
           6: { cellWidth: 24 }  // Payment Date - adjusted for better fit
         },
-        // Improved spacing and table layout
-        margin: { top: 150, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
-        pageBreak: 'auto',
-        showFoot: 'lastPage',
-        tableWidth: 'auto' // Let table use available width efficiently
+        // Force Vietnamese font in all table styles
+        styles: {
+          font: 'VNPro', // Force Vietnamese font
+          fontStyle: 'normal' as const
+        },
+        headStyles: {
+          font: 'VNPro', // Force Vietnamese font
+          fontStyle: 'bold' as const
+        },
+        bodyStyles: {
+          font: 'VNPro', // Force Vietnamese font
+          fontStyle: 'normal' as const
+        }
       })
+      
+      // Re-apply Vietnamese fonts after table creation to ensure consistency
+      setupVietnameseFonts(doc)
       
       // Add footer after table is completely drawn
       addFooterAfterTable(doc)
@@ -155,7 +168,7 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
       // Fallback: add text manually if table fails
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
-      addSafeText(doc, 'Lỗi khi tạo bảng thanh toán', 20, 140)
+      addSafeText(doc, 'Lỗi khi tạo bảng thanh toán', 20, 195)
       
       // Still add footer even if table fails
       addFooterAfterTable(doc)

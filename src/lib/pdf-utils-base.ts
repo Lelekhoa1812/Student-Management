@@ -1,9 +1,10 @@
 // src/lib/pdf-utils-base.ts
 import jsPDF from 'jspdf'
 import { UserOptions } from 'jspdf-autotable'
+import { setupVietnameseFontsAdvanced, renderVietnameseTextSync, processVietnameseTextAdvanced } from './pdf-vietnamese-fonts'
 
 // Company information
-export const COMPANY_NAME = "Student Management System"
+export const COMPANY_NAME = "Hải Âu Academy"
 export const COMPANY_LOGO = "/company.JPG"
 
 // Common interfaces
@@ -43,44 +44,12 @@ export interface PaymentData {
   paymentDate: string
 }
 
-// Enhanced Vietnamese font setup with proper encoding and custom font support
+// Enhanced Vietnamese font setup with advanced methods
 export const setupVietnameseFonts = (doc: jsPDF) => {
-  try {
-    // For jsPDF v3, we need to use a different approach
-    // Try to use helvetica which has better Unicode support in newer versions
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(10)
-    
-    // Set text encoding to UTF-8
-    try {
-      doc.setLanguage('vi')
-    } catch (langError) {
-      console.warn('⚠️ Language setting failed, continuing with font setup:', langError)
-    }
-    
-    console.log('✅ Vietnamese font setup successful with helvetica font')
-    return true
-  } catch (error) {
-    console.warn('⚠️ Helvetica font failed, trying times:', error)
-    try {
-      // Fallback to times font
-      doc.setFont('times', 'normal')
-      doc.setFontSize(10)
-      try {
-        doc.setLanguage('vi')
-      } catch (langError) {
-        console.warn('⚠️ Language setting failed on fallback, continuing:', langError)
-      }
-      console.log('✅ Fallback font setup successful with times font')
-      return true
-    } catch (fallbackError) {
-      console.error('❌ All font setup failed:', fallbackError)
-      return false
-    }
-  }
+  return setupVietnameseFontsAdvanced(doc)
 }
 
-// Enhanced safe text rendering with proper Vietnamese text support
+// Enhanced safe text rendering with advanced Vietnamese text support
 export const addSafeText = (doc: jsPDF, text: string, x: number, y: number, options?: { 
   align?: 'left' | 'center' | 'right' | 'justify'; 
   baseline?: 'alphabetic' | 'ideographic' | 'bottom' | 'top' | 'middle' | 'hanging';
@@ -89,166 +58,244 @@ export const addSafeText = (doc: jsPDF, text: string, x: number, y: number, opti
 }) => {
   if (!text) return
   
-  try {
-    // Set font properties
-    const fontSize = options?.fontSize || doc.getFontSize()
-    const fontStyle = options?.fontStyle || 'normal'
-    
-    // Ensure Vietnamese font is set
-    setupVietnameseFonts(doc)
-    
-    // For Vietnamese text, we need to handle special characters carefully
-    // Try to normalize the text to handle Vietnamese diacritics
-    const normalizedText = text.normalize('NFC')
-    
-    // Render text directly with proper encoding
-    doc.text(normalizedText, x, y, options)
-  } catch (error) {
-    console.error('Text rendering failed:', error)
-    // Fallback: try with different font
-    try {
-      doc.setFont('times', 'normal')
-      doc.text(text, x, y, options)
-    } catch (fallbackError) {
-      console.error('Fallback text rendering failed:', fallbackError)
-      // Last resort: add empty text to maintain positioning
-      try {
-        doc.text('', x, y, options)
-      } catch {
-        console.error('Complete text rendering failure')
-      }
-    }
-  }
+  // Use the synchronous Vietnamese text rendering for compatibility
+  return renderVietnameseTextSync(doc, text, x, y, options)
 }
 
-// Add page header with pagination at top right
-export const addPageHeader = (doc: jsPDF, pageNumber: number) => {
+// Process Vietnamese text to ensure proper encoding for table cells
+export const processVietnameseText = (text: string): string => {
+  return processVietnameseTextAdvanced(text)
+}
+
+// Student PDF cover page
+export const createStudentListCoverPage = (doc: jsPDF, students: StudentData[], filters: string = "") => {
+  const pageWidth = doc.internal.pageSize.width
+  const pageHeight = doc.internal.pageSize.height
+  
+  // Setup Vietnamese fonts
+  setupVietnameseFonts(doc)
+  
+  // Main title - BIG and centered
+  doc.setFontSize(40)
+  doc.setTextColor(59, 130, 246) // Blue color
+  addSafeText(doc, 'DANH SÁCH HỌC VIÊN', pageWidth / 2, pageHeight / 2 - 40, { align: 'center' })
+  
+  // Company name - BIG and below title
+  doc.setFontSize(30)
+  doc.setTextColor(255, 165, 0) // Orange color
+  addSafeText(doc, COMPANY_NAME, pageWidth / 2, pageHeight / 2 - 10, { align: 'center' })
+  
+  // Summary info - concise and below company name
+  doc.setFontSize(15)
+  doc.setTextColor(51, 65, 85)
+  addSafeText(doc, `Tổng số: ${students.length} học viên`, pageWidth / 2, pageHeight / 2 + 50, { align: 'center' })
+  addSafeText(doc, `Ngày: ${new Date().toLocaleDateString('vi-VN')}`, pageWidth / 2, pageHeight / 2 + 80, { align: 'center' })
+  
+  // Footer note - small and at bottom
+  doc.setFontSize(10)
+  doc.setTextColor(100, 100, 100)
+  addSafeText(doc, 'Hệ thống quản lý học viên Hải Âu Academy', pageWidth / 2, pageHeight - 20, { align: 'center' })
+}
+
+// Class PDF cover page
+export const createClassInfoCoverPage = (doc: jsPDF, classData: ClassData) => {
+  const pageWidth = doc.internal.pageSize.width
+  const pageHeight = doc.internal.pageSize.height
+  
+  // Setup Vietnamese fonts
+  setupVietnameseFonts(doc)
+  
+  // Main title - BIG and centered
+  doc.setFontSize(40)
+  doc.setTextColor(59, 130, 246) // Blue color
+  addSafeText(doc, 'THÔNG TIN LỚP HỌC', pageWidth / 2, pageHeight / 2 - 60, { align: 'center' })
+  
+  // Company name - BIG and below title
+  doc.setFontSize(30)
+  doc.setTextColor(255, 165, 0) // Orange color
+  addSafeText(doc, COMPANY_NAME, pageWidth / 2, pageHeight / 2 - 30, { align: 'center' })
+
+  // Class name - BIG and prominent
+  doc.setFontSize(20)
+  doc.setTextColor(100, 100, 100)
+  addSafeText(doc, classData.name, pageWidth / 2, pageHeight / 2 + 30, { align: 'center' })
+  
+  // Key info - concise and below class name
+  doc.setFontSize(15)
+  doc.setTextColor(100, 100, 100)
+  addSafeText(doc, `Level: ${classData.level} | ${classData.students.length}/${classData.maxStudents} học viên`, pageWidth / 2, pageHeight / 2 + 40, { align: 'center' })
+  
+  // Footer note - small and at bottom
+  doc.setFontSize(10)
+  doc.setTextColor(100, 100, 100)
+  addSafeText(doc, 'Hệ thống quản lý học viên', pageWidth / 2, pageHeight - 20, { align: 'center' })
+}
+
+// Add page header with pagination (only on data pages, not cover page)
+export const addPageHeader = (doc: jsPDF, pageNumber: number, isCoverPage: boolean = false) => {
   try {
-    const pageWidth = doc.internal.pageSize.width
-    
-    // Add pagination at top right
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    addSafeText(doc, `Trang ${pageNumber}`, pageWidth - 20, 15, { align: 'right' })
+    // Removed top-right pagination and header line to save space
+    // Pagination will now be shown in the footer of all pages
+    if (!isCoverPage) {
+      console.log(`📄 Page ${pageNumber} header added (no pagination - moved to footer)`)
+    }
     
   } catch (error) {
     console.error('Error adding page header:', error)
   }
 }
 
-// Enhanced company footer that ONLY appears on the last page and doesn't overlap content
+// Enhanced company footer that shows pagination on all pages, but logo only on last page
 export const addCompanyFooter = (doc: jsPDF, pageNumber: number, isLastPage: boolean = false) => {
-  // Critical: Only add footer on the last page
-  if (!isLastPage) {
-    console.log(`🚫 Skipping footer on page ${pageNumber} - not the last page`)
-    return
-  }
-  
-  console.log(`✅ Adding company footer on last page ${pageNumber}`)
+  console.log(`✅ Adding footer on page ${pageNumber} (isLastPage: ${isLastPage})`)
   
   try {
     const pageWidth = doc.internal.pageSize.width
     const pageHeight = doc.internal.pageSize.height
     
-    // Calculate safe position for footer - ensure it doesn't overlap content
-    const imageHeight = 60 // Reduced height to prevent overlap
-    const imageWidth = pageWidth - 20
-    const imageY = pageHeight - imageHeight - 15 // Reduced margin
-    
-    // Add company banner image
-    doc.addImage(COMPANY_LOGO, 'JPEG', 10, imageY, imageWidth, imageHeight)
-    
-    // Add company info above the image with proper spacing
-    doc.setFontSize(9)
+    // Always add pagination text on every page
+    doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
+    addSafeText(doc, `${COMPANY_NAME} - Trang ${pageNumber}`, pageWidth / 2, pageHeight - 15, { align: 'center' })
+    
+    // Only add company logo on the last page
+    if (isLastPage) {
+      console.log(`🖼️ Adding company logo on last page ${pageNumber}`)
+      
+      // Calculate safe position for footer - ensure it doesn't overlap content
+      const imageHeight = 40
+      const imageWidth = pageWidth - 30
+      const imageY = pageHeight - imageHeight - 25 // Moved up to make room for pagination text
+      
+      // Add company banner image
+      doc.addImage(COMPANY_LOGO, 'JPEG', 15, imageY, imageWidth, imageHeight)
+    }
     
   } catch (error) {
     console.error('Error adding company footer:', error)
     // Fallback: add simple text footer
     try {
+      const pageWidth = doc.internal.pageSize.width
+      const pageHeight = doc.internal.pageSize.height
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
-      addSafeText(doc, `${COMPANY_NAME} - Page ${pageNumber}`, 105, doc.internal.pageSize.height - 10, { align: 'center' })
+      addSafeText(doc, `${COMPANY_NAME} - Trang ${pageNumber}`, pageWidth / 2, pageHeight - 15, { align: 'center' })
     } catch (fallbackError) {
       console.error('Even fallback footer failed:', fallbackError)
     }
   }
 }
 
-// Common table styles with proper typing and Vietnamese font support
-export const getCommonTableStyles = (): Partial<UserOptions> => ({
-  styles: {
-    fontSize: 9,
-    cellPadding: 2, // Reduced padding to fit more rows
-    overflow: 'linebreak' as const,
-    halign: 'left' as const,
-    font: 'helvetica', // Use helvetica for better Vietnamese support in jsPDF v3
-    fontStyle: 'normal' as const,
-    lineWidth: 0.1 // Thin borders to save space
-  },
-  headStyles: {
-    fillColor: [59, 130, 246],
-    textColor: 255,
-    fontSize: 10,
-    fontStyle: 'bold' as const,
-    font: 'helvetica', // Use helvetica for better Vietnamese support in jsPDF v3
-    cellPadding: 3 // Slightly more padding for headers
-  },
-  // Ensure proper font handling for Vietnamese text
-  didParseCell: (data) => {
-    // Set font for each cell to ensure Vietnamese support
-    if (data.doc) {
-      setupVietnameseFonts(data.doc)
-    }
-  },
-  // Custom font setup for the entire table
-  didDrawPage: (data) => {
-    if (data.doc) {
-      setupVietnameseFonts(data.doc)
-      // Add page header with pagination
-      addPageHeader(data.doc, data.pageNumber)
-    }
-  },
-  // Improved table layout settings
-  tableWidth: 'auto', // Let table use available width
-  pageBreak: 'auto', // Allow automatic page breaks
-  showFoot: 'lastPage', // Only show footer on last page
-  margin: { top: 20, right: 10, bottom: 20, left: 10 }, // Reduced margins for more content
-  startY: 20 // Start table closer to top
-})
-
-// Enhanced table styles with proper footer logic for multi-page tables
-export const getTableStylesWithFooter = (): Partial<UserOptions> => {
+// New function to get optimized table styles for maximum space usage with proper margins
+export const getOptimizedTableStyles = (startY: number = 30): Partial<UserOptions> => {
   return {
-    ...getCommonTableStyles(),
-    // Enhanced footer logic that properly detects the last page
+    // Start table at specified Y position (after header)
+    startY: startY,
+    
+    // Optimized margins: small header margin, smaller footer margin for pagination only
+    // Company logo only appears on last page, so we can use smaller margins
+    margin: { top: 0, right: 15, bottom: 30, left: 15 },
+    
+    // Table layout settings
+    tableWidth: 'auto',
+    showFoot: 'lastPage',
+    
+    // Styles for table cells - force Vietnamese font
+    styles: {
+      fontSize: 9,
+      cellPadding: 3, // Comfortable padding
+      overflow: 'linebreak' as const,
+      halign: 'left' as const,
+      font: 'VNPro',
+      fontStyle: 'normal' as const,
+      lineWidth: 0.1,
+      textColor: [0, 0, 0]
+    },
+    
+    // Header styles - force Vietnamese font
+    headStyles: {
+      fillColor: [59, 130, 246],
+      textColor: [255, 255, 255],
+      fontSize: 10,
+      fontStyle: 'bold' as const,
+      font: 'VNPro',
+      cellPadding: 4
+    },
+    
+    // Body styles - force Vietnamese font
+    bodyStyles: {
+      font: 'VNPro',
+      fontStyle: 'normal' as const
+    },
+    
+    // Ensure proper font handling for Vietnamese text in each cell
+    didParseCell: (data) => {
+      if (data.doc) {
+        console.log('🔤 Setting font in didParseCell for cell:', data.cell.text)
+        // Setup Vietnamese fonts for each cell to ensure consistency
+        setupVietnameseFonts(data.doc)
+        try {
+          data.doc.setFont('VNPro', 'normal')
+          data.doc.setFontSize(9)
+          console.log('✅ Font set to VNPro in didParseCell')
+        } catch (error) {
+          console.warn('⚠️ Cell font setup failed:', error)
+          try {
+            data.doc.setFont('helvetica', 'normal')
+            data.doc.setFontSize(9)
+            console.log('✅ Fallback font set to helvetica in didParseCell')
+          } catch (fallbackError) {
+            console.warn('⚠️ Fallback font setup failed:', fallbackError)
+          }
+        }
+      }
+    },
+    
+    // Ensure font is applied when drawing each cell
+    didDrawCell: (data) => {
+      if (data.doc) {
+        console.log('🎨 Setting font in didDrawCell for cell:', data.cell.text)
+        // Re-apply Vietnamese font for each cell to ensure it's used
+        try {
+          data.doc.setFont('VNPro', 'normal')
+          data.doc.setFontSize(9)
+          console.log('✅ Font set to VNPro in didDrawCell')
+        } catch (error) {
+          console.warn('⚠️ Cell drawing font setup failed:', error)
+          try {
+            data.doc.setFont('helvetica', 'normal')
+            data.doc.setFontSize(9)
+            console.log('✅ Fallback font set to helvetica in didDrawCell')
+          } catch (fallbackError) {
+            console.warn('⚠️ Fallback font setup failed:', fallbackError)
+          }
+        }
+        
+        // Ensure consistent cell height for better table layout
+        if (data.row.index < 50) { // Apply to most rows
+          data.cell.height = 10
+        }
+      }
+    },
+    
+    // Page drawing logic with proper header and footer spacing
     didDrawPage: (data) => {
       if (data.doc) {
+        console.log('📄 Setting font in didDrawPage for page:', data.pageNumber)
         setupVietnameseFonts(data.doc)
-        // Add page header with pagination
-        addPageHeader(data.doc, data.pageNumber)
+        // Add page header (not on cover page)
+        const isCoverPage = data.pageNumber === 1
+        addPageHeader(data.doc, data.pageNumber, isCoverPage)
+        
+        // Add footer to all pages (pagination + logo only on last page)
+        const totalPages = data.doc.getNumberOfPages()
+        const isLastPage = data.pageNumber === totalPages
+        addCompanyFooter(data.doc, data.pageNumber, isLastPage)
       }
-      
-      // IMPORTANT: We need to wait until the table is completely drawn
-      // to get the accurate page count. Use a small delay to ensure
-      // the page count is finalized.
-      setTimeout(() => {
-        try {
-          const actualTotalPages = data.doc.getNumberOfPages()
-          const currentPage = data.pageNumber
-          const isLastPage = currentPage === actualTotalPages
-          
-          console.log(`📄 Drawing page ${currentPage}/${actualTotalPages}, isLastPage: ${isLastPage}`)
-          
-          // Only add footer on the last page
-          if (isLastPage) {
-            addCompanyFooter(data.doc, currentPage, true)
-          }
-        } catch (error) {
-          console.error('Error in footer logic:', error)
-        }
-      }, 100) // Small delay to ensure page count is accurate
-    }
+    },
+    
+    // Prevent table splitting across pages
+    pageBreak: 'avoid' as const
   }
 }
 
@@ -258,29 +305,28 @@ export const addFooterAfterTable = (doc: jsPDF) => {
     const totalPages = doc.getNumberOfPages()
     console.log(`📊 Table completed. Total pages: ${totalPages}`)
     
-    // Add footer only to the last page
-    if (totalPages > 0) {
-      addCompanyFooter(doc, totalPages, true)
-    }
+    // Note: Footers are now added in didDrawPage callback for all pages
+    // This function is kept for compatibility but footers are handled automatically
+    console.log('ℹ️ Footers are now automatically added to all pages during table drawing')
   } catch (error) {
-    console.error('Error adding footer after table:', error)
+    console.error('Error in addFooterAfterTable:', error)
   }
 }
 
-// Common header rendering
+// Common header rendering with improved positioning and spacing
 export const addHeader = (doc: jsPDF, title: string, subtitle?: string) => {
   // Setup Vietnamese fonts first
   setupVietnameseFonts(doc)
   
-  // Add main title
-  doc.setFontSize(20)
-  doc.setTextColor(59, 130, 246) // Blue color
-  addSafeText(doc, title, 105, 20, { align: 'center' }) // Reduced from 25 to 20
+  // Add main title with larger font and better positioning
+  doc.setFontSize(26)
+  doc.setTextColor(59, 130, 246)
+  addSafeText(doc, title, 105, 25, { align: 'center' })
   
-  // Add subtitle if provided
+  // Add subtitle if provided with proper spacing
   if (subtitle) {
-    doc.setFontSize(12)
+    doc.setFontSize(16)
     doc.setTextColor(100, 100, 100)
-    addSafeText(doc, subtitle, 105, 30, { align: 'center' }) // Reduced from 35 to 30
+    addSafeText(doc, subtitle, 105, 40, { align: 'center' })
   }
 }
