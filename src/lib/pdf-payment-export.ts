@@ -85,37 +85,33 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
     // Add header
     addHeader(doc, 'DANH SÁCH THANH TOÁN', `Tổng số: ${payments.length} giao dịch`)
     
-    // Add export info
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    addSafeText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 45)
-    
     // Calculate totals
     const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0)
     const paidCount = payments.filter(payment => payment.isPaid).length
     const unpaidCount = payments.length - paidCount
     
-    // Add summary information
+    // Add payment details
     doc.setFontSize(12)
     doc.setTextColor(59, 130, 246)
-    addSafeText(doc, 'Tổng quan:', 20, 60)
+    addSafeText(doc, `Tổng số thanh toán: ${payments.length}`, 20, 100) // Reduced from 105 to 100
+    addSafeText(doc, `Tổng tiền: ${totalAmount.toLocaleString('vi-VN')} VNĐ`, 20, 110) // Reduced from 115 to 110
+    addSafeText(doc, `Đã thanh toán: ${paidCount}`, 20, 120) // Reduced from 125 to 120
+    addSafeText(doc, `Chưa thanh toán: ${unpaidCount}`, 20, 130) // Reduced from 135 to 130
     
+    // Add export info
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
-    addSafeText(doc, `Tổng số giao dịch: ${payments.length}`, 20, 75)
-    addSafeText(doc, `Tổng tiền: ${totalAmount.toLocaleString('vi-VN')} VND`, 20, 85)
-    addSafeText(doc, `Đã thanh toán: ${paidCount}`, 20, 95)
-    addSafeText(doc, `Chưa thanh toán: ${unpaidCount}`, 20, 105)
+    addSafeText(doc, `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 140) // Reduced from 145 to 140
     
-    // Prepare table data - keep original Vietnamese text
+    // Prepare payment table data
     const tableData = payments.map(payment => [
       payment.studentName,
       payment.className,
-      payment.amount.toLocaleString('vi-VN') + ' VND',
+      payment.amount.toLocaleString('vi-VN'),
       payment.paymentMethod,
       payment.staffName,
       payment.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
-      payment.paymentDate
+      payment.paymentDate || 'Chưa có'
     ])
     
     console.log('Payment table data prepared:', tableData)
@@ -133,7 +129,7 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
           'Ngày thanh toán'
         ]],
         body: tableData,
-        startY: 120, // Adjusted to accommodate header and pagination
+        startY: 150, // Increased from 120 to 150 to create more space
         ...getTableStylesWithFooter(), // Use the improved table styles with footer
         columnStyles: {
           0: { cellWidth: 32 }, // Student Name - adjusted for better fit
@@ -145,7 +141,7 @@ export const exportPaymentToPDF = (payments: PaymentData[]) => {
           6: { cellWidth: 24 }  // Payment Date - adjusted for better fit
         },
         // Improved spacing and table layout
-        margin: { top: 120, right: 10, bottom: 30, left: 10 }, // Reduced margins for better space usage
+        margin: { top: 150, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
         pageBreak: 'auto',
         showFoot: 'lastPage',
         tableWidth: 'auto' // Let table use available width efficiently

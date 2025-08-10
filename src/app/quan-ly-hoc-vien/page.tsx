@@ -527,7 +527,7 @@ export default function StudentManagementPage() {
       
       <div className="container mx-auto px-4 py-8">
         <Card>
-          <CardHeader className="text-center">
+          <CardHeader className="text-center mb-6">
             {/* <CompanyImage position="top" /> */}
             <div className="flex items-center justify-center mb-4">
               <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400 mr-2" />
@@ -539,7 +539,7 @@ export default function StudentManagementPage() {
               Xem và quản lý thông tin học viên
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="mt-6">
             {/* Filters and Export */}
             <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center justify-between mb-4">

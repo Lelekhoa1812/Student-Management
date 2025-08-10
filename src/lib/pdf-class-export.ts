@@ -55,7 +55,7 @@ export const exportClassToPDF = (classData: ClassData) => {
           'Trạng thái thanh toán'
         ]],
         body: tableData,
-        startY: 170, // Increased from 135 to 170 to create more space
+        startY: 180, // Space in-between title and table
         ...getTableStylesWithFooter(), // Use the improved table styles with footer
         columnStyles: {
           0: { cellWidth: 75 }, // Student Name - adjusted for better fit
@@ -63,7 +63,7 @@ export const exportClassToPDF = (classData: ClassData) => {
           2: { cellWidth: 45 }  // Payment Status - adjusted for better fit
         },
         // Improved spacing and table layout
-        margin: { top: 170, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
+        margin: { top: 180, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
         pageBreak: 'auto',
         showFoot: 'lastPage',
         tableWidth: 'auto' // Let table use available width efficiently

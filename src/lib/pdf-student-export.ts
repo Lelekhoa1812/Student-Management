@@ -61,10 +61,10 @@ export const exportStudentsToPDF = (students: StudentData[], filters: string = "
           'Level'
         ]],
         body: tableData,
-        startY: 60, // Increased from 55 to 60 to create more space
+        startY: 70, // Space in-between title and table
         ...getTableStylesWithFooter(), // Use the improved table styles with footer
         // Improved spacing and table layout
-        margin: { top: 60, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
+        margin: { top: 70, right: 10, bottom: 30, left: 10 }, // Increased top margin to match startY
         pageBreak: 'auto',
         showFoot: 'lastPage',
         tableWidth: 'auto' // Let table use available width efficiently

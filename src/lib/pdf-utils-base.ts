@@ -43,23 +43,35 @@ export interface PaymentData {
   paymentDate: string
 }
 
-// Enhanced Vietnamese font setup with proper encoding
+// Enhanced Vietnamese font setup with proper encoding and custom font support
 export const setupVietnameseFonts = (doc: jsPDF) => {
   try {
-    // Try to use a font that better supports Vietnamese characters
-    // Use 'times' font which has better Unicode support
-    doc.setFont('times', 'normal')
+    // For jsPDF v3, we need to use a different approach
+    // Try to use helvetica which has better Unicode support in newer versions
+    doc.setFont('helvetica', 'normal')
     doc.setFontSize(10)
     
-    console.log('✅ Vietnamese font setup successful with times font')
+    // Set text encoding to UTF-8
+    try {
+      doc.setLanguage('vi')
+    } catch (langError) {
+      console.warn('⚠️ Language setting failed, continuing with font setup:', langError)
+    }
+    
+    console.log('✅ Vietnamese font setup successful with helvetica font')
     return true
   } catch (error) {
-    console.warn('⚠️ Times font failed, trying helvetica:', error)
+    console.warn('⚠️ Helvetica font failed, trying times:', error)
     try {
-      // Fallback to helvetica
-      doc.setFont('helvetica', 'normal')
+      // Fallback to times font
+      doc.setFont('times', 'normal')
       doc.setFontSize(10)
-      console.log('✅ Fallback font setup successful with helvetica')
+      try {
+        doc.setLanguage('vi')
+      } catch (langError) {
+        console.warn('⚠️ Language setting failed on fallback, continuing:', langError)
+      }
+      console.log('✅ Fallback font setup successful with times font')
       return true
     } catch (fallbackError) {
       console.error('❌ All font setup failed:', fallbackError)
@@ -82,17 +94,20 @@ export const addSafeText = (doc: jsPDF, text: string, x: number, y: number, opti
     const fontSize = options?.fontSize || doc.getFontSize()
     const fontStyle = options?.fontStyle || 'normal'
     
-    // Use times font for better Vietnamese character support
-    doc.setFont('times', fontStyle)
-    doc.setFontSize(fontSize)
+    // Ensure Vietnamese font is set
+    setupVietnameseFonts(doc)
     
-    // Render text directly
-    doc.text(text, x, y, options)
+    // For Vietnamese text, we need to handle special characters carefully
+    // Try to normalize the text to handle Vietnamese diacritics
+    const normalizedText = text.normalize('NFC')
+    
+    // Render text directly with proper encoding
+    doc.text(normalizedText, x, y, options)
   } catch (error) {
     console.error('Text rendering failed:', error)
-    // Fallback: try with helvetica font
+    // Fallback: try with different font
     try {
-      doc.setFont('helvetica', 'normal')
+      doc.setFont('times', 'normal')
       doc.text(text, x, y, options)
     } catch (fallbackError) {
       console.error('Fallback text rendering failed:', fallbackError)
@@ -167,7 +182,7 @@ export const getCommonTableStyles = (): Partial<UserOptions> => ({
     cellPadding: 2, // Reduced padding to fit more rows
     overflow: 'linebreak' as const,
     halign: 'left' as const,
-    font: 'times', // Use times font for better Vietnamese support
+    font: 'helvetica', // Use helvetica for better Vietnamese support in jsPDF v3
     fontStyle: 'normal' as const,
     lineWidth: 0.1 // Thin borders to save space
   },
@@ -176,15 +191,14 @@ export const getCommonTableStyles = (): Partial<UserOptions> => ({
     textColor: 255,
     fontSize: 10,
     fontStyle: 'bold' as const,
-    font: 'times', // Use times font for better Vietnamese support
+    font: 'helvetica', // Use helvetica for better Vietnamese support in jsPDF v3
     cellPadding: 3 // Slightly more padding for headers
   },
   // Ensure proper font handling for Vietnamese text
   didParseCell: (data) => {
     // Set font for each cell to ensure Vietnamese support
     if (data.doc) {
-      data.doc.setFont('times', 'normal')
-      // Use times font for better Vietnamese character support
+      setupVietnameseFonts(data.doc)
     }
   },
   // Custom font setup for the entire table

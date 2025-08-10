@@ -446,7 +446,7 @@ export default function ClassManagementPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Navbar />
       <div className={`py-8 ${(isCreating || editingClass || selectedClass) ? 'container mx-auto px-4' : 'container mx-auto px-4 max-w-4xl'}`}>
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-blue-600 mb-2">
             Quản lý lớp học
           </h1>
@@ -470,7 +470,7 @@ export default function ClassManagementPage() {
         <div className={`${(isCreating || editingClass || selectedClass) ? 'grid grid-cols-1 lg:grid-cols-3 gap-6' : 'flex justify-center'}`}>
           {/* Left side - Class list */}
           <div className={`${(isCreating || editingClass || selectedClass) ? 'lg:col-span-2' : 'w-full max-w-2xl'}`}>
-            <Card>
+            <Card className="mt-6">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div>
