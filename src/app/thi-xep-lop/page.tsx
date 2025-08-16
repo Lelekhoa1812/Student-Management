@@ -129,12 +129,12 @@ export default function ExamPlacementPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-center">
+                {/* <div className="flex justify-center">
                   <Button onClick={exportPDF}>
                     <Download className="w-4 h-4 mr-2" />
                     Xuất kết quả
                   </Button>
-                </div>
+                </div> */}
               </div>
             ) : (
               <div className="text-center space-y-4">
