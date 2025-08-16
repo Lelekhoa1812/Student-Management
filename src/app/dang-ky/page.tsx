@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/ui/navbar"
 import { 
   BookOpen, 
@@ -12,8 +13,10 @@ import {
   XCircle, 
   Calendar,
   User,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from "lucide-react"
+import { exportSinglePaymentToPDF, PaymentData } from "@/lib/pdf-utils"
 
 interface Payment {
   id: string
@@ -62,6 +65,7 @@ export default function CourseRegistrationPage() {
   const [student, setStudent] = useState<Student | null>(null)
   const [payments, setPayments] = useState<Payment[]>([])
   const [error, setError] = useState("")
+  const [exportingPaymentId, setExportingPaymentId] = useState<string | null>(null)
 
   const fetchStudentData = useCallback(async () => {
     try {
@@ -166,6 +170,28 @@ export default function CourseRegistrationPage() {
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  // Export payment to PDF
+  const handleExportPayment = async (payment: Payment) => {
+    setExportingPaymentId(payment.id)
+    try {
+      const paymentData: PaymentData = {
+        studentName: payment.student.name,
+        className: payment.class.name,
+        amount: payment.payment_amount,
+        paymentMethod: payment.payment_method,
+        staffName: payment.staff.name,
+        isPaid: payment.have_paid,
+        paymentDate: payment.have_paid ? formatDate(payment.datetime) : formatDate(new Date().toISOString())
+      }
+
+      exportSinglePaymentToPDF(paymentData)
+    } catch (error) {
+      console.error('Error exporting PDF:', error)
+    } finally {
+      setExportingPaymentId(null)
+    }
   }
 
   if (status === "loading" || isLoading) {
@@ -346,6 +372,33 @@ export default function CourseRegistrationPage() {
                         </p>
                       </div>
                     )}
+
+                    {/* Export Button */}
+                    <div className="mt-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExportPayment(payment)}
+                        disabled={exportingPaymentId === payment.id}
+                        className={`w-full ${
+                          payment.have_paid
+                            ? "bg-green-600 hover:bg-green-700 text-white border-green-600"
+                            : "bg-red-600 hover:bg-red-700 text-white border-red-600"
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {exportingPaymentId === payment.id ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                            Đang xuất...
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-4 h-4 mr-1" />
+                            {payment.have_paid ? "Xuất hoá đơn" : "Xuất lời nhắc"}
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
