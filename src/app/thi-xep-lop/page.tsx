@@ -235,9 +235,9 @@ export default function ExamPlacementPage() {
                     <div className="bg-yellow-100 p-4 rounded-lg border border-yellow-300">
                       <div className="flex items-start space-x-2">
                         <AlertCircle className="w-5 h-5 text-yellow-700 mt-0.5 flex-shrink-0" />
-                        <div className="text-yellow-800 text-sm">
+                        <div className="text-yellow-800 text-sm text-left">
                           <p className="font-medium mb-1">Hướng dẫn:</p>
-                          <ul className="list-disc list-inside space-y-1">
+                          <ul className="list-disc list-inside space-y-1 text-left">
                             <li>Nhân viên sẽ xem xét kết quả thi và phân lớp phù hợp</li>
                             <li>Quá trình này thường mất 1-2 ngày làm việc</li>
                             <li>Nếu vẫn chưa được phân lớp sau 3 ngày, vui lòng liên hệ nhân viên</li>

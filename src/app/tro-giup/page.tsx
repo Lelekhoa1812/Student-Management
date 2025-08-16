@@ -111,7 +111,7 @@ export default function HelpPage() {
                       <div>
                         <Image
                           src="/helper/student/thi-xep-lop/get-result.png"
-                          alt="Thi xếp lớp - Có kết quả"
+                          alt="Thi xếp lớp - Có kết quả - Chưa có lớp"
                           width={600}
                           height={400}
                           className="rounded-lg border shadow-sm"
@@ -119,12 +119,33 @@ export default function HelpPage() {
                       </div>
                       <div className="space-y-3">
                         <p className="text-gray-600 dark:text-gray-300">
-                          <strong>Khi có kết quả thi:</strong>
+                          <strong>Khi có kết quả thi nhưng chưa xếp lớp:</strong>
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
                           <li>Xem điểm thi và level được xếp</li>
-                          <li>Thông tin chi tiết về kỳ thi</li>
                           <li>Hướng dẫn đăng ký khóa học phù hợp</li>
+                          <li>Liên hệ nhân viên để được xếp lớp mong muốn</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/thi-xep-lop/get-class.png"
+                          alt="Thi xếp lớp - Có kết quả - Đã có lớp"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Khi đã được xếp lớp học:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Lớp học được chọn tương ứng với điểm thi</li>
+                          <li>Có thể xem thông tin chi tiết về lớp học</li>
+                          <li>Liên hệ nhân viên để thay đổi lớp học phù hợp</li>
                         </ul>
                       </div>
                     </div>
@@ -174,6 +195,7 @@ export default function HelpPage() {
                           <li>Xem danh sách khóa học phù hợp với level</li>
                           <li>Thông tin chi tiết về khóa học</li>
                           <li>Hướng dẫn đăng ký và thanh toán</li>
+                          <li>Xuất hoá đơn hoặc liên hệ nhân viên để in hoá đơn</li>
                         </ul>
                       </div>
                     </div>
