@@ -143,7 +143,15 @@ export async function GET(request: NextRequest) {
         include: {
           studentClasses: {
             include: {
-              class: true
+              class: {
+                include: {
+                  _count: {
+                    select: {
+                      studentClasses: true
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -165,7 +173,15 @@ export async function GET(request: NextRequest) {
       include: {
         studentClasses: {
           include: {
-            class: true
+            class: {
+              include: {
+                _count: {
+                  select: {
+                    studentClasses: true
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -186,8 +202,8 @@ export async function GET(request: NextRequest) {
     try {
       await prisma.$disconnect()
       console.log("✅ Database disconnected")
-    } catch (e) {
-      console.error("❌ Error disconnecting:", e)
+    } catch (error) {
+      console.error("❌ Error disconnecting:", error)
     }
   }
 } 
