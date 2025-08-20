@@ -55,7 +55,7 @@ export async function GET(
       level: classData.level,
       maxStudents: classData.maxStudents,
       teacherName: classData.teacherName || "",
-      numSessions: (classData as any).numSessions ?? 24,
+      numSessions: classData.numSessions ?? 24,
       isActive: classData.isActive,
       createdAt: classData.createdAt.toISOString(),
       students: classData.studentClasses.map(sc => sc.student)

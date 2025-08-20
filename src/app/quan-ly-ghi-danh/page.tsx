@@ -167,7 +167,7 @@ export default function RegistrationManagementPage() {
         setSuccess("Cập nhật thanh toán thành công!")
         await fetchPayments()
         setEditingPayment(null)
-        setEditForm({ have_paid: false, payment_method: "" })
+        setEditForm((prev) => ({ ...prev, have_paid: false, payment_method: "" }))
       } else {
         const errorData = await response.json()
         setError(errorData.error || "Có lỗi xảy ra")
@@ -180,7 +180,7 @@ export default function RegistrationManagementPage() {
 
   const handleCancelEdit = () => {
     setEditingPayment(null)
-    setEditForm({ have_paid: false, payment_method: "" })
+    setEditForm((prev) => ({ ...prev, have_paid: false, payment_method: "" }))
   }
 
   const formatCurrency = (amount: number) => {
