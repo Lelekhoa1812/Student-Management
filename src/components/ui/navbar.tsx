@@ -48,6 +48,7 @@ export function Navbar({ className }: NavbarProps) {
 
   const isStaff = session?.user?.role === "staff"
   const isManager = session?.user?.role === "manager"
+  const isTeacher = session?.user?.role === "teacher"
 
   const navigationLinks = isStaff 
     ? [
@@ -64,6 +65,12 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
         { href: "/kpi-dashboard", label: "Bảng giám sát KPI" },
         { href: "/thong-tin-manager", label: "Thông tin manager" },
+      ]
+    : isTeacher
+    ? [
+        { href: "/teacher/lop-hoc", label: "Lớp học" },
+        { href: "/teacher/xet-diem", label: "Xét điểm" },
+        { href: "/thong-tin-teacher", label: "Thông tin giáo viên" },
       ]
     : [
         { href: "/thong-tin-hoc-vien", label: "Thông tin học viên" },

@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
     const active = searchParams.get("active")
+    const teacherId = searchParams.get("teacherId")
 
     if (id) {
       // Get specific class with students
@@ -44,6 +45,9 @@ export async function GET(request: NextRequest) {
                 }
               }
             }
+          },
+          teacher: {
+            select: { id: true, name: true, email: true }
           },
           _count: {
             select: {
@@ -64,11 +68,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all classes
-    const whereClause = active === "true" ? { isActive: true } : {}
+    const whereClause: any = active === "true" ? { isActive: true } : {}
+    if (teacherId) {
+      whereClause.teacherId = teacherId
+    }
     
     const classes = await prisma.class.findMany({
       where: whereClause,
       include: {
+        teacher: { select: { id: true, name: true, email: true } },
         _count: {
           select: {
             studentClasses: true
@@ -125,7 +133,7 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { name, level, maxStudents, teacherName, payment_amount, numSessions } = body
+    const { name, level, maxStudents, teacherId, payment_amount, numSessions } = body
 
     // Validate required fields
     if (!name || !level || !maxStudents) {
@@ -153,10 +161,11 @@ export async function POST(request: NextRequest) {
         name,
         level,
         maxStudents: parseInt(maxStudents),
-        teacherName: teacherName || null,
+        teacherId: teacherId || null,
         payment_amount: payment_amount ? parseFloat(payment_amount) : null,
         numSessions: numSessions ? parseInt(numSessions) : undefined
-      }
+      },
+      include: { teacher: { select: { id: true, name: true, email: true } } }
     })
 
     return NextResponse.json(newClass)
@@ -206,7 +215,7 @@ export async function PUT(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { id, name, level, maxStudents, teacherName, payment_amount, numSessions, isActive } = body
+    const { id, name, level, maxStudents, teacherId, payment_amount, numSessions, isActive } = body
 
     if (!id) {
       return NextResponse.json(
@@ -252,11 +261,12 @@ export async function PUT(request: NextRequest) {
         name: name || existingClass.name,
         level: level || existingClass.level,
         maxStudents: maxStudents ? parseInt(maxStudents) : existingClass.maxStudents,
-        teacherName: teacherName !== undefined ? teacherName : existingClass.teacherName,
+        teacherId: teacherId !== undefined ? (teacherId || null) : (existingClass as any).teacherId,
         payment_amount: payment_amount !== undefined ? (payment_amount ? parseFloat(payment_amount) : null) : existingClass.payment_amount,
         numSessions: numSessions !== undefined ? parseInt(numSessions) : existingClass.numSessions,
         isActive: isActive !== undefined ? isActive : existingClass.isActive
-      }
+      },
+      include: { teacher: { select: { id: true, name: true, email: true } } }
     })
 
     return NextResponse.json(updatedClass)

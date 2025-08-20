@@ -35,6 +35,7 @@ interface Class {
   level: string
   maxStudents: number
   teacherName?: string
+  teacherId?: string | null
   payment_amount?: number
   numSessions?: number
   isActive: boolean
@@ -68,12 +69,19 @@ interface LevelThreshold {
   maxScore: number
 }
 
+interface Teacher {
+  id: string
+  name: string
+  email: string
+}
+
 export default function ClassManagementPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [classes, setClasses] = useState<Class[]>([])
   const [levels, setLevels] = useState<LevelThreshold[]>([])
   const [students, setStudents] = useState<Student[]>([])
+  const [teachers, setTeachers] = useState<Teacher[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const [editingClass, setEditingClass] = useState<string | null>(null)
@@ -97,7 +105,7 @@ export default function ClassManagementPage() {
     name: "",
     level: "",
     maxStudents: "",
-    teacherName: "",
+    teacherId: "",
     payment_amount: "",
     numSessions: ""
   })
@@ -132,10 +140,11 @@ export default function ClassManagementPage() {
 
   const fetchData = async () => {
     try {
-      const [classesResponse, levelsResponse, studentsResponse] = await Promise.all([
+      const [classesResponse, levelsResponse, studentsResponse, teachersResponse] = await Promise.all([
         fetch("/api/classes"),
         fetch("/api/level-thresholds"),
-        fetch("/api/students")
+        fetch("/api/students"),
+        fetch("/api/teacher")
       ])
 
       if (classesResponse.ok) {
@@ -151,6 +160,11 @@ export default function ClassManagementPage() {
       if (studentsResponse.ok) {
         const studentsData = await studentsResponse.json()
         setStudents(studentsData)
+      }
+
+      if (teachersResponse.ok) {
+        const teachersData = await teachersResponse.json()
+        setTeachers(teachersData)
       }
     } catch (error) {
       console.error("Error fetching data:", error)
@@ -168,7 +182,7 @@ export default function ClassManagementPage() {
       name: "",
       level: "",
       maxStudents: "",
-      teacherName: "",
+      teacherId: "",
       payment_amount: "",
       numSessions: ""
     })
@@ -184,7 +198,7 @@ export default function ClassManagementPage() {
       name: "",
       level: "",
       maxStudents: "",
-      teacherName: "",
+      teacherId: "",
       payment_amount: "",
       numSessions: ""
     })
@@ -246,7 +260,7 @@ export default function ClassManagementPage() {
       name: classData.name,
       level: classData.level,
       maxStudents: classData.maxStudents.toString(),
-      teacherName: classData.teacherName || "",
+      teacherId: classData.teacherId || "",
       payment_amount: classData.payment_amount?.toString() || "",
       numSessions: classData.numSessions?.toString() || ""
     })
@@ -626,13 +640,23 @@ export default function ClassManagementPage() {
                     />
                   </div>
 
-                  <div>
-                    <Label>Tên giáo viên (tùy chọn)</Label>
-                    <Input
-                      value={formData.teacherName}
-                      onChange={(e) => setFormData({ ...formData, teacherName: e.target.value })}
-                      placeholder="Nhập tên giáo viên"
-                    />
+                  <div className="space-y-2">
+                    <Label>Giáo viên (chọn trong danh sách)</Label>
+                    <select
+                      value={formData.teacherId}
+                      onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Không phân công</option>
+                      {teachers.map(t => (
+                        <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
+                      ))}
+                    </select>
+                    {/* <Input
+                      value={formData.teacherId}
+                      onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
+                      placeholder="Hoặc nhập ID giáo viên thủ công"
+                    /> */}
                   </div>
 
                   <div>

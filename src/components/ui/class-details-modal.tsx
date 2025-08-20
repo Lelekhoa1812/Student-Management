@@ -17,9 +17,11 @@ interface ClassDetails {
   maxStudents: number
   numSessions?: number
   teacherName: string
+  teacherId?: string | null
   isActive: boolean
   createdAt: string
   students: Student[]
+  attendanceByStudentId?: Record<string, number>
 }
 
 interface ClassDetailsModalProps {
@@ -148,6 +150,11 @@ export function ClassDetailsModal({ classDetails, isOpen, onClose }: ClassDetail
                           </p>
                         </div>
                       </div>
+                      {classDetails.attendanceByStudentId && (
+                        <div className="text-xs text-gray-700">
+                          {classDetails.attendanceByStudentId[student.id] || 0}/{classDetails.numSessions ?? 24}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

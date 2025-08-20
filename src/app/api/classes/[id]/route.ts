@@ -33,6 +33,7 @@ export async function GET(
             }
           }
         },
+        teacher: { select: { id: true, name: true, email: true } },
         _count: {
           select: {
             studentClasses: true
@@ -49,16 +50,24 @@ export async function GET(
     }
 
     // Transform the data to match the expected format for the modal
+    const attendanceByStudentId: Record<string, number> = {}
+    for (const sc of classData.studentClasses) {
+      // @ts-ignore
+      attendanceByStudentId[sc.student.id] = (sc as any).attendance ?? 0
+    }
+
     const transformedClassData = {
       id: classData.id,
       name: classData.name,
       level: classData.level,
       maxStudents: classData.maxStudents,
-      teacherName: classData.teacherName || "",
+      teacherName: classData.teacher?.name || "",
+      teacherId: (classData as any).teacherId || null,
       numSessions: classData.numSessions ?? 24,
       isActive: classData.isActive,
       createdAt: classData.createdAt.toISOString(),
-      students: classData.studentClasses.map(sc => sc.student)
+      students: classData.studentClasses.map(sc => sc.student),
+      attendanceByStudentId
     }
 
     console.log("✅ Retrieved class by ID:", classData.id)

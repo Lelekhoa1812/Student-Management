@@ -72,7 +72,31 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
-          // Check in Manager collection if not found in Staff
+          // Check in Teacher collection if not found in Staff
+          const teacher = await prisma.teacher.findUnique({
+            where: { email: credentials.email }
+          })
+
+          if (teacher) {
+            const isPasswordValid = await bcrypt.compare(
+              credentials.password,
+              teacher.password
+            )
+
+            if (isPasswordValid) {
+              console.log("✅ Teacher login successful:", teacher.email)
+              return {
+                id: teacher.id,
+                email: teacher.email,
+                name: teacher.name,
+                role: teacher.role,
+              }
+            } else {
+              console.log("❌ Invalid password for teacher:", teacher.email)
+            }
+          }
+
+          // Check in Manager collection if not found in Teacher
           const manager = await prisma.manager.findUnique({
             where: { email: credentials.email }
           })
@@ -140,6 +164,19 @@ export const authOptions: NextAuthOptions = {
             return true
           }
 
+          // Check if user exists in Teacher collection
+          const teacher = await prisma.teacher.findUnique({
+            where: { email: profile.email }
+          })
+
+          if (teacher) {
+            console.log("✅ Google OAuth: Existing teacher found:", teacher.name)
+            user.id = teacher.id
+            user.role = teacher.role
+            user.name = teacher.name
+            return true
+          }
+
           // Check if user exists in Manager collection
           const manager = await prisma.manager.findUnique({
             where: { email: profile.email }
@@ -197,6 +234,19 @@ export const authOptions: NextAuthOptions = {
             token.email = staff.email
             token.name = staff.name
             console.log("✅ JWT: Staff data set for:", staff.email, "role:", staff.role)
+            return token
+          }
+
+          const teacher = await prisma.teacher.findUnique({
+            where: { email: profile.email }
+          })
+
+          if (teacher) {
+            token.uid = teacher.id
+            token.role = teacher.role
+            token.email = teacher.email
+            token.name = teacher.name
+            console.log("✅ JWT: Teacher data set for:", teacher.email, "role:", teacher.role)
             return token
           }
 

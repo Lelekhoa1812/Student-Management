@@ -68,6 +68,7 @@ export default function HomePage() {
 
   const isStaff = session.user?.role === "staff"
   const isManager = session.user?.role === "manager"
+  const isTeacher = session.user?.role === "teacher"
 
   // Redirect based on user role
   if (isStaff) {
@@ -186,6 +187,77 @@ export default function HomePage() {
               <CardContent>
                 <Link href="/thong-tin-staff">
                   <Button className="w-full">Xem thông tin</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <CompanyImage position="bottom" />
+      </div>
+    )
+  }
+
+  // Teacher dashboard
+  if (isTeacher) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">
+              Bảng điều khiển Giáo viên
+            </h1>
+            <p className="text-lg text-gray-600">
+              Xin chào, {session.user?.name}! (Giáo viên)
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Lớp học
+                </CardTitle>
+                <CardDescription>
+                  Quản lý các lớp được phân công
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/teacher/lop-hoc">
+                  <Button className="w-full">Vào lớp</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Xét điểm
+                </CardTitle>
+                <CardDescription>
+                  Xem điểm thi và xếp hạng
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/teacher/xet-diem">
+                  <Button className="w-full">Xem</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow md:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Thông tin giáo viên
+                </CardTitle>
+                <CardDescription>
+                  Cập nhật thông tin tài khoản
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/thong-tin-teacher">
+                  <Button className="w-full">Cập nhật</Button>
                 </Link>
               </CardContent>
             </Card>

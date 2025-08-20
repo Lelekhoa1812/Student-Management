@@ -27,6 +27,7 @@ model Account {
   student Student? @relation(fields: [userId], references: [id], onDelete: Cascade)
   staff   Staff?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   manager Manager? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teacher Teacher? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
@@ -37,6 +38,7 @@ model Session {
   student      Student? @relation(fields: [userId], references: [id], onDelete: Cascade)
   staff        Staff?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   manager      Manager? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teacher      Teacher? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -82,6 +84,19 @@ model Staff {
   accounts    Account[]
   sessions    Session[]
   reminders   Reminder[]
+}
+
+model Teacher {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String   @unique
+  phoneNumber String
+  password    String
+  role        String   @default("teacher")
+  createdAt   DateTime @default(now())
+  accounts    Account[]
+  sessions    Session[]
+  classes     Class[]
 }
 
 model Manager {
@@ -130,13 +145,16 @@ model Class {
   name           String
   level          String
   maxStudents    Int
-  teacherName    String?
+  teacherId      String?   @db.ObjectId
+  teacher        Teacher?  @relation(fields: [teacherId], references: [id])
   payment_amount Float?
   numSessions    Int       @default(24)    // number of class session at default
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
   payments       Payment[]
   studentClasses StudentClass[]
+  classroom      Classroom?
+  notes          ClassNote[]
 }
 
 model Payment {
@@ -164,6 +182,7 @@ model StudentClass {
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  attendance Int     @default(0)
 
   @@unique([studentId, classId], name: "studentId_classId")
 }
@@ -193,3 +212,27 @@ model Feedback {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 } 
+
+// Tracks per-class running session count
+model Classroom {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  classId    String  @db.ObjectId
+  class      Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classCount Int     @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([classId])
+}
+
+// Notes per class session
+model ClassNote {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  classId       String   @db.ObjectId
+  class         Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  sessionNumber Int
+  content       String
+  createdAt     DateTime @default(now())
+
+  @@unique([classId, sessionNumber])
+}

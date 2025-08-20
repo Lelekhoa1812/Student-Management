@@ -9,6 +9,7 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
+    "seed:teacher": "tsx prisma/seed-teacher.ts",
     "generate-payments": "tsx scripts/generate-payments.ts",
     "backfill-class-sessions": "tsx scripts/backfill-class-sessions.ts"
   },
