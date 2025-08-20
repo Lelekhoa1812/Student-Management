@@ -30,6 +30,7 @@ interface Student {
       name: string
       level: string
       maxStudents: number
+      numSessions?: number
       teacherName: string
       isActive: boolean
       createdAt: string
@@ -45,6 +46,7 @@ interface ClassDetails {
   name: string
   level: string
   maxStudents: number
+  numSessions?: number
   teacherName: string
   isActive: boolean
   createdAt: string
@@ -295,6 +297,12 @@ export default function ExamPlacementPage() {
                               <Users className="w-4 h-4 text-purple-600" />
                               <span className="text-blue-800">
                                 <strong>Sĩ số:</strong> {studentCount}/{maxStudents}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <Clock className="w-4 h-4 text-blue-600" />
+                              <span className="text-blue-800">
+                                <strong>Số buổi:</strong> {classData.numSessions ?? 24}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">

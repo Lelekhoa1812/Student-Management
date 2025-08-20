@@ -36,6 +36,7 @@ interface Class {
   maxStudents: number
   teacherName?: string
   payment_amount?: number
+  numSessions?: number
   isActive: boolean
   createdAt: string
   _count?: {
@@ -97,7 +98,8 @@ export default function ClassManagementPage() {
     level: "",
     maxStudents: "",
     teacherName: "",
-    payment_amount: ""
+    payment_amount: "",
+    numSessions: ""
   })
 
   useEffect(() => {
@@ -167,7 +169,8 @@ export default function ClassManagementPage() {
       level: "",
       maxStudents: "",
       teacherName: "",
-      payment_amount: ""
+      payment_amount: "",
+      numSessions: ""
     })
     setError("")
   }
@@ -182,7 +185,8 @@ export default function ClassManagementPage() {
       level: "",
       maxStudents: "",
       teacherName: "",
-      payment_amount: ""
+      payment_amount: "",
+      numSessions: ""
     })
     setError("")
   }
@@ -203,11 +207,13 @@ export default function ClassManagementPage() {
         ? { 
             id: editingClass, 
             ...formData,
-            payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null
+            payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null,
+            numSessions: formData.numSessions ? parseInt(formData.numSessions) : undefined
           }
         : {
             ...formData,
-            payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null
+            payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null,
+            numSessions: formData.numSessions ? parseInt(formData.numSessions) : undefined
           }
 
       const response = await fetch(url, {
@@ -241,7 +247,8 @@ export default function ClassManagementPage() {
       level: classData.level,
       maxStudents: classData.maxStudents.toString(),
       teacherName: classData.teacherName || "",
-      payment_amount: classData.payment_amount?.toString() || ""
+      payment_amount: classData.payment_amount?.toString() || "",
+      numSessions: classData.numSessions?.toString() || ""
     })
     setError("")
   }
@@ -521,6 +528,7 @@ export default function ClassManagementPage() {
                           <p className="text-gray-600">
                             Sỉ số: {classItem._count?.studentClasses || 0}/{classItem.maxStudents}
                           </p>
+                          <p className="text-gray-600">Số buổi: {classItem.numSessions ?? 24}</p>
                           {classItem.teacherName && (
                             <p className="text-gray-600">GV: {classItem.teacherName}</p>
                           )}
@@ -637,6 +645,16 @@ export default function ClassManagementPage() {
                     />
                   </div>
 
+                  <div>
+                    <Label>Số buổi (Số buổi học của lớp)</Label>
+                    <Input
+                      type="number"
+                      value={formData.numSessions}
+                      onChange={(e) => setFormData({ ...formData, numSessions: e.target.value })}
+                      placeholder="Ví dụ: 24"
+                    />
+                  </div>
+
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={handleCancel} className="flex-1">
                       <X className="w-4 h-4 mr-2" />
@@ -660,7 +678,7 @@ export default function ClassManagementPage() {
                     {selectedClass.name}
                   </CardTitle>
                   <CardDescription>
-                    Level: {selectedClass.level} | Sỉ số: {selectedClass.studentClasses?.length || 0}/{selectedClass.maxStudents}
+                    Level: {selectedClass.level} | Sỉ số: {selectedClass.studentClasses?.length || 0}/{selectedClass.maxStudents} | Số buổi: {selectedClass.numSessions ?? 24}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -15,6 +15,7 @@ interface ClassDetails {
   name: string
   level: string
   maxStudents: number
+  numSessions?: number
   teacherName: string
   isActive: boolean
   createdAt: string
@@ -90,6 +91,13 @@ export function ClassDetailsModal({ classDetails, isOpen, onClose }: ClassDetail
                   <span className="text-sm text-gray-600 dark:text-gray-400">Sĩ số:</span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {classDetails.students.length}/{classDetails.maxStudents}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Số buổi:</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {classDetails.numSessions ?? 24}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

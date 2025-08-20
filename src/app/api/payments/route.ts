@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { class_id, payment_amount, user_id, payment_method, staff_assigned } = body
+    const { class_id, payment_amount, user_id, payment_method, staff_assigned, discount_percentage, discount_reason } = body
 
     // Validate required fields
     if (!class_id || !payment_amount || !user_id || !payment_method || !staff_assigned) {
@@ -106,7 +106,9 @@ export async function POST(request: NextRequest) {
         payment_amount: parseFloat(payment_amount),
         user_id,
         payment_method,
-        staff_assigned
+        staff_assigned,
+        discount_percentage: discount_percentage !== undefined ? parseFloat(discount_percentage) : 0,
+        discount_reason: discount_reason ?? null
       },
       include: {
         class: true,
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, have_paid, payment_method, staff_assigned } = body
+    const { id, have_paid, payment_method, staff_assigned, payment_amount, discount_percentage, discount_reason } = body
 
     if (!id) {
       return NextResponse.json(
@@ -155,6 +157,9 @@ export async function PUT(request: NextRequest) {
       datetime?: Date
       payment_method?: string
       staff_assigned?: string
+      payment_amount?: number
+      discount_percentage?: number
+      discount_reason?: string | null
     } = {}
     
     if (have_paid !== undefined) {
@@ -170,6 +175,41 @@ export async function PUT(request: NextRequest) {
     
     if (staff_assigned !== undefined) {
       updateData.staff_assigned = staff_assigned
+    }
+
+    if (payment_amount !== undefined) {
+      updateData.payment_amount = parseFloat(payment_amount)
+    }
+
+    if (discount_percentage !== undefined) {
+      updateData.discount_percentage = parseFloat(discount_percentage)
+    }
+
+    if (discount_reason !== undefined) {
+      updateData.discount_reason = discount_reason ?? null
+    }
+
+    // If client sends a discount without payment_amount, compute amount server-side
+    if (payment_amount === undefined && discount_percentage !== undefined) {
+      // Get class tuition (preferred), or infer full price from existing payment if a discount already exists
+      const paymentWithClass = await prisma.payment.findUnique({
+        where: { id },
+        include: { class: true }
+      })
+      if (paymentWithClass) {
+        const baseTuition = paymentWithClass.class?.payment_amount
+        let fullAmount = baseTuition ?? undefined
+        if (!fullAmount || !isFinite(fullAmount)) {
+          // infer: payment_amount / (1 - existingPct)
+          const existingPct = paymentWithClass.discount_percentage ?? 0
+          if (existingPct < 100) {
+            fullAmount = paymentWithClass.payment_amount / (1 - existingPct / 100)
+          }
+        }
+        if (fullAmount && isFinite(fullAmount)) {
+          updateData.payment_amount = Math.round(fullAmount * (1 - parseFloat(discount_percentage) / 100))
+        }
+      }
     }
 
     const updatedPayment = await prisma.payment.update({

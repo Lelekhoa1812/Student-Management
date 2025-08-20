@@ -31,11 +31,15 @@ interface Payment {
   payment_method: string
   staff_assigned: string
   have_paid: boolean
+  discount_percentage?: number
+  discount_reason?: string | null
   createdAt: string
   class: {
     id: string
     name: string
     level: string
+    payment_amount?: number
+    numSessions?: number
   }
   student: {
     id: string
@@ -61,7 +65,11 @@ export default function RegistrationManagementPage() {
   const [editingPayment, setEditingPayment] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     have_paid: false,
-    payment_method: ""
+    payment_method: "",
+    payment_amount: "",
+    discount_percentage: "0",
+    discount_reason: "",
+    reducedSessions: ""
   })
   const [exportingPaymentId, setExportingPaymentId] = useState<string | null>(null)
 
@@ -127,7 +135,11 @@ export default function RegistrationManagementPage() {
     setEditingPayment(payment.id)
     setEditForm({
       have_paid: payment.have_paid,
-      payment_method: payment.payment_method
+      payment_method: payment.payment_method,
+      payment_amount: payment.payment_amount.toString(),
+      discount_percentage: (payment.discount_percentage ?? 0).toString(),
+      discount_reason: payment.discount_reason ?? "",
+      reducedSessions: ""
     })
   }
 
@@ -144,7 +156,10 @@ export default function RegistrationManagementPage() {
           id: editingPayment,
           have_paid: editForm.have_paid,
           payment_method: editForm.payment_method,
-          staff_assigned: session.user.id
+          staff_assigned: session.user.id,
+          payment_amount: editForm.payment_amount ? parseFloat(editForm.payment_amount) : undefined,
+          discount_percentage: editForm.discount_percentage ? parseFloat(editForm.discount_percentage) : undefined,
+          discount_reason: editForm.discount_reason || undefined
         }),
       })
 
@@ -173,6 +188,22 @@ export default function RegistrationManagementPage() {
       style: 'currency',
       currency: 'VND'
     }).format(amount)
+  }
+
+  // Proportional price recalculation when reducing sessions
+  const recalcForReducedSessions = (payment: Payment, newSessionCount: number) => {
+    const baseSessions = payment.class.numSessions ?? 24
+    if (!baseSessions || baseSessions <= 0) return
+    const currentFullAmount = payment.payment_amount / (1 - (payment.discount_percentage ?? 0) / 100)
+    const proportionalAmount = (currentFullAmount * newSessionCount) / baseSessions
+    const discountPct = (1 - proportionalAmount / currentFullAmount) * 100
+    setEditForm((prev) => ({
+      ...prev,
+      payment_amount: Math.round(proportionalAmount).toString(),
+      discount_percentage: discountPct.toFixed(2),
+      discount_reason: `Giảm số buổi từ ${baseSessions} sang ${newSessionCount}`,
+      reducedSessions: newSessionCount.toString()
+    }))
   }
 
   const formatDate = (dateString: string) => {
@@ -381,6 +412,11 @@ export default function RegistrationManagementPage() {
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                           Phương thức: {payment.payment_method}
                         </div>
+                        {(payment.discount_percentage ?? 0) > 0 && (
+                          <div className="text-xs text-blue-700 dark:text-blue-300">
+                            Giảm: {payment.discount_percentage}%{payment.discount_reason ? ` - ${payment.discount_reason}` : ""}
+                          </div>
+                        )}
                       </div>
 
                       {/* Payment Status */}
@@ -417,6 +453,76 @@ export default function RegistrationManagementPage() {
                                 placeholder="Nhập phương thức thanh toán"
                                 className="text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                               />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div>
+                                <Label className="text-sm text-gray-700 dark:text-gray-300">Số tiền</Label>
+                                <Input
+                                  type="number"
+                                  value={editForm.payment_amount}
+                                  onChange={(e) => setEditForm({ ...editForm, payment_amount: e.target.value })}
+                                  placeholder="Nhập số tiền"
+                                  className="text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-sm text-gray-700 dark:text-gray-300">Giảm giá (%)</Label>
+                                <Input
+                                  type="number"
+                                  value={editForm.discount_percentage}
+                                  onChange={(e) => {
+                                    const value = e.target.value
+                                    // Auto recompute payment_amount if user edits discount only
+                                    const newPct = parseFloat(value)
+                                    if (!isNaN(newPct)) {
+                                      const fullAmount = (payment.class.payment_amount ?? (payment.payment_amount / (1 - ((payment.discount_percentage ?? 0) / 100))))
+                                      if (fullAmount && isFinite(fullAmount)) {
+                                        const newAmount = Math.round(fullAmount * (1 - newPct / 100))
+                                        setEditForm({
+                                          ...editForm,
+                                          discount_percentage: value,
+                                          payment_amount: newAmount.toString(),
+                                        })
+                                        return
+                                      }
+                                    }
+                                    setEditForm({ ...editForm, discount_percentage: value })
+                                  }}
+                                  placeholder="0"
+                                  className="text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-sm text-gray-700 dark:text-gray-300">Lý do giảm</Label>
+                              <Input
+                                value={editForm.discount_reason}
+                                onChange={(e) => setEditForm({ ...editForm, discount_reason: e.target.value })}
+                                placeholder="Nhập lý do giảm (nếu có)"
+                                className="text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-sm text-gray-700 dark:text-gray-300">Giảm số buổi</Label>
+                              <div className="flex gap-2">
+                                <select
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                  value={editForm.reducedSessions}
+                                  onChange={(e) => recalcForReducedSessions(payment, parseInt(e.target.value))}
+                                >
+                                  <option value="">Chọn số buổi mới</option>
+                                  {(() => {
+                                    const base = payment.class.numSessions ?? 24
+                                    const options = [] as number[]
+                                    for (let s = base - 1; s >= Math.max(12, base - 12); s--) {
+                                      options.push(s)
+                                    }
+                                    return options.map((opt) => (
+                                      <option key={opt} value={opt}>{`Giảm số buổi xuống ${opt}`}</option>
+                                    ))
+                                  })()}
+                                </select>
+                              </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <input

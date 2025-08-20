@@ -132,6 +132,7 @@ model Class {
   maxStudents    Int
   teacherName    String?
   payment_amount Float?
+  numSessions    Int       @default(24)    // number of class session at default
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
   payments       Payment[]
@@ -150,6 +151,8 @@ model Payment {
   staff_assigned String   @db.ObjectId
   staff          Staff    @relation(fields: [staff_assigned], references: [id])
   have_paid      Boolean  @default(false)
+  discount_percentage Float  @default(0)
+  discount_reason     String?
   createdAt      DateTime @default(now())
 }
 
