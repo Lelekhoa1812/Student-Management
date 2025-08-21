@@ -2,6 +2,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 
+type ClassWhere = {
+  isActive?: boolean
+  teacherId?: string | null
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Ensure database connection with retry logic
@@ -10,7 +15,7 @@ export async function GET(request: NextRequest) {
       try {
         await prisma.$connect()
         break
-      } catch (error) {
+      } catch {
         retries--
         if (retries === 0) {
           console.error("Failed to connect to database after 3 attempts")
@@ -68,7 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all classes
-    const whereClause: any = active === "true" ? { isActive: true } : {}
+    const whereClause: ClassWhere = active === "true" ? { isActive: true } : {}
     if (teacherId) {
       whereClause.teacherId = teacherId
     }
@@ -105,8 +110,8 @@ export async function GET(request: NextRequest) {
   } finally {
     try {
       await prisma.$disconnect()
-    } catch (error) {
-      console.error("Error disconnecting from database:", error)
+    } catch (e) {
+      console.error("Error disconnecting from database:", e)
     }
   }
 }
@@ -119,7 +124,7 @@ export async function POST(request: NextRequest) {
       try {
         await prisma.$connect()
         break
-      } catch (error) {
+      } catch {
         retries--
         if (retries === 0) {
           console.error("Failed to connect to database after 3 attempts")
@@ -133,7 +138,14 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { name, level, maxStudents, teacherId, payment_amount, numSessions } = body
+    const { name, level, maxStudents, teacherId, payment_amount, numSessions } = body as {
+      name: string
+      level: string
+      maxStudents: string | number
+      teacherId?: string | null
+      payment_amount?: string | number | null
+      numSessions?: string | number
+    }
 
     // Validate required fields
     if (!name || !level || !maxStudents) {
@@ -160,10 +172,10 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         level,
-        maxStudents: parseInt(maxStudents),
+        maxStudents: typeof maxStudents === 'string' ? parseInt(maxStudents) : maxStudents,
         teacherId: teacherId || null,
-        payment_amount: payment_amount ? parseFloat(payment_amount) : null,
-        numSessions: numSessions ? parseInt(numSessions) : undefined
+        payment_amount: payment_amount != null ? (typeof payment_amount === 'string' ? parseFloat(payment_amount) : payment_amount) : null,
+        numSessions: numSessions != null ? (typeof numSessions === 'string' ? parseInt(numSessions) : numSessions) : undefined
       },
       include: { teacher: { select: { id: true, name: true, email: true } } }
     })
@@ -187,8 +199,8 @@ export async function POST(request: NextRequest) {
   } finally {
     try {
       await prisma.$disconnect()
-    } catch (error) {
-      console.error("Error disconnecting from database:", error)
+    } catch (e) {
+      console.error("Error disconnecting from database:", e)
     }
   }
 }
@@ -201,7 +213,7 @@ export async function PUT(request: NextRequest) {
       try {
         await prisma.$connect()
         break
-      } catch (error) {
+      } catch {
         retries--
         if (retries === 0) {
           console.error("Failed to connect to database after 3 attempts")
@@ -215,7 +227,16 @@ export async function PUT(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { id, name, level, maxStudents, teacherId, payment_amount, numSessions, isActive } = body
+    const { id, name, level, maxStudents, teacherId, payment_amount, numSessions, isActive } = body as {
+      id: string
+      name?: string
+      level?: string
+      maxStudents?: string | number
+      teacherId?: string | null
+      payment_amount?: string | number | null
+      numSessions?: string | number
+      isActive?: boolean
+    }
 
     if (!id) {
       return NextResponse.json(
@@ -258,12 +279,12 @@ export async function PUT(request: NextRequest) {
     const updatedClass = await prisma.class.update({
       where: { id },
       data: {
-        name: name || existingClass.name,
-        level: level || existingClass.level,
-        maxStudents: maxStudents ? parseInt(maxStudents) : existingClass.maxStudents,
-        teacherId: teacherId !== undefined ? (teacherId || null) : (existingClass as any).teacherId,
-        payment_amount: payment_amount !== undefined ? (payment_amount ? parseFloat(payment_amount) : null) : existingClass.payment_amount,
-        numSessions: numSessions !== undefined ? parseInt(numSessions) : existingClass.numSessions,
+        name: name ?? existingClass.name,
+        level: level ?? existingClass.level,
+        maxStudents: maxStudents != null ? (typeof maxStudents === 'string' ? parseInt(maxStudents) : maxStudents) : existingClass.maxStudents,
+        teacherId: teacherId !== undefined ? (teacherId || null) : existingClass.teacherId,
+        payment_amount: payment_amount !== undefined ? (payment_amount != null ? (typeof payment_amount === 'string' ? parseFloat(payment_amount) : payment_amount) : null) : existingClass.payment_amount,
+        numSessions: numSessions !== undefined ? (typeof numSessions === 'string' ? parseInt(numSessions) : numSessions) : existingClass.numSessions,
         isActive: isActive !== undefined ? isActive : existingClass.isActive
       },
       include: { teacher: { select: { id: true, name: true, email: true } } }
@@ -288,8 +309,8 @@ export async function PUT(request: NextRequest) {
   } finally {
     try {
       await prisma.$disconnect()
-    } catch (error) {
-      console.error("Error disconnecting from database:", error)
+    } catch (e) {
+      console.error("Error disconnecting from database:", e)
     }
   }
 }
@@ -302,7 +323,7 @@ export async function DELETE(request: NextRequest) {
       try {
         await prisma.$connect()
         break
-      } catch (error) {
+      } catch {
         retries--
         if (retries === 0) {
           console.error("Failed to connect to database after 3 attempts")
@@ -375,8 +396,8 @@ export async function DELETE(request: NextRequest) {
   } finally {
     try {
       await prisma.$disconnect()
-    } catch (error) {
-      console.error("Error disconnecting from database:", error)
+    } catch (e) {
+      console.error("Error disconnecting from database:", e)
     }
   }
 } 

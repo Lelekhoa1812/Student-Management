@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
         await prisma.studentClass.create({
           data: {
             studentId,
-            classId
+            classId,
+            classRegistered: targetClass.numSessions || 24
           }
         })
 

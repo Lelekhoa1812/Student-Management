@@ -222,10 +222,15 @@ export async function PUT(
         // Create StudentClass records
         for (const classId of classesToAdd) {
           try {
+            const classData = await prisma.class.findUnique({
+              where: { id: classId }
+            })
+            
             await prisma.studentClass.create({
               data: {
                 studentId: id,
-                classId
+                classId,
+                classRegistered: classData?.numSessions || 24
               }
             })
           } catch (error) {

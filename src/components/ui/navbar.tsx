@@ -70,6 +70,7 @@ export function Navbar({ className }: NavbarProps) {
     ? [
         { href: "/teacher/lop-hoc", label: "Lớp học" },
         { href: "/teacher/xet-diem", label: "Xét điểm" },
+        { href: "/teacher/tao-de-thi", label: "Tạo đề thi" },
         { href: "/thong-tin-teacher", label: "Thông tin giáo viên" },
       ]
     : [

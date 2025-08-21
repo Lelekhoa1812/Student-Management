@@ -23,7 +23,9 @@ export async function GET(
       where: { id },
       include: {
         studentClasses: {
-          include: {
+          select: {
+            attendance: true,
+            classRegistered: true,
             student: {
               select: {
                 id: true,
@@ -51,9 +53,10 @@ export async function GET(
 
     // Transform the data to match the expected format for the modal
     const attendanceByStudentId: Record<string, number> = {}
+    const classRegisteredByStudentId: Record<string, number> = {}
     for (const sc of classData.studentClasses) {
-      // @ts-ignore
-      attendanceByStudentId[sc.student.id] = (sc as any).attendance ?? 0
+      attendanceByStudentId[sc.student.id] = sc.attendance ?? 0
+      classRegisteredByStudentId[sc.student.id] = sc.classRegistered ?? classData.numSessions ?? 24
     }
 
     const transformedClassData = {
@@ -62,15 +65,21 @@ export async function GET(
       level: classData.level,
       maxStudents: classData.maxStudents,
       teacherName: classData.teacher?.name || "",
-      teacherId: (classData as any).teacherId || null,
+      teacherId: classData.teacherId || null,
       numSessions: classData.numSessions ?? 24,
       isActive: classData.isActive,
       createdAt: classData.createdAt.toISOString(),
       students: classData.studentClasses.map(sc => sc.student),
-      attendanceByStudentId
+      attendanceByStudentId,
+      classRegisteredByStudentId
     }
 
     console.log("✅ Retrieved class by ID:", classData.id)
+    console.log("📊 Transformed data:", {
+      attendanceByStudentId,
+      classRegisteredByStudentId,
+      studentCount: classData.studentClasses.length
+    })
     return NextResponse.json(transformedClassData)
 
   } catch (error) {

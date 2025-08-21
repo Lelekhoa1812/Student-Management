@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CompanyImage } from "@/components/ui/company-image"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, BookOpen, CreditCard, Settings, UserPlus, Calendar } from "lucide-react"
+import { Users, BookOpen, CreditCard, Settings, UserPlus, Calendar, ClipboardList, FileText } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -217,6 +217,7 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-red-600" />
                   Lớp học
                 </CardTitle>
                 <CardDescription>
@@ -233,6 +234,7 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-blue-600" />
                   Xét điểm
                 </CardTitle>
                 <CardDescription>
@@ -246,9 +248,27 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-shadow md:col-span-2">
+            <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-purple-600" />
+                  Tạo đề thi
+                </CardTitle>
+                <CardDescription>
+                  Tạo và quản lý đề thi
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/teacher/tao-de-thi">
+                  <Button className="w-full">Tạo đề thi</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-green-600" />
                   Thông tin giáo viên
                 </CardTitle>
                 <CardDescription>

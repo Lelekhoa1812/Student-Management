@@ -429,6 +429,7 @@ async function main() {
         data: {
           studentId: student.id,
           classId: classData.id,
+          classRegistered: classData.numSessions || 24, // Set default to class's numSessions
         },
       })
       studentClassAssignments.push(assignment)

@@ -24,8 +24,8 @@ function LoginForm() {
 
   // Check for error parameters from Google OAuth
   useEffect(() => {
-    const errorParam = searchParams.get('error')
-    const emailParam = searchParams.get('email')
+    const errorParam = searchParams?.get('error') || null
+    const emailParam = searchParams?.get('email') || null
     
     if (errorParam === 'no-account' && emailParam) {
       setError(`Tài khoản với email ${emailParam} chưa được tạo. Vui lòng đăng ký tài khoản trước.`)

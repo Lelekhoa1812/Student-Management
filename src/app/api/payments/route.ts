@@ -222,6 +222,76 @@ export async function PUT(request: NextRequest) {
       }
     })
 
+    // If discount_reason indicates reduced sessions, update StudentClass.classRegistered
+    if (updateData.discount_reason && updateData.discount_reason.includes('Giảm số buổi')) {
+      console.log('🔄 Detected reduced sessions discount reason:', updateData.discount_reason)
+      
+      // Try multiple regex patterns to handle different text encodings
+      let newSessionCount: number | null = null
+      
+      // Pattern 1: "sang X" (Vietnamese)
+      let match = updateData.discount_reason.match(/sang (\d+)/)
+      if (match) {
+        newSessionCount = parseInt(match[1])
+        console.log('✅ Matched pattern 1 (sang):', newSessionCount)
+      }
+      
+      // Pattern 2: "to X" (English fallback)
+      if (!newSessionCount) {
+        match = updateData.discount_reason.match(/to (\d+)/)
+        if (match) {
+          newSessionCount = parseInt(match[1])
+          console.log('✅ Matched pattern 2 (to):', newSessionCount)
+        }
+      }
+      
+      // Pattern 3: Extract any number that appears after "Giảm số buổi"
+      if (!newSessionCount) {
+        match = updateData.discount_reason.match(/Giảm số buổi.*?(\d+)/)
+        if (match) {
+          newSessionCount = parseInt(match[1])
+          console.log('✅ Matched pattern 3 (extract):', newSessionCount)
+        }
+      }
+      
+      if (newSessionCount) {
+        console.log(`🔄 Updating StudentClass.classRegistered to ${newSessionCount} for student ${updatedPayment.user_id} in class ${updatedPayment.class_id}`)
+        
+        try {
+          const updateResult = await prisma.studentClass.updateMany({
+            where: {
+              studentId: updatedPayment.user_id,
+              classId: updatedPayment.class_id
+            },
+            data: {
+              classRegistered: newSessionCount
+            }
+          })
+          
+          console.log(`✅ Successfully updated ${updateResult.count} StudentClass records`)
+          
+          // Verify the update
+          const verifySC = await prisma.studentClass.findFirst({
+            where: {
+              studentId: updatedPayment.user_id,
+              classId: updatedPayment.class_id
+            }
+          })
+          
+          if (verifySC) {
+            console.log(`📊 Verification: StudentClass.classRegistered is now ${verifySC.classRegistered}`)
+          }
+          
+        } catch (error) {
+          console.error('❌ Error updating StudentClass.classRegistered:', error)
+        }
+      } else {
+        console.log('⚠️ Could not extract session count from discount reason:', updateData.discount_reason)
+      }
+    } else {
+      console.log('ℹ️ No reduced sessions discount reason detected')
+    }
+
     return NextResponse.json(updatedPayment)
   } catch (error) {
     console.error("Error updating payment:", error)
