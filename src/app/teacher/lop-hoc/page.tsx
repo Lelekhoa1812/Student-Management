@@ -25,6 +25,7 @@ interface StudentItem {
 }
 
 interface ClassNoteItem {
+  id: string
   sessionNumber: number
   createdAt: string
   content: string
@@ -67,6 +68,9 @@ export default function TeacherClassesPage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [historyNotes, setHistoryNotes] = useState<ClassNoteItem[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+  const [editingNoteContent, setEditingNoteContent] = useState("")
+  const [isSavingNote, setIsSavingNote] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
@@ -192,7 +196,7 @@ export default function TeacherClassesPage() {
     try {
       const r = await fetch(`/api/teacher/classroom?classId=${selectedClass.id}&history=true`)
       if (r.ok) {
-        const data = await r.json() as { notes: { sessionNumber: number, createdAt: string, content: string }[] }
+        const data = await r.json() as { notes: { id: string, sessionNumber: number, createdAt: string, content: string }[] }
         setHistoryNotes(data.notes || [])
       }
     } catch (e) {
@@ -204,6 +208,51 @@ export default function TeacherClassesPage() {
 
   const closeHistory = () => {
     setShowHistoryModal(false)
+    setEditingNoteId(null)
+    setEditingNoteContent("")
+  }
+
+  const startEditingNote = (note: ClassNoteItem) => {
+    setEditingNoteId(note.id)
+    setEditingNoteContent(note.content)
+  }
+
+  const cancelEditingNote = () => {
+    setEditingNoteId(null)
+    setEditingNoteContent("")
+  }
+
+  const saveEditedNote = async () => {
+    if (!editingNoteId || !selectedClass) return
+    
+    setIsSavingNote(true)
+    try {
+      const response = await fetch(`/api/teacher/classroom/notes/${editingNoteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editingNoteContent })
+      })
+      
+      if (response.ok) {
+        // Update the note in local state
+        setHistoryNotes(prev => prev.map(note => 
+          note.id === editingNoteId 
+            ? { ...note, content: editingNoteContent }
+            : note
+        ))
+        
+        setEditingNoteId(null)
+        setEditingNoteContent("")
+        alert("Đã lưu ghi chú thành công!")
+      } else {
+        alert("Có lỗi khi lưu ghi chú")
+      }
+    } catch (error) {
+      console.error('Error saving note:', error)
+      alert("Có lỗi khi lưu ghi chú")
+    } finally {
+      setIsSavingNote(false)
+    }
   }
 
   const toggleStudent = (id: string) => {
@@ -532,6 +581,9 @@ export default function TeacherClassesPage() {
                         onChange={(e) => setNote(e.target.value)} 
                         placeholder="Nội dung buổi học..." 
                       />
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Nhấn Enter để lưu nhanh, hoặc sử dụng nút Lưu/Hủy
+                      </div>
                     </div>
                   </>
                 )}
@@ -543,24 +595,99 @@ export default function TeacherClassesPage() {
               <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-60 p-4">
                 <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
                   <div className="flex items-center justify-between p-4 border-b">
-                    <h3 className="font-semibold text-black">Lịch sử lớp học</h3>
+                    <div className="flex items-center gap-2">
+                      <Notebook className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-semibold text-black">Lịch sử lớp học - {selectedClass?.name}</h3>
+                    </div>
                     <Button variant="ghost" size="sm" onClick={closeHistory} className="group hover:bg-red-100">
                       <X className="w-5 h-5 text-black group-hover:text-red-600" />
                     </Button>
                   </div>
                   <div className="p-4 space-y-3">
                     {isLoadingHistory ? (
-                      <div className="flex items-center justify-center py-6">
-                        <Loader2 className="w-6 h-6 animate-spin" />
+                      <div className="flex items-center justify-center py-8">
+                        <div className="text-center">
+                          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-blue-600" />
+                          <p className="text-gray-600">Đang tải lịch sử lớp học...</p>
+                        </div>
                       </div>
                     ) : historyNotes.length === 0 ? (
-                      <div className="text-sm text-gray-600">Chưa có lịch sử ghi chú.</div>
+                      <div className="text-center py-8">
+                        <Notebook className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <p className="text-gray-600 font-medium">Chưa có lịch sử ghi chú</p>
+                        <p className="text-sm text-gray-500 mt-1">Ghi chú sẽ xuất hiện sau khi bạn kết thúc các buổi học</p>
+                      </div>
                     ) : (
                       historyNotes.map((n) => (
-                        <div key={`${n.sessionNumber}-${n.createdAt}`} className="border rounded p-3 bg-gray-50">
-                          <div className="text-sm font-medium">Buổi {n.sessionNumber}</div>
-                          <div className="text-xs text-gray-500 mb-1">{new Date(n.createdAt).toLocaleString()}</div>
-                          <div className="text-sm">{n.content}</div>
+                        <div key={`${n.sessionNumber}-${n.createdAt}`} className="border border-gray-200 dark:border-gray-600 rounded p-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <div className="text-sm font-medium text-black dark:text-white">Buổi {n.sessionNumber}</div>
+                              <div className="text-xs text-gray-400 dark:text-gray-300">{new Date(n.createdAt).toLocaleString('vi-VN')}</div>
+                            </div>
+                            {editingNoteId === n.id ? (
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={saveEditedNote}
+                                  disabled={isSavingNote}
+                                  className="text-xs bg-green-500 hover:bg-green-600 text-white border-green-500 hover:bg-green-700"
+                                >
+                                  {isSavingNote ? (
+                                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <span>💾</span>
+                                  )}
+                                  Lưu
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={cancelEditingNote}
+                                  className="text-xs bg-gray-500 hover:bg-gray-600 text-white border-gray-500 hover:bg-gray-700"
+                                >
+                                  ✕ Hủy
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => startEditingNote(n)}
+                                className="text-xs bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:bg-blue-700 transition-colors"
+                              >
+                                ✏️ Sửa
+                              </Button>
+                            )}
+                          </div>
+                          
+                          {editingNoteId === n.id ? (
+                            <div className="space-y-2">
+                              <textarea
+                                value={editingNoteContent}
+                                onChange={(e) => setEditingNoteContent(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    saveEditedNote()
+                                  }
+                                  if (e.key === 'Escape') {
+                                    cancelEditingNote()
+                                  }
+                                }}
+                                className="w-full border border-gray-300 dark:border-gray-500 rounded p-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                                rows={3}
+                                placeholder="Nhập nội dung ghi chú..."
+                                autoFocus
+                              />
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                Nhấn Enter để lưu nhanh, hoặc sử dụng nút Lưu/Hủy
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">{n.content}</div>
+                          )}
                         </div>
                       ))
                     )}
