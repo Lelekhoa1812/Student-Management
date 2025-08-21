@@ -88,7 +88,7 @@ export async function GET(
     if (error instanceof Error && error.message.includes('Engine is not yet connected')) {
       return NextResponse.json(
         { error: "Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại." },
-        { status: 500 }
+        { status: 503 }
       )
     }
     
@@ -96,12 +96,7 @@ export async function GET(
       { error: "Có lỗi xảy ra khi tải thông tin lớp học" },
       { status: 500 }
     )
-  } finally {
-    try {
-      await prisma.$disconnect()
-      console.log("✅ Database disconnected")
-    } catch (error) {
-      console.error("❌ Error disconnecting:", error)
-    }
   }
+  // Don't disconnect here as other requests might need the connection
+  // The connection will be managed by the global Prisma instance
 }

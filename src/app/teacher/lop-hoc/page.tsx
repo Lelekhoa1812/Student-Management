@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/ui/navbar"
-import { Users, Play, StopCircle, ClipboardList, CheckSquare, Notebook, X, Loader2, RefreshCw } from "lucide-react"
+import { Users, Play, StopCircle, ClipboardList, CheckSquare, Notebook, X, Loader2, RefreshCw, Wifi } from "lucide-react"
 
 interface ClassItem {
   id: string
@@ -90,35 +90,26 @@ export default function TeacherClassesPage() {
   }
 
   const refreshClassData = useCallback(async () => {
-    if (!selectedClass) return
-    
+    if (!selectedClass) return;
     try {
-      console.log('🔄 Refreshing class data for class:', selectedClass.id)
-      const classRes = await fetch(`/api/classes/${selectedClass.id}`)
+      const classRes = await fetch(`/api/classes/${selectedClass.id}`);
       if (classRes.ok) {
-        const data = await classRes.json()
-        console.log('📊 Received class data:', data)
-        console.log('📈 Attendance map:', data?.attendanceByStudentId)
-        console.log('📚 Class registered map:', data?.classRegisteredByStudentId)
-        
-        // Log the difference between old and new data
-        console.log('📊 Data comparison:')
-        console.log('   - Old attendance map:', attendanceMap)
-        console.log('   - New attendance map:', data?.attendanceByStudentId)
-        console.log('   - Old class registered map:', classRegisteredMap)
-        console.log('   - New class registered map:', data?.classRegisteredByStudentId)
-        
-        setAttendanceMap(data?.attendanceByStudentId || {})
-        setClassRegisteredMap(data?.classRegisteredByStudentId || {})
-        
-        console.log('✅ State updated with new data')
+        const data = await classRes.json() as ClassData; // Cast to ClassData
+        setAttendanceMap(data?.attendanceByStudentId || {});
+        setClassRegisteredMap(data?.classRegisteredByStudentId || {});
+        console.log('✅ Class data refreshed successfully')
       } else {
-        console.error('❌ Failed to fetch class data:', classRes.status)
+        const errorData = await classRes.json()
+        console.error('❌ Failed to refresh class data:', classRes.status, errorData)
+        
+        if (classRes.status === 503) {
+          console.error('Database connection issue detected')
+        }
       }
     } catch (e) {
       console.error('❌ Error refreshing class data:', e)
     }
-  }, [selectedClass, attendanceMap, classRegisteredMap])
+  }, [selectedClass, attendanceMap, classRegisteredMap]);
 
   // Refresh class data when modal is shown
   useEffect(() => {
@@ -128,11 +119,12 @@ export default function TeacherClassesPage() {
   }, [showClassModal, selectedClass, refreshClassData])
 
   const openClassModal = async (cls: ClassItem) => {
-    setSelectedClass(null)
+    setSelectedClass(cls) // Set selectedClass first
     setIsClassStarted(false)
     setAttendance({})
     setSavedPresent({})
     setNote("")
+    
     try {
       const [classRes, classroomRes] = await Promise.all([
         fetch(`/api/classes/${cls.id}`),
@@ -171,7 +163,8 @@ export default function TeacherClassesPage() {
         const data = await classroomRes.json()
         setClassCount(data.classCount)
       }
-      setSelectedClass(cls)
+      
+      // Now open the modal after all data is loaded
       setShowClassModal(true)
     } catch (e) {
       console.error(e)
@@ -239,45 +232,29 @@ export default function TeacherClassesPage() {
     console.log('   - Current attendance map:', attendanceMap)
 
     try {
-      const response = await fetch(`/api/teacher/attendance`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: selectedClass.id, incrementIds, decrementIds })
+      // Don't call the attendance API - just save the current session state
+      // The attendance will only be incremented when the class ends
+      
+      // Update local attendance map for display purposes only
+      const newAttendanceMap = { ...attendanceMap }
+      incrementIds.forEach(id => {
+        newAttendanceMap[id] = Math.max(0, (newAttendanceMap[id] || 0) + 1)
+      })
+      decrementIds.forEach(id => {
+        newAttendanceMap[id] = Math.max(0, (newAttendanceMap[id] || 0) - 1)
       })
       
-      console.log('📡 API response status:', response.status)
+      console.log('📊 Updated local attendance map:', newAttendanceMap)
+      setAttendanceMap(newAttendanceMap)
       
-      if (response.ok) {
-        const responseData = await response.json()
-        console.log('📡 API response data:', responseData)
-        
-        // Update local attendance map
-        const newAttendanceMap = { ...attendanceMap }
-        incrementIds.forEach(id => {
-          newAttendanceMap[id] = Math.max(0, (newAttendanceMap[id] || 0) + 1)
-        })
-        decrementIds.forEach(id => {
-          newAttendanceMap[id] = Math.max(0, (newAttendanceMap[id] || 0) - 1)
-        })
-        
-        console.log('📊 Updated local attendance map:', newAttendanceMap)
-        setAttendanceMap(newAttendanceMap)
-        
-        // Persist the saved state so checkboxes remain
-        const newSaved: Record<string, boolean> = {}
-        currentPresentIds.forEach(id => { newSaved[id] = true })
-        setSavedPresent(newSaved)
-        
-        console.log('🔄 Refreshing class data from database...')
-        // Refresh class data to get latest classRegistered values
-        await refreshClassData()
-        
-        alert("Đã lưu điểm danh")
-      } else {
-        const errorData = await response.json()
-        console.error('❌ API error:', errorData)
-        alert("Có lỗi khi lưu điểm danh")
-      }
+      // Persist the saved state so checkboxes remain
+      const newSaved: Record<string, boolean> = {}
+      currentPresentIds.forEach(id => { newSaved[id] = true })
+      setSavedPresent(newSaved)
+      
+      console.log('✅ Attendance session state saved locally (not incremented in database)')
+      alert("Đã lưu trạng thái điểm danh buổi học")
+      
     } catch (e) {
       console.error('❌ Error saving attendance:', e)
       alert("Có lỗi khi lưu điểm danh")
@@ -289,12 +266,50 @@ export default function TeacherClassesPage() {
   const endClass = async () => {
     if (!selectedClass) return
     setIsEnding(true)
+    
     try {
+      // First, increment attendance for students who were present in this session
+      const presentStudentIds = Object.keys(savedPresent).filter(id => savedPresent[id])
+      
+      if (presentStudentIds.length > 0) {
+        console.log('🔄 Ending class - incrementing attendance for present students:', presentStudentIds)
+        
+        try {
+          const attendanceResponse = await fetch(`/api/teacher/attendance`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              classId: selectedClass.id, 
+              incrementIds: presentStudentIds, 
+              decrementIds: [] 
+            })
+          })
+          
+          if (attendanceResponse.ok) {
+            console.log('✅ Attendance incremented successfully for present students')
+          } else {
+            const errorData = await attendanceResponse.json()
+            console.error('❌ Failed to increment attendance:', attendanceResponse.status, errorData)
+            
+            if (attendanceResponse.status === 503) {
+              alert("Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại.")
+              return
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error incrementing attendance:', error)
+          alert("Lỗi khi cập nhật điểm danh. Vui lòng thử lại.")
+          return
+        }
+      }
+      
+      // Then, end the class session
       const response = await fetch(`/api/teacher/classroom`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classId: selectedClass.id, note })
       })
+      
       if (response.ok) {
         setClassCount(prev => prev + 1)
         
@@ -307,12 +322,22 @@ export default function TeacherClassesPage() {
         // This will preserve the accumulated attendance from the database
         await refreshClassData()
         
-        alert("Đã kết thúc buổi học")
+        alert("Đã kết thúc buổi học và cập nhật điểm danh")
         // Don't close the modal immediately, let teacher see the updated attendance
         // closeClassModal()
       } else {
-        alert("Có lỗi khi kết thúc buổi học")
+        const errorData = await response.json()
+        console.error('❌ Failed to end class:', response.status, errorData)
+        
+        if (response.status === 503) {
+          alert("Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại.")
+        } else {
+          alert("Có lỗi khi kết thúc buổi học")
+        }
       }
+    } catch (error) {
+      console.error('❌ Error in endClass:', error)
+      alert("Có lỗi xảy ra. Vui lòng thử lại.")
     } finally {
       setIsEnding(false)
     }
@@ -410,19 +435,52 @@ export default function TeacherClassesPage() {
 
                     {/* Student List */}
                     <div className="border rounded p-3 text-black">
+                      {/* Debug Section */}
+                      {/* <div className="mb-3 p-2 bg-gray-100 rounded text-xs">
+                        <div className="font-semibold">Debug Info:</div>
+                        <div>attendanceMap: {JSON.stringify(attendanceMap)}</div>
+                        <div>classRegisteredMap: {JSON.stringify(classRegisteredMap)}</div>
+                        <div>selectedClass?.numSessions: {selectedClass?.numSessions}</div>
+                      </div> */}
+                      
+                      {/* System Explanation */}
+                      <div className="mb-3 p-2 bg-gray-300 rounded text-xs text-blue-800">
+                        <div className="font-semibold">ℹ️ Hệ thống điểm danh:</div>
+                        <div>• <strong>Danh sách  điểm danh:</strong> Chọn ô điểm danh, và huỷ chọn để hoàn tác.</div>
+                        <div>• <strong>Lưu trạng thái điểm danh:</strong> Lưu trạng thái điểm danh trong lớp học.</div>
+                        <div>• <strong>Kết thúc lớp học:</strong> Lưu tổng điểm danh cuối cùng và ghi chú buổi học</div>
+                        <div>• <strong>Điểm danh hiển thị:</strong> Tổng số buổi đã tham gia / Số buổi đã đăng ký</div>
+                      </div>
+                      
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 text-sm text-black">
                           <ClipboardList className="w-4 h-4 text-black" /> Điểm danh lớp học
                         </div>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={refreshClassData}
-                          className="text-xs text-black bg-blue-500 hover:bg-blue-900 hover:text-white"
-                        >
-                          <RefreshCw className="w-3 h-3 mr-1" />
-                          Làm mới
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={refreshClassData}
+                            className="text-xs text-black bg-blue-500 hover:bg-blue-900 hover:text-white"
+                          >
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            Làm mới
+                          </Button>
+                          
+                          {/* Retry button for connection issues */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              alert("Đang thử kết nối lại cơ sở dữ liệu...")
+                              refreshClassData()
+                            }}
+                            className="text-xs text-black bg-yellow-500 hover:bg-yellow-900 hover:text-white"
+                          >
+                            <Wifi className="w-3 h-3 mr-1" />
+                            Thử lại
+                          </Button>
+                        </div>
                       </div>
                       <div className="space-y-2 max-h-64 overflow-y-auto text-black">
                         {students.map(st => {
@@ -446,7 +504,7 @@ export default function TeacherClassesPage() {
                                   disabled={hasReachedLimit}
                                   className={hasReachedLimit ? 'opacity-50 cursor-not-allowed' : ''}
                                 />
-                                <span className={hasReachedLimit ? 'text-red-700 dark:text-red-300' : ''}>
+                                <span className={hasReachedLimit ? 'text-red-700 dark:text-red-700' : ''}>
                                   {st.name} - {st.gmail}
                                   {hasReachedLimit && <span className="ml-2 text-xs font-medium">(Đã hết buổi học)</span>}
                                 </span>

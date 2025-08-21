@@ -514,7 +514,7 @@ export default function RegistrationManagementPage() {
                                   {(() => {
                                     const base = payment.class.numSessions ?? 24
                                     const options = [] as number[]
-                                    for (let s = base - 1; s >= Math.max(12, base - 12); s--) {
+                                    for (let s = base - 1; s >= Math.max(10, base - 10); s--) {
                                       options.push(s)
                                     }
                                     return options.map((opt) => (
