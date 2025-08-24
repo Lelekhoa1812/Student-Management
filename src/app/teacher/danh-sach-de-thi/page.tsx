@@ -209,6 +209,14 @@ export default function TestListPage() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => router.push(`/teacher/gan-de-thi?testId=${test.id}`)}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <Users className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => toggleTestStatus(test.id, test.isActive)}
                     >
                       {test.isActive ? "Ẩn" : "Hiện"}

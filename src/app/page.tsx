@@ -178,7 +178,7 @@ export default function HomePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-600" />
-                  Thông tin cá nhân
+                  Tài khoản
                 </CardTitle>
                 <CardDescription>
                   Xem và cập nhật thông tin nhân viên
@@ -213,7 +213,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -268,8 +268,42 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-orange-600" />
+                  Danh sách đề thi
+                </CardTitle>
+                <CardDescription>
+                  Xem và quản lý tất cả đề thi đã tạo
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/teacher/danh-sach-de-thi">
+                  <Button className="w-full">Xem danh sách</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-indigo-600" />
+                  Giao đề thi
+                </CardTitle>
+                <CardDescription>
+                  Giao đề thi cho học viên
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/teacher/gan-de-thi">
+                  <Button className="w-full">Giao đề thi</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-green-600" />
-                  Thông tin giáo viên
+                  Tài khoản
                 </CardTitle>
                 <CardDescription>
                   Cập nhật thông tin tài khoản
@@ -355,7 +389,7 @@ export default function HomePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-blue-600" />
-                Thông tin học viên
+                Tài khoản
               </CardTitle>
               <CardDescription>
                 Cập nhật thông tin cá nhân

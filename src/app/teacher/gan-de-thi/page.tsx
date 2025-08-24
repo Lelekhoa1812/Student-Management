@@ -44,6 +44,15 @@ export default function AssignTestPage() {
   const [selectedStudents, setSelectedStudents] = useState<string[]>([])
   const [dueDate, setDueDate] = useState<string>("")
 
+  // Check for testId in URL query params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const testId = urlParams.get('testId')
+    if (testId) {
+      setSelectedTest(testId)
+    }
+  }, [])
+
   useEffect(() => {
     if (status === "loading") return
     if (!session) { router.push("/dang-nhap"); return }

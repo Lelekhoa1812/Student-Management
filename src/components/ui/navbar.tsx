@@ -50,8 +50,9 @@ export function Navbar({ className }: NavbarProps) {
   const isManager = session?.user?.role === "manager"
   const isTeacher = session?.user?.role === "teacher"
 
-  const navigationLinks = isStaff 
-    ? [
+  const navigationLinks = 
+    isStaff ? 
+      [
         { href: "/quan-ly-hoc-vien", label: "Quản lý học viên" },
         { href: "/quan-ly-lop-hoc", label: "Quản lý lớp học" },
         { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
@@ -64,21 +65,21 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/quan-ly-lop-hoc", label: "Quản lý lớp học" },
         { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
         { href: "/kpi-dashboard", label: "Bảng giám sát KPI" },
-        { href: "/thong-tin-manager", label: "Thông tin manager" },
+        { href: "/thong-tin-manager", label: "Tài khoản" },
       ]
     : isTeacher
     ? [
         { href: "/teacher/lop-hoc", label: "Lớp học" },
         { href: "/teacher/xet-diem", label: "Xét điểm" },
         { href: "/teacher/tao-de-thi", label: "Tạo đề thi" },
-        { href: "/teacher/danh-sach-de-thi", label: "Danh sách đề thi" },
+        { href: "/teacher/danh-sach-de-thi", label: "Danh sách đề" },
         { href: "/teacher/gan-de-thi", label: "Giao đề thi" },
-        { href: "/thong-tin-teacher", label: "Thông tin giáo viên" },
+        { href: "/thong-tin-teacher", label: "Tài khoản" },
       ]
     : [
-        { href: "/thong-tin-hoc-vien", label: "Thông tin học viên" },
         { href: "/thi-xep-lop", label: "Thi xếp lớp" },
         { href: "/dang-ky", label: "Đăng ký khóa học" },
+        { href: "/thong-tin-hoc-vien", label: "Tài khoản" },
       ]
 
   return (
