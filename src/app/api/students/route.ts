@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 
@@ -35,11 +37,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("3. Checking for existing students...")
-    // Check if student already exists
-    const existingStudent = await prisma.student.findUnique({
-      where: { gmail }
-    })
+          console.log("3. Checking for existing students...")
+      // Check if student already exists
+      const existingStudent = await prisma.student.findUnique({
+        where: { gmail }
+      })
 
     if (existingStudent) {
       console.log("❌ Student already exists:", gmail)
@@ -128,82 +130,53 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// GET /api/students - Get students for test assignment
 export async function GET(request: NextRequest) {
   try {
-    await prisma.$connect()
-    console.log("✅ Database connected for GET request")
-
-    const { searchParams } = new URL(request.url)
-    const email = searchParams.get("email")
-
-    if (email) {
-      // Get specific student by email
-      const student = await prisma.student.findUnique({
-        where: { gmail: email },
-        include: {
-          studentClasses: {
-            include: {
-              class: {
-                include: {
-                  _count: {
-                    select: {
-                      studentClasses: true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      })
-
-      if (!student) {
-        return NextResponse.json(
-          { error: "Không tìm thấy học viên" },
-          { status: 404 }
-        )
-      }
-
-      console.log("✅ Retrieved student by email:", student.id)
-      return NextResponse.json([student]) // Return as array for consistency
+    const session = await getServerSession(authOptions)
+    
+    if (!session || session.user?.role !== "teacher") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get all students
+    const teacherId = session.user.id
+    
+    // Get students from classes taught by this teacher
     const students = await prisma.student.findMany({
-      include: {
+      where: {
         studentClasses: {
-          include: {
+          some: {
             class: {
-              include: {
-                _count: {
-                  select: {
-                    studentClasses: true
-                  }
-                }
+              teacherId
+            }
+          }
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        gmail: true,
+        school: true,
+        studentClasses: {
+          select: {
+            class: {
+              select: {
+                name: true,
+                level: true
               }
             }
           }
         }
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { name: 'asc' }
     })
 
-    console.log("✅ Retrieved students:", students.length)
     return NextResponse.json(students)
   } catch (error) {
-    console.error("❌ Error fetching students:", error)
+    console.error("Error fetching students:", error)
     return NextResponse.json(
-      { error: "Có lỗi xảy ra khi lấy danh sách học viên" },
+      { error: "Internal server error" },
       { status: 500 }
     )
-  } finally {
-    try {
-      await prisma.$disconnect()
-      console.log("✅ Database disconnected")
-    } catch (error) {
-      console.error("❌ Error disconnecting:", error)
-    }
   }
 } 

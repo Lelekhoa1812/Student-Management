@@ -70,6 +70,7 @@ model Student {
   sessions       Session[]
   studentClasses StudentClass[]
   reminders      Reminder[]
+  testAssignments TestAssignment[]
 }
 
 model Staff {
@@ -97,6 +98,7 @@ model Teacher {
   accounts    Account[]
   sessions    Session[]
   classes     Class[]
+  tests       Test[]
 }
 
 model Manager {
@@ -236,4 +238,104 @@ model ClassNote {
   createdAt     DateTime @default(now())
 
   @@unique([classId, sessionNumber])
+}
+
+// Test model for creating exams
+model Test {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String?
+  teacherId       String   @db.ObjectId
+  teacher         Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  duration        Int      // Duration in minutes
+  totalQuestions  Int
+  totalScore      Float    // Maximum possible score
+  passingScore    Float    // Minimum score to pass (in percentage)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  questions       Question[]
+  assignments     TestAssignment[]
+}
+
+// Question model for test questions
+model Question {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  testId      String   @db.ObjectId
+  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  questionText String
+  questionType String  // "mcq", "constructed_response", "fill_blank", "mapping"
+  order       Int      // Question order in the test
+  score       Float    // Points for this question
+  createdAt   DateTime @default(now())
+  
+  // MCQ options
+  options     QuestionOption[]
+  
+  // Fill in the blank content
+  fillBlankContent String?
+  
+  // Mapping columns
+  mappingColumns MappingColumn[]
+  
+  // Correct answers for MCQ and mapping
+  correctAnswers String[] // Array of correct answer IDs or text
+  
+  // Student answers to this question
+  studentAnswers StudentAnswer[]
+}
+
+// Question options for MCQ questions
+model QuestionOption {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionText String
+  optionKey  String   // A, B, C, D, E, F
+  isCorrect  Boolean  @default(false)
+  order      Int
+  createdAt  DateTime @default(now())
+}
+
+// Mapping columns for mapping questions
+model MappingColumn {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  columnType String   // "left" or "right"
+  itemText   String
+  order      Int
+  createdAt  DateTime @default(now())
+}
+
+// Test assignment to students
+model TestAssignment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  testId    String   @db.ObjectId
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentId String   @db.ObjectId
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+  dueDate   DateTime?
+  completedAt DateTime?
+  score     Float?
+  answers   StudentAnswer[]
+  
+  @@unique([testId, studentId])
+}
+
+// Student answers to questions
+model StudentAnswer {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  assignmentId    String   @db.ObjectId
+  assignment      TestAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  questionId      String   @db.ObjectId
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerText      String?  // For constructed response and fill in the blank
+  selectedOptions String[] // For MCQ - array of selected option IDs
+  mappingAnswers  String[] // For mapping - array of paired item IDs
+  score           Float?   // Score awarded for this answer
+  feedback        String?  // Teacher feedback for constructed response
+  answeredAt      DateTime @default(now())
 }

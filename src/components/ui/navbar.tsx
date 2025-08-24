@@ -71,6 +71,8 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/teacher/lop-hoc", label: "Lớp học" },
         { href: "/teacher/xet-diem", label: "Xét điểm" },
         { href: "/teacher/tao-de-thi", label: "Tạo đề thi" },
+        { href: "/teacher/danh-sach-de-thi", label: "Danh sách đề thi" },
+        { href: "/teacher/gan-de-thi", label: "Giao đề thi" },
         { href: "/thong-tin-teacher", label: "Thông tin giáo viên" },
       ]
     : [
