@@ -190,6 +190,57 @@ export default function HelpPage() {
                     </div>
                   </div>
 
+                  {/* Làm bài thi */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      🔬 Làm bài thi
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/lam-bai-thi/test.png"
+                          alt="Hoàn thành trong thời gian quy định"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Các dạng đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Trắc nghiệm (chọn một hoặc nhiều hơn một đáp án đúng)</li>
+                          <li>Tự luận</li>
+                          <li>Điền vào chỗ trống</li>
+                          <li>Nối cột</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/lam-bai-thi/timeup.png"
+                          alt="Lưu ý thời gian quy định"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Vui lòng để ý thời gian đếm ngược</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Bạn sắp hết thời gian làm bài khi đồng hồ chuyển màu đỏ</li>
+                          <li>Nhanh chóng đưa ra kết quả trước khi đếm ngược kết thúc</li>
+                          <li>Vui lòng dành ra tối thiểu 1 phút kiểm tra lại đáp án</li>
+                          <li>Bạn có thể nộp bài sớm hơn thời gian quy định</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Đăng ký khóa học */}
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -1023,9 +1074,9 @@ export default function HelpPage() {
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
                           <li>Tạo câu hỏi với 4 lựa chọn A, B, C, D</li>
-                          <li>Chọn đáp án đúng bằng cách nhấn nút "Đúng"</li>
+                          <li>Chọn đáp án đúng bằng cách nhấn nút &quot;Đúng&quot;</li>
                           <li>Thêm tối đa 6 lựa chọn nếu cần</li>
-                          <li>Xóa lựa chọn thừa bằng nút "Xóa"</li>
+                          <li>Xóa lựa chọn thừa bằng nút &quot;Xóa&quot;</li>
                         </ul>
                       </div>
                     </div>
