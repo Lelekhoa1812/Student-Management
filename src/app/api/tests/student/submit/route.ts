@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { QuestionOption } from "@/lib/types"
 
 // POST /api/tests/student/submit - Submit test answers
 export async function POST(request: NextRequest) {
@@ -32,9 +33,14 @@ export async function POST(request: NextRequest) {
       },
       include: {
         test: {
-          include: {
-            questions: true
+                  include: {
+          questions: {
+            include: {
+              options: true,
+              mappingColumns: true
+            }
           }
+        }
         }
       }
     })
@@ -60,9 +66,9 @@ export async function POST(request: NextRequest) {
       // Score calculation based on question type
       if (question.questionType === 'mcq' && answer.selectedOptions) {
         // For MCQ, check if selected options match correct answers
-        const correctOptions = question.options?.filter(opt => opt.isCorrect).map(opt => opt.id) || []
+        const correctOptions = question.options?.filter((opt: QuestionOption) => opt.isCorrect).map((opt: QuestionOption) => opt.id) || []
         const isCorrect = answer.selectedOptions.length === correctOptions.length &&
-          answer.selectedOptions.every(opt => correctOptions.includes(opt))
+          answer.selectedOptions.every((opt: string) => correctOptions.includes(opt))
         score = isCorrect ? question.score : 0
         feedback = isCorrect ? "Đúng" : "Sai"
       } else if (question.questionType === 'constructed_response') {

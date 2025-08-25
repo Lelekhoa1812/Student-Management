@@ -98,18 +98,40 @@ export default function LamBaiThiPage() {
       const response = await fetch('/api/tests/student/assignment')
       if (response.ok) {
         const data = await response.json()
-        if (data.assignment) {
-          setAssignment(data.assignment)
-          setTimeLeft(data.assignment.test.duration * 60) // Convert minutes to seconds
+        console.log('🔍 API Response:', data)
+        console.log('🔍 Assignment:', data.assignment)
+        
+        // Handle both single assignment and array of assignments
+        let assignment = data.assignment
+        if (Array.isArray(data.assignment)) {
+          if (data.assignment.length === 0) {
+            console.log('❌ No assignments found')
+            toast.error('Bạn chưa được giao đề thi nào')
+            return
+          }
+          // Use the first assignment if multiple exist
+          assignment = data.assignment[0]
+          console.log('🔍 Using first assignment from array:', assignment)
+        }
+        
+        console.log('🔍 Final assignment:', assignment)
+        console.log('🔍 Assignment test:', assignment?.test)
+        
+        if (assignment && assignment.test) {
+          setAssignment(assignment)
+          setTimeLeft(assignment.test.duration * 60) // Convert minutes to seconds
           
           // Initialize answers array
-          const initialAnswers = data.assignment.test.questions.map((q: Question) => ({
+          const initialAnswers = assignment.test.questions.map((q: Question) => ({
             questionId: q.id,
             answerText: '',
             selectedOptions: [],
             mappingAnswers: []
           }))
           setAnswers(initialAnswers)
+        } else {
+          console.error('Assignment or test data is missing:', assignment)
+          toast.error('Dữ liệu đề thi không hợp lệ')
         }
       }
     } catch (error) {
@@ -120,7 +142,7 @@ export default function LamBaiThiPage() {
     }
   }
 
-  const updateAnswer = (questionId: string, field: keyof StudentAnswer, value: any) => {
+  const updateAnswer = (questionId: string, field: keyof StudentAnswer, value: string | string[]) => {
     setAnswers(prev => prev.map(answer => 
       answer.questionId === questionId 
         ? { ...answer, [field]: value }
@@ -250,7 +272,7 @@ export default function LamBaiThiPage() {
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{assignment.test.title}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{assignment.test.title}</h1>
               <p className="text-gray-600">{assignment.test.description}</p>
             </div>
             

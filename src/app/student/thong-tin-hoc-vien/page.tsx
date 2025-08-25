@@ -59,7 +59,7 @@ export default function StudentInfoPage() {
       return
     }
 
-    if (session.user?.role === "staff") {
+    if (session.user?.role === "manager" || session.user?.role === "staff" || session.user?.role === "teacher") {
       router.push("/")
       return
     }
@@ -476,7 +476,7 @@ export default function StudentInfoPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Lock className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Đổi mật khẩu</h3>
+                  <h3 className="text-lg font-semibold dark:text-white text-gray-900">Đổi mật khẩu</h3>
                 </div>
                 {!isChangingPassword && (
                   <Button

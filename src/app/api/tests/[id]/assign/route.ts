@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db"
 // POST /api/tests/[id]/assign - Assign test to students
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -16,7 +16,8 @@ export async function POST(
     }
 
     const teacherId = session.user.id
-    const testId = params.id
+    const resolvedParams = await params
+    const testId = resolvedParams.id
     const body = await request.json()
     
     const { studentIds, dueDate } = body
@@ -67,7 +68,7 @@ export async function POST(
 // GET /api/tests/[id]/assign - Get test assignments
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -77,7 +78,8 @@ export async function GET(
     }
 
     const teacherId = session.user.id
-    const testId = params.id
+    const resolvedParams = await params
+    const testId = resolvedParams.id
 
     // Check if test exists and belongs to teacher
     const test = await prisma.test.findFirst({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { Question, QuestionOption, MappingColumn, TestData } from "@/lib/types"
 
 // GET /api/tests/[id] - Get a specific test
 export async function GET(
@@ -79,9 +80,13 @@ export async function PUT(
     }
 
     const teacherId = session.user.id
+    if (!teacherId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    
     const resolvedParams = await params
     const testId = resolvedParams.id
-    const body = await request.json()
+    const body = await request.json() as TestData
 
     // Check if test exists and belongs to teacher
     const existingTest = await prisma.test.findFirst({
@@ -126,7 +131,7 @@ export async function PUT(
         updatedAt: new Date(),
         questions: {
           deleteMany: {},
-          create: questions.map((q: any, index: number) => ({
+          create: questions.map((q: Question, index: number) => ({
             questionText: q.questionText,
             questionType: q.questionType,
             order: index + 1,
@@ -134,7 +139,7 @@ export async function PUT(
             fillBlankContent: q.fillBlankContent,
             correctAnswers: q.correctAnswers || [],
             options: q.questionType === 'mcq' ? {
-              create: q.options.map((opt: any, optIndex: number) => ({
+              create: q.options?.map((opt: QuestionOption, optIndex: number) => ({
                 optionText: opt.optionText,
                 optionKey: opt.optionKey,
                 isCorrect: opt.isCorrect,
@@ -142,7 +147,7 @@ export async function PUT(
               }))
             } : undefined,
             mappingColumns: q.questionType === 'mapping' ? {
-              create: q.mappingColumns.map((col: any, colIndex: number) => ({
+              create: q.mappingColumns?.map((col: MappingColumn, colIndex: number) => ({
                 columnType: col.columnType,
                 itemText: col.itemText,
                 order: colIndex + 1

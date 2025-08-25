@@ -130,17 +130,53 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/students - Get students for test assignment
+// GET /api/students - Get students for test assignment or get student by email
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session || session.user?.role !== "teacher") {
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const email = searchParams.get('email')
+    
+    // If email is provided, it's a student requesting their own data
+    if (email) {
+      if (session.user?.role !== "student") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      
+      // Verify the email matches the session user's email
+      if (session.user.email !== email) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      
+      const student = await prisma.student.findUnique({
+        where: { gmail: email },
+        include: {
+          studentClasses: {
+            include: {
+              class: true
+            }
+          }
+        }
+      })
+      
+      if (!student) {
+        return NextResponse.json({ error: "Student not found" }, { status: 404 })
+      }
+      
+      return NextResponse.json([student]) // Return as array to maintain compatibility
+    }
+    
+    // If no email, it's a teacher requesting students for test assignment
+    if (session.user?.role !== "teacher") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const teacherId = session.user.id
-    const { searchParams } = new URL(request.url)
     const scope = searchParams.get('scope') // 'all' or 'teacher' (default)
     
     let students

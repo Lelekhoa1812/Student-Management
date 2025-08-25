@@ -77,6 +77,17 @@ export async function GET(request: NextRequest) {
 
     // Return single assignment if only one, array if multiple
     const result = assignments.length === 1 ? assignments[0] : assignments
+    console.log('🔍 Final result being returned:', result)
+    console.log('🔍 Result type:', typeof result)
+    console.log('🔍 Is array:', Array.isArray(result))
+    if (Array.isArray(result)) {
+      console.log('🔍 Array length:', result.length)
+      if (result.length > 0) {
+        console.log('🔍 First assignment test:', result[0]?.test)
+      }
+    } else {
+      console.log('🔍 Single assignment test:', result?.test)
+    }
     return NextResponse.json({ assignment: result })
   } catch (error) {
     console.error("Error fetching student assignment:", error)

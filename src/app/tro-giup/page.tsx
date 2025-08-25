@@ -109,7 +109,7 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
-                          src="/helper/student/thi-xep-lop/no-test.png"
+                          src="/helper/student/thi-xep-lop/got-test.png"
                           alt="Thi xếp lớp - Đã giao đề thi"
                           width={600}
                           height={400}
@@ -920,6 +920,548 @@ export default function HelpPage() {
                           <li>Không chia sẻ thông tin đăng nhập với người khác</li>
                           <li>Xử lý phản hồi khách hàng một cách chuyên nghiệp</li>
                           <li>Đảm bảo bảo mật thông tin nhân viên và học viên</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {userRole === "teacher" && (
+          <div className="space-y-6">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <UserCog className="h-5 w-5 text-orange-600" />
+                    <span>Hướng dẫn cho Giáo viên</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Hướng dẫn sử dụng các tính năng quản lý đề thi và lớp học dành cho giáo viên
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Dashboard */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      📊 Dashboard - Trang chủ giáo viên
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/dashboard.png"
+                          alt="Teacher Dashboard"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Dashboard giáo viên</strong> cung cấp:
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Tổng quan lớp học đang phụ trách</li>
+                          <li>Thống kê học viên và đề thi</li>
+                          <li>Lịch dạy và nhiệm vụ trong ngày</li>
+                          <li>Thông báo quan trọng từ quản lý</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Thông tin giáo viên */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      👤 Thông tin giáo viên
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/thong-tin-teacher.png"
+                          alt="Thông tin giáo viên"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Quản lý thông tin cá nhân:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem và cập nhật thông tin cá nhân</li>
+                          <li>Thay đổi mật khẩu tài khoản</li>
+                          <li>Xem lịch sử giảng dạy</li>
+                          <li>Quản lý thông tin liên hệ</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tạo đề thi */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      📝 Tạo đề thi
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/tao-de-thi/mcq.png"
+                          alt="Tạo câu hỏi trắc nghiệm"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Câu hỏi trắc nghiệm (MCQ):</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Tạo câu hỏi với 4 lựa chọn A, B, C, D</li>
+                          <li>Chọn đáp án đúng bằng cách nhấn nút "Đúng"</li>
+                          <li>Thêm tối đa 6 lựa chọn nếu cần</li>
+                          <li>Xóa lựa chọn thừa bằng nút "Xóa"</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/tao-de-thi/fill-in-the-blank.png"
+                          alt="Tạo câu hỏi điền vào chỗ trống"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Câu hỏi điền vào chỗ trống:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Nhập nội dung với dấu gạch dưới ___ để đánh dấu chỗ trống</li>
+                          <li>Hệ thống sẽ tự động tách các chỗ trống</li>
+                          <li>Nhập đáp án đúng cho từng chỗ trống</li>
+                          <li>Học viên sẽ điền từng chỗ trống một cách riêng biệt</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/tao-de-thi/mapping.png"
+                          alt="Tạo câu hỏi nối từ"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Câu hỏi nối từ (Mapping):</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Tạo hai cột: cột trái và cột phải</li>
+                          <li>Thêm các mục vào từng cột</li>
+                          <li>Học viên sẽ nối các mục tương ứng</li>
+                          <li>Hệ thống sẽ chấm điểm tự động</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/tao-de-thi/context-answering.png"
+                          alt="Tạo câu hỏi tự luận"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Câu hỏi tự luận:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Nhập câu hỏi và yêu cầu trả lời</li>
+                          <li>Học viên sẽ trả lời bằng văn bản</li>
+                          <li>Giáo viên cần chấm điểm thủ công</li>
+                          <li>Phù hợp cho các câu hỏi mở</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/tao-de-thi/summary.png"
+                          alt="Tổng quan đề thi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Tổng quan đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem tổng số câu hỏi và điểm số</li>
+                          <li>Kiểm tra thời gian làm bài</li>
+                          <li>Điều chỉnh điểm đạt và tổng điểm</li>
+                          <li>Lưu đề thi hoặc tiếp tục chỉnh sửa</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Danh sách đề thi */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      📋 Danh sách đề thi
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/danh-sach-de-thi/view.png"
+                          alt="Xem danh sách đề thi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Quản lý đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem tất cả đề thi đã tạo</li>
+                          <li>Thống kê số lần giao đề thi</li>
+                          <li>Chỉnh sửa hoặc xóa đề thi</li>
+                          <li>Xem chi tiết từng đề thi</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Xem đề thi */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      👁️ Xem đề thi
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/xem-de-thi/view.png"
+                          alt="Xem chi tiết đề thi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Xem chi tiết đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem toàn bộ nội dung đề thi</li>
+                          <li>Kiểm tra từng câu hỏi và đáp án</li>
+                          <li>Xem thời gian và điểm số</li>
+                          <li>Chỉnh sửa đề thi nếu cần</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chỉnh sửa đề thi */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      ✏️ Chỉnh sửa đề thi
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/chinh-sua-de-thi/view.png"
+                          alt="Chỉnh sửa đề thi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Chỉnh sửa đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Thay đổi thông tin đề thi</li>
+                          <li>Chỉnh sửa từng câu hỏi</li>
+                          <li>Thêm hoặc xóa câu hỏi</li>
+                          <li>Điều chỉnh điểm số và thời gian</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Giao đề thi */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      📤 Giao đề thi
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/giao-de-thi/for-class.png"
+                          alt="Giao đề thi cho lớp"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Giao đề thi cho lớp:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Chọn lớp học cụ thể</li>
+                          <li>Xem danh sách học viên trong lớp</li>
+                          <li>Giao đề thi cho toàn bộ lớp</li>
+                          <li>Thiết lập thời hạn làm bài</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/giao-de-thi/for-all.png"
+                          alt="Giao đề thi cho tất cả học viên"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Giao đề thi cho tất cả học viên:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Giao đề thi cho tất cả học viên trong hệ thống</li>
+                          <li>Phù hợp cho đề thi xếp lớp</li>
+                          <li>Thiết lập thời hạn chung</li>
+                          <li>Theo dõi tiến độ giao đề thi</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/giao-de-thi/set-time.png"
+                          alt="Thiết lập thời gian"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Thiết lập thời gian:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Đặt thời hạn làm bài</li>
+                          <li>Chọn ngày và giờ bắt đầu</li>
+                          <li>Thiết lập thời gian kết thúc</li>
+                          <li>Học viên chỉ có thể làm bài trong khoảng thời gian này</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Lớp học */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      🎓 Quản lý lớp học
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/lop-hoc/view-all.png"
+                          alt="Xem tất cả lớp học"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Xem tất cả lớp học:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem danh sách tất cả lớp học đang phụ trách</li>
+                          <li>Thông tin sĩ số và trạng thái lớp</li>
+                          <li>Lịch học và thời gian</li>
+                          <li>Chọn lớp để xem chi tiết</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/lop-hoc/start-class.png"
+                          alt="Bắt đầu lớp học"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Bắt đầu lớp học:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Kích hoạt lớp học để học viên có thể tham gia</li>
+                          <li>Xem danh sách học viên đã tham gia</li>
+                          <li>Theo dõi thời gian học</li>
+                          <li>Quản lý điểm danh học viên</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/lop-hoc/edit-class.png"
+                          alt="Chỉnh sửa lớp học"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Chỉnh sửa lớp học:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Cập nhật thông tin lớp học</li>
+                          <li>Thay đổi lịch học</li>
+                          <li>Điều chỉnh sĩ số tối đa</li>
+                          <li>Quản lý học viên trong lớp</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/lop-hoc/student-exceed.png"
+                          alt="Sĩ số vượt quá"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Quản lý sĩ số:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Cảnh báo khi sĩ số vượt quá giới hạn</li>
+                          <li>Xem danh sách học viên đăng ký</li>
+                          <li>Quyết định chấp nhận hoặc từ chối</li>
+                          <li>Liên hệ quản lý để mở rộng lớp</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/lop-hoc/class-history.png"
+                          alt="Lịch sử lớp học"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Lịch sử lớp học:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem lịch sử các buổi học</li>
+                          <li>Thống kê điểm danh học viên</li>
+                          <li>Ghi chú về nội dung bài học</li>
+                          <li>Theo dõi tiến độ học tập</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/lop-hoc/class-history-edit.png"
+                          alt="Chỉnh sửa lịch sử lớp học"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Chỉnh sửa lịch sử lớp học:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Cập nhật điểm danh học viên</li>
+                          <li>Thêm ghi chú về buổi học</li>
+                          <li>Điều chỉnh nội dung bài học</li>
+                          <li>Lưu thông tin để tham khảo sau</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hướng dẫn sử dụng hệ thống trợ giúp */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      ❓ Hướng dẫn sử dụng hệ thống trợ giúp
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                          🎯 Cách sử dụng trang trợ giúp:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-blue-700 dark:text-blue-300">
+                          <li><strong>Xem hướng dẫn:</strong> Cuộn xuống để xem hướng dẫn chi tiết cho từng tính năng</li>
+                          <li><strong>Hình ảnh minh họa:</strong> Mỗi tính năng đều có hình ảnh minh họa để dễ hiểu</li>
+                          <li><strong>Gửi phản hồi:</strong> Nếu cần hỗ trợ thêm, nhấn nút &quot;Gửi phản hồi&quot; ở cuối trang</li>
+                          <li><strong>Quản lý phản hồi:</strong> Truy cập &quot;Phản hồi khách hàng&quot; từ navbar để xem và xử lý phản hồi</li>
+                          <li><strong>Quay lại trang chủ:</strong> Nhấn &quot;Quay lại trang chủ&quot; để trở về dashboard</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+                          💡 Mẹo sử dụng hiệu quả:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-green-700 dark:text-green-300">
+                          <li>Đọc kỹ hướng dẫn trước khi sử dụng tính năng mới</li>
+                          <li>Lưu ý các biểu tượng và màu sắc để nhận biết trạng thái</li>
+                          <li>Nếu gặp lỗi, hãy chụp màn hình và gửi phản hồi</li>
+                          <li>Thường xuyên kiểm tra thông báo và nhắc nhở</li>
+                          <li>Tạo đề thi đa dạng để đánh giá toàn diện học viên</li>
+                          <li>Quản lý lớp học hiệu quả để đảm bảo chất lượng giảng dạy</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                        <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                          ⚠️ Lưu ý quan trọng:
+                        </h4>
+                        <ul className="list-disc list-inside space-y-2 text-yellow-700 dark:text-yellow-300">
+                          <li>Đảm bảo đã đăng nhập trước khi sử dụng các tính năng</li>
+                          <li>Lưu dữ liệu thường xuyên để tránh mất thông tin</li>
+                          <li>Liên hệ quản lý nếu cần hỗ trợ khẩn cấp</li>
+                          <li>Không chia sẻ thông tin đăng nhập với người khác</li>
+                          <li>Đảm bảo đề thi được tạo chính xác trước khi giao cho học viên</li>
+                          <li>Theo dõi tiến độ học tập của học viên thường xuyên</li>
                         </ul>
                       </div>
                     </div>

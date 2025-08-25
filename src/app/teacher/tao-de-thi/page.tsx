@@ -83,13 +83,13 @@ export default function CreateExamPage() {
     setQuestions([...questions, newQuestion])
   }
 
-  const updateQuestion = (index: number, field: keyof Question, value: any) => {
+  const updateQuestion = (index: number, field: keyof Question, value: string | number | string[]) => {
     const updatedQuestions = [...questions]
     updatedQuestions[index] = { ...updatedQuestions[index], [field]: value }
     setQuestions(updatedQuestions)
   }
 
-  const updateQuestionOption = (questionIndex: number, optionIndex: number, field: keyof QuestionOption, value: any) => {
+  const updateQuestionOption = (questionIndex: number, optionIndex: number, field: keyof QuestionOption, value: string | boolean) => {
     const updatedQuestions = [...questions]
     const question = updatedQuestions[questionIndex]
     if (question.options) {
@@ -97,9 +97,9 @@ export default function CreateExamPage() {
       // Update correct answers if this is a correct option
       if (field === 'isCorrect') {
         if (value) {
-          question.correctAnswers = [...(question.correctAnswers || []), question.options[optionIndex].id || optionIndex.toString()]
+          question.correctAnswers = [...(question.correctAnswers || []), question.options?.[optionIndex]?.id || optionIndex.toString()]
         } else {
-          question.correctAnswers = question.correctAnswers.filter(id => id !== (question.options[optionIndex].id || optionIndex.toString()))
+          question.correctAnswers = question.correctAnswers.filter(id => id !== (question.options?.[optionIndex]?.id || optionIndex.toString()))
         }
       }
     }
@@ -155,7 +155,7 @@ export default function CreateExamPage() {
     console.log('Updated mapping columns:', question.mappingColumns)
   }
 
-  const updateMappingColumn = (questionIndex: number, columnIndex: number, field: keyof MappingColumn, value: any) => {
+  const updateMappingColumn = (questionIndex: number, columnIndex: number, field: keyof MappingColumn, value: string) => {
     const updatedQuestions = [...questions]
     const question = updatedQuestions[questionIndex]
     if (question.mappingColumns) {
@@ -394,7 +394,7 @@ export default function CreateExamPage() {
                         <Label>Loại câu hỏi</Label>
                         <Select
                           value={question.questionType}
-                          onValueChange={(value: any) => updateQuestion(questionIndex, 'questionType', value)}
+                          onValueChange={(value: 'mcq' | 'constructed_response' | 'fill_blank' | 'mapping') => updateQuestion(questionIndex, 'questionType', value)}
                         >
                           <SelectTrigger>
                             <SelectValue />

@@ -10,6 +10,7 @@ import { Navbar } from "@/components/ui/navbar"
 import { ClassDetailsModal } from "@/components/ui/class-details-modal"
 import { BookOpen, Clock, AlertCircle, Users, User, Calendar, Eye } from "lucide-react"
 import React from "react"
+import { QuestionOption, MappingColumn } from "@/lib/types"
 
 interface ExamResult {
   id: string
@@ -17,6 +18,33 @@ interface ExamResult {
   levelEstimate: string
   examDate: string
   notes?: string
+}
+
+interface Question {
+  id: string
+  questionText: string
+  questionType: string
+  score: number
+  options?: QuestionOption[]
+  correctAnswers?: string[]
+  mappingColumns?: MappingColumn[]
+}
+
+interface TestAssignment {
+  id: string
+  studentId: string
+  testId: string
+  assignedAt: string
+  dueDate?: string
+  completedAt?: string
+  score?: number
+  test: {
+    id: string
+    title: string
+    description?: string
+    duration: number
+    questions: Question[]
+  }
 }
 
 interface Student {
@@ -62,10 +90,19 @@ export default function ExamPlacementPage() {
   const router = useRouter()
   const [examResult, setExamResult] = useState<ExamResult | null>(null)
   const [student, setStudent] = useState<Student | null>(null)
-  const [testAssignment, setTestAssignment] = useState<any>(null)
+  const [testAssignment, setTestAssignment] = useState<TestAssignment | TestAssignment[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedClassDetails, setSelectedClassDetails] = useState<ClassDetails | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Type guard functions
+  const isTestAssignmentArray = (assignment: TestAssignment | TestAssignment[] | null): assignment is TestAssignment[] => {
+    return Array.isArray(assignment)
+  }
+
+  const isTestAssignmentSingle = (assignment: TestAssignment | TestAssignment[] | null): assignment is TestAssignment => {
+    return assignment !== null && !Array.isArray(assignment)
+  }
 
   useEffect(() => {
     if (status === "loading") return
@@ -319,9 +356,9 @@ export default function ExamPlacementPage() {
                       <div>
                         <p>Type: {Array.isArray(testAssignment) ? 'Array' : 'Single'}</p>
                         {Array.isArray(testAssignment) ? (
-                          <p>Count: {testAssignment.length}</p>
+                          <p>Count: {(testAssignment as TestAssignment[]).length}</p>
                         ) : (
-                          <p>Test: {testAssignment.test?.title}, Duration: {testAssignment.test?.duration}min</p>
+                          <p>Test: {(testAssignment as TestAssignment).test?.title}, Duration: {(testAssignment as TestAssignment).test?.duration}min</p>
                         )}
                       </div>
                     )}
