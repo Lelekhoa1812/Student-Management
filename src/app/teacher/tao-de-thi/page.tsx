@@ -363,7 +363,7 @@ export default function CreateExamPage() {
             </div>
 
             {/* Questions Section */}
-            <div className="space-y-4">
+              <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Câu hỏi ({questions.length})</h3>
                 <Button onClick={addQuestion} className="bg-green-600 hover:bg-green-700">

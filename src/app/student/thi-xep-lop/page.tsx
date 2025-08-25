@@ -87,18 +87,36 @@ export default function ExamPlacementPage() {
     try {
       setIsLoading(true)
       
+      console.log("🔍 === FETCH DATA START ===")
+      console.log("🔍 Session object:", session)
+      console.log("🔍 Session user:", session?.user)
+      console.log("🔍 Session user email:", session?.user?.email)
+      console.log("🔍 Session user ID:", session?.user?.id)
+      console.log("🔍 Session user role:", session?.user?.role)
+      console.log("🔍 === FETCH DATA START ===")
+      
       // Fetch exam result
+      console.log("🔍 Fetching exam result for email:", session?.user?.email)
       const examResponse = await fetch(`/api/exams?email=${session?.user?.email}`)
+      console.log("🔍 Exam response status:", examResponse.status)
       if (examResponse.ok) {
         const exams = await examResponse.json()
+        console.log("🔍 Exam data received:", exams)
         if (exams.length > 0) {
-          const latestExam = exams[exams.length - 1]
+          const latestExam = exams[0]
+          console.log("🔍 Setting exam result:", latestExam)
           setExamResult(latestExam)
+        } else {
+          console.log("🔍 No exam results found")
         }
+      } else {
+        console.log("🔍 Exam response not ok:", examResponse.status)
       }
 
       // Fetch student data with class assignments
+      console.log("🔍 Fetching student data for email:", session?.user?.email)
       const studentResponse = await fetch(`/api/students?email=${session?.user?.email}`)
+      console.log("🔍 Student response status:", studentResponse.status)
       if (studentResponse.ok) {
         const students = await studentResponse.json()
         console.log("🔍 Debug - Student data received:", students)
@@ -106,16 +124,40 @@ export default function ExamPlacementPage() {
           console.log("🔍 Debug - First student data:", students[0])
           console.log("🔍 Debug - Student classes:", students[0].studentClasses)
           setStudent(students[0])
+        } else {
+          console.log("🔍 No student data found")
         }
+      } else {
+        console.log("🔍 Student response not ok:", studentResponse.status)
       }
 
       // Fetch test assignment for student
       if (session?.user?.role === "student") {
+        console.log("🔍 Fetching test assignment for student role")
+        console.log("🔍 Session user ID:", session.user.id)
+        console.log("🔍 Session user email:", session.user.email)
+        console.log("🔍 Session user role:", session.user.role)
+        
         const testResponse = await fetch('/api/tests/student/assignment')
+        console.log("🔍 Test response status:", testResponse.status)
+        console.log("🔍 Test response headers:", Object.fromEntries(testResponse.headers.entries()))
+        
         if (testResponse.ok) {
           const testData = await testResponse.json()
+          console.log("🔍 Test data received:", testData)
           if (testData.assignment) {
+            console.log("🔍 Setting test assignment:", testData.assignment)
             setTestAssignment(testData.assignment)
+          } else {
+            console.log("🔍 No assignment in test data")
+          }
+        } else {
+          console.log("🔍 Test response not ok:", testResponse.status, testResponse.statusText)
+          try {
+            const errorData = await testResponse.json()
+            console.log("🔍 Error response data:", errorData)
+          } catch (e) {
+            console.log("🔍 Could not parse error response")
           }
         }
       }
@@ -174,7 +216,69 @@ export default function ExamPlacementPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {examResult ? (
+            {testAssignment ? (
+              // SCENARIO 2: Student has been assigned a test (regardless of exam results)
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="flex justify-center mb-4">
+                    <Clock className="w-16 h-16 text-blue-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-blue-600 mb-2">
+                    Bạn có đề thi cần làm
+                  </h3>
+                  
+                  {/* Handle multiple test assignments */}
+                  {Array.isArray(testAssignment) ? (
+                    // Multiple test assignments
+                    <div className="space-y-4">
+                      {testAssignment.map((assignment, index) => (
+                        <div key={assignment.id} className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                          <div className="text-lg font-semibold text-blue-700 mb-2">
+                            {assignment.test.title}
+                          </div>
+                          <div className="text-blue-600 mb-3">
+                            Thời gian làm bài: {assignment.test.duration} phút
+                          </div>
+                          {assignment.test.description && (
+                            <div className="text-sm text-blue-500 mb-4">
+                              {assignment.test.description}
+                            </div>
+                          )}
+                          <Button
+                            onClick={() => router.push(`/student/lam-bai-thi?testId=${assignment.test.id}`)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                          >
+                            Làm bài thi: {assignment.test.title}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    // Single test assignment
+                    <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                      <div className="text-lg font-semibold text-blue-700 mb-2">
+                        {testAssignment.test.title}
+                      </div>
+                      <div className="text-blue-600 mb-3">
+                        Thời gian làm bài: {testAssignment.test.duration} phút
+                      </div>
+                      {testAssignment.test.description && (
+                        <div className="text-sm text-blue-500 mb-4">
+                          {testAssignment.test.description}
+                        </div>
+                      )}
+                      <Button
+                        onClick={() => router.push(`/student/lam-bai-thi?testId=${testAssignment.test.id}`)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                      >
+                        Làm bài thi: {testAssignment.test.title}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : examResult ? (
+              // SCENARIO 3: Student has completed exam and has results
               <div className="space-y-6">
                 <div className="text-center">
                   <h3 className="text-xl font-semibold text-green-600 mb-2">
@@ -194,58 +298,44 @@ export default function ExamPlacementPage() {
                 </div>
               </div>
             ) : (
+              // SCENARIO 1: Student has no test assignment and no exam results
               <div className="text-center space-y-4">
                 <div className="flex justify-center">
-                  <Clock className="w-16 h-16 text-orange-500" />
+                  <Users className="w-16 h-16 text-orange-500" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-orange-600 mb-2">
-                    Chưa có kết quả thi
+                    Chưa được giao đề thi
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Kết quả thi xếp lớp của bạn chưa được cập nhật.
+                    Bạn chưa được giao đề thi nào để làm.
                   </p>
                   
                   {/* Debug Information */}
-                  {/* <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
+                  <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
                     <p><strong>Debug:</strong> testAssignment: {testAssignment ? 'Yes' : 'No'}</p>
+                    <p><strong>Debug:</strong> examResult: {examResult ? 'Yes' : 'No'}</p>
                     {testAssignment && (
-                      <p>Test: {testAssignment.test?.title}, Duration: {testAssignment.test?.duration}min</p>
+                      <div>
+                        <p>Type: {Array.isArray(testAssignment) ? 'Array' : 'Single'}</p>
+                        {Array.isArray(testAssignment) ? (
+                          <p>Count: {testAssignment.length}</p>
+                        ) : (
+                          <p>Test: {testAssignment.test?.title}, Duration: {testAssignment.test?.duration}min</p>
+                        )}
+                      </div>
                     )}
-                  </div> */}
+                  </div>
                   
-                  {testAssignment ? (
-                    // Student has been assigned a test but hasn't taken it
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                      <div className="flex items-start space-x-2">
-                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-blue-800 text-sm">
-                          <p className="font-medium mb-1">Thông báo:</p>
-                          <p>Bạn đã được giao đề thi: <strong>{testAssignment.test.title}</strong></p>
-                          <p className="mt-2">Thời gian làm bài: {testAssignment.test.duration} phút</p>
-                          <div className="mt-3">
-                            <Button
-                              onClick={() => router.push('/student/lam-bai-thi')}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              Làm bài thi ngay
-                            </Button>
-                          </div>
-                        </div>
+                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                    <div className="flex items-start space-x-2">
+                      <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-orange-800 text-sm">
+                        <p className="font-medium mb-1">Lưu ý:</p>
+                        <p>Bạn chưa được giao đề thi nào. Vui lòng liên hệ với nhân viên để được sắp xếp lịch thi phù hợp.</p>
                       </div>
                     </div>
-                  ) : (
-                    // Student has no test assigned
-                    <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                      <div className="flex items-start space-x-2">
-                        <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-orange-800 text-sm">
-                          <p className="font-medium mb-1">Lưu ý:</p>
-                          <p>Bạn chưa được giao đề thi nào. Vui lòng liên hệ với giáo viên để được sắp xếp lịch thi phù hợp.</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             )}
@@ -253,7 +343,9 @@ export default function ExamPlacementPage() {
         </Card>
 
         {/* Class Assignment Section */}
-        {examResult && (
+        {
+        // SCENARIO 3 + 1: Student has completed exam and has results and a class assigned
+        testAssignment && examResult && (
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-6">
               <h2 className="text-3xl font-bold mb-2">
@@ -262,12 +354,14 @@ export default function ExamPlacementPage() {
               <p className="text-lg text-gray-600">
                 {student?.studentClasses && student.studentClasses.length > 0
                   ? `Bạn đã được phân công vào ${student.studentClasses.length} lớp học`
-                  : "Xem trạng thái phân lớp của bạn"
+                  : "Bạn chưa được phân công vào lớp học nào"
                 }
               </p>
             </div>
 
-            {!student?.studentClasses || student.studentClasses.length === 0 ? (
+            {
+            // SCENARIO 3 + 2: Student has completed exam and has results but no class assigned
+            (!student?.studentClasses || student.studentClasses.length === 0) && examResult ? (
               <Card className="border-yellow-200 bg-yellow-50">
                 <CardContent className="pt-6">
                   <div className="text-center">
@@ -296,7 +390,7 @@ export default function ExamPlacementPage() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {student.studentClasses
+                {student?.studentClasses
                   .map((studentClass) => {
                     // Safety check for class data
                     if (!studentClass?.class) {

@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       where: { 
         id: assignmentId,
         studentId,
-        completedAt: null
+        completedAt: undefined // Use undefined for MongoDB null values
       },
       include: {
         test: {

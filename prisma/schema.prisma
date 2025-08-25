@@ -61,7 +61,7 @@ model Student {
   school         String
   platformKnown  String
   note           String?
-  role           String         @default("user")
+  role           String         @default("student")
   createdAt      DateTime       @default(now())
   exams          Exam[]
   registrations  Registration[]
