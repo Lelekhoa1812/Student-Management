@@ -205,6 +205,15 @@ export default function ExamPlacementPage() {
                   <p className="text-gray-600 mb-4">
                     Kết quả thi xếp lớp của bạn chưa được cập nhật.
                   </p>
+                  
+                  {/* Debug Information */}
+                  {/* <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
+                    <p><strong>Debug:</strong> testAssignment: {testAssignment ? 'Yes' : 'No'}</p>
+                    {testAssignment && (
+                      <p>Test: {testAssignment.test?.title}, Duration: {testAssignment.test?.duration}min</p>
+                    )}
+                  </div> */}
+                  
                   {testAssignment ? (
                     // Student has been assigned a test but hasn't taken it
                     <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -216,7 +225,7 @@ export default function ExamPlacementPage() {
                           <p className="mt-2">Thời gian làm bài: {testAssignment.test.duration} phút</p>
                           <div className="mt-3">
                             <Button
-                              onClick={() => router.push('/lam-bai-thi')}
+                              onClick={() => router.push('/student/lam-bai-thi')}
                               className="bg-blue-600 hover:bg-blue-700"
                             >
                               Làm bài thi ngay

@@ -140,36 +140,63 @@ export async function GET(request: NextRequest) {
     }
 
     const teacherId = session.user.id
+    const { searchParams } = new URL(request.url)
+    const scope = searchParams.get('scope') // 'all' or 'teacher' (default)
     
-    // Get students from classes taught by this teacher
-    const students = await prisma.student.findMany({
-      where: {
-        studentClasses: {
-          some: {
-            class: {
-              teacherId
-            }
-          }
-        }
-      },
-      select: {
-        id: true,
-        name: true,
-        gmail: true,
-        school: true,
-        studentClasses: {
-          select: {
-            class: {
-              select: {
-                name: true,
-                level: true
+    let students
+    
+    if (scope === 'all') {
+      // Get ALL students in the system for individual assignment
+      students = await prisma.student.findMany({
+        select: {
+          id: true,
+          name: true,
+          gmail: true,
+          school: true,
+          studentClasses: {
+            select: {
+              class: {
+                select: {
+                  name: true,
+                  level: true
+                }
               }
             }
           }
-        }
-      },
-      orderBy: { name: 'asc' }
-    })
+        },
+        orderBy: { name: 'asc' }
+      })
+    } else {
+      // Get only students from classes taught by this teacher (default behavior)
+      students = await prisma.student.findMany({
+        where: {
+          studentClasses: {
+            some: {
+              class: {
+                teacherId
+              }
+            }
+          }
+        },
+        select: {
+          id: true,
+          name: true,
+          gmail: true,
+          school: true,
+          studentClasses: {
+            select: {
+              class: {
+                select: {
+                  name: true,
+                  level: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: { name: 'asc' }
+      })
+    }
 
     return NextResponse.json(students)
   } catch (error) {

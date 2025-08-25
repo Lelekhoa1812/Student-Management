@@ -27,9 +27,12 @@ interface Student {
   name: string
   gmail: string
   school?: string
-  class: {
-    name: string
-  }
+  studentClasses?: {
+    class: {
+      name: string
+      level: string
+    }
+  }[]
 }
 
 export default function GiaoDeThiPage() {
@@ -46,6 +49,18 @@ export default function GiaoDeThiPage() {
   const [selectedClass, setSelectedClass] = useState<string>("")
   const [classes, setClasses] = useState<{ id: string; name: string; level: string }[]>([])
 
+  // Debug logging
+  console.log('🔍 GiaoDeThiPage render:', {
+    status,
+    session: session?.user?.role,
+    tests: tests.length,
+    classes: classes.length,
+    students: students.length,
+    isFetching,
+    assignmentType,
+    selectedClass
+  })
+
   useEffect(() => {
     if (session?.user?.role === "teacher") {
       fetchTests()
@@ -57,6 +72,9 @@ export default function GiaoDeThiPage() {
       if (testId) {
         setSelectedTest(testId)
       }
+      
+      // Initially fetch all students for individual assignment mode
+      fetchAllStudents()
     }
   }, [session])
 
@@ -70,10 +88,15 @@ export default function GiaoDeThiPage() {
 
   const fetchTests = async () => {
     try {
+      console.log('🔍 Fetching tests...')
       const response = await fetch('/api/tests')
       if (response.ok) {
         const data = await response.json()
+        console.log('🔍 Tests fetched:', data)
         setTests(data)
+      } else {
+        console.error('🔍 Error response:', response.status, response.statusText)
+        toast.error('Không thể tải danh sách đề thi')
       }
     } catch (error) {
       console.error('Error fetching tests:', error)
@@ -83,10 +106,15 @@ export default function GiaoDeThiPage() {
 
   const fetchClasses = async () => {
     try {
+      console.log('🔍 Fetching classes...')
       const response = await fetch('/api/classes')
       if (response.ok) {
         const data = await response.json()
+        console.log('🔍 Classes fetched:', data)
         setClasses(data)
+      } else {
+        console.error('🔍 Error response:', response.status, response.statusText)
+        toast.error('Không thể tải danh sách lớp học')
       }
     } catch (error) {
       console.error('Error fetching classes:', error)
@@ -113,10 +141,15 @@ export default function GiaoDeThiPage() {
   const fetchAllStudents = async () => {
     try {
       setIsFetching(true)
-      const response = await fetch('/api/students')
+      console.log('🔍 Fetching all students in system...')
+      const response = await fetch('/api/students?scope=all')
       if (response.ok) {
         const data = await response.json()
+        console.log('🔍 All students fetched:', data)
         setStudents(data)
+      } else {
+        console.error('🔍 Error response:', response.status, response.statusText)
+        toast.error('Không thể tải danh sách học viên')
       }
     } catch (error) {
       console.error('Error fetching all students:', error)
@@ -125,6 +158,18 @@ export default function GiaoDeThiPage() {
       setIsFetching(false)
     }
   }
+
+  // Add a safety timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isFetching) {
+        console.log('🔍 Safety timeout triggered, setting isFetching to false')
+        setIsFetching(false)
+      }
+    }, 10000) // 10 seconds timeout
+
+    return () => clearTimeout(timeout)
+  }, [isFetching])
 
   const handleStudentToggle = (studentId: string) => {
     setSelectedStudents(prev => 
@@ -184,7 +229,7 @@ export default function GiaoDeThiPage() {
     }
   }
 
-  if (status === "loading" || isFetching) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -192,7 +237,50 @@ export default function GiaoDeThiPage() {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Đang tải...</p>
+              <p className="text-gray-600">Đang xác thực...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isFetching) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/teacher/danh-sach-de-thi')}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Quay lại
+            </Button>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Giao đề thi</h1>
+            <p className="text-gray-600">Chọn đề thi và giao cho học viên</p>
+          </div>
+          
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Đang tải dữ liệu...</p>
+              <div className="mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    console.log('🔍 Manual retry triggered')
+                    setIsFetching(false)
+                    fetchTests()
+                    fetchClasses()
+                    fetchAllStudents()
+                  }}
+                >
+                  Thử lại
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -218,7 +306,7 @@ export default function GiaoDeThiPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Quay lại
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Giao đề thi</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Giao đề thi</h1>
           <p className="text-gray-600">Chọn đề thi và giao cho học viên</p>
         </div>
 
@@ -258,7 +346,7 @@ export default function GiaoDeThiPage() {
                     setSelectedClass("")
                   }}
                 />
-                <Label htmlFor="individual-assignment">Giao cho từng học viên cụ thể</Label>
+                <Label htmlFor="individual-assignment">Giao cho từng học viên cụ thể (tất cả học viên trong hệ thống)</Label>
               </div>
 
               {assignmentType === 'class' && (
@@ -314,10 +402,10 @@ export default function GiaoDeThiPage() {
 
                 {selectedTest && (
                   <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
                       {tests.find(t => t.id === selectedTest)?.title}
                     </h4>
-                    <div className="text-sm text-blue-700 space-y-1">
+                    <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                       <p>Thời gian: {tests.find(t => t.id === selectedTest)?.duration} phút</p>
                       <p>Số câu hỏi: {tests.find(t => t.id === selectedTest)?.totalQuestions}</p>
                       <p>Điểm tối đa: {tests.find(t => t.id === selectedTest)?.totalScore}</p>
@@ -338,7 +426,7 @@ export default function GiaoDeThiPage() {
               <CardDescription>
                 {assignmentType === 'class' 
                   ? `Học viên trong lớp ${classes.find(c => c.id === selectedClass)?.name || ''}`
-                  : 'Chọn học viên cụ thể để giao đề thi'
+                  : 'Chọn học viên cụ thể từ tất cả học viên trong hệ thống để giao đề thi'
                 }
               </CardDescription>
             </CardHeader>
@@ -379,6 +467,14 @@ export default function GiaoDeThiPage() {
                 ) : (
                   // Individual assignment - show all available students
                   <div>
+                    <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-800 dark:text-blue-300">
+                        <strong>Lưu ý:</strong> Bạn có thể giao đề thi cho bất kỳ học viên nào trong hệ thống, 
+                        không chỉ những học viên trong lớp của bạn. Điều này hữu ích cho các bài thi xếp lớp, 
+                        đánh giá năng lực, hoặc bài thi chung.
+                      </p>
+                    </div>
+                    
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="select-all"
@@ -402,7 +498,10 @@ export default function GiaoDeThiPage() {
                               <span className="text-sm text-gray-500 ml-2">({student.gmail})</span>
                             </div>
                             <div className="text-xs text-gray-400">
-                              Lớp: {student.class?.name || 'Chưa phân lớp'}
+                              Lớp: {student.studentClasses && student.studentClasses.length > 0 
+                                ? student.studentClasses[0]?.class?.name || 'Chưa phân lớp'
+                                : 'Chưa phân lớp'
+                              }
                               {student.school && ` • ${student.school}`}
                             </div>
                           </Label>
