@@ -38,7 +38,7 @@ export default function HelpPage() {
         </div>
 
         {/* Role-specific content based on user role */}
-        {userRole === "user" && (
+        {userRole === "user" || userRole === "student" && (
           <div className="space-y-6">
             <div className="grid gap-6">
               <Card>
@@ -89,6 +89,46 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
+                          src="/helper/student/thi-xep-lop/no-test.png"
+                          alt="Thi xếp lớp - Chưa được giao đề thi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Khi chưa có đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Thông báo chưa có đề thi được giao</li>
+                          <li>Hướng dẫn liên hệ nhân viên để được hỗ trợ</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/thi-xep-lop/no-test.png"
+                          alt="Thi xếp lớp - Đã giao đề thi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Khi có đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Thông báo đã có đề thi được giao</li>
+                          <li>Đưa các đường dẫn tới phòng thi online</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
                           src="/helper/student/thi-xep-lop/no-result.png"
                           alt="Thi xếp lớp - Chưa có kết quả"
                           width={600}
@@ -103,7 +143,6 @@ export default function HelpPage() {
                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
                           <li>Thông báo chưa có kết quả thi</li>
                           <li>Hướng dẫn liên hệ nhân viên để được hỗ trợ</li>
-                          <li>Thông tin về quy trình thi xếp lớp</li>
                         </ul>
                       </div>
                     </div>
