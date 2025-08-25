@@ -1,91 +1,32 @@
 // src/app/api/classes/route.ts
 import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 
-type ClassWhere = {
-  isActive?: boolean
-  teacherId?: string | null
-}
-
+// GET /api/classes - Get all classes for the authenticated teacher
 export async function GET(request: NextRequest) {
   try {
-    // Ensure database connection with retry logic
-    let retries = 3
-    while (retries > 0) {
-      try {
-        await prisma.$connect()
-        break
-      } catch {
-        retries--
-        if (retries === 0) {
-          console.error("Failed to connect to database after 3 attempts")
-          return NextResponse.json(
-            { error: "Không thể kết nối cơ sở dữ liệu" },
-            { status: 500 }
-          )
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
-      }
-    }
+    const session = await getServerSession(authOptions)
     
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get("id")
-    const active = searchParams.get("active")
-    const teacherId = searchParams.get("teacherId")
-
-    if (id) {
-      // Get specific class with students
-      const classData = await prisma.class.findUnique({
-        where: { id },
-        include: {
-          studentClasses: {
-            include: {
-              student: {
-                select: {
-                  id: true,
-                  name: true,
-                  gmail: true,
-                  dob: true,
-                  phoneNumber: true
-                }
-              }
-            }
-          },
-          teacher: {
-            select: { id: true, name: true, email: true }
-          },
-          _count: {
-            select: {
-              studentClasses: true
-            }
-          }
-        }
-      })
-
-      if (!classData) {
-        return NextResponse.json(
-          { error: "Không tìm thấy lớp học" },
-          { status: 404 }
-        )
-      }
-
-      return NextResponse.json(classData)
+    if (!session || session.user?.role !== "teacher") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get all classes
-    const whereClause: ClassWhere = active === "true" ? { isActive: true } : {}
-    if (teacherId) {
-      whereClause.teacherId = teacherId
-    }
-    
+    const teacherId = session.user.id
+
     const classes = await prisma.class.findMany({
-      where: whereClause,
-      include: {
-        teacher: { select: { id: true, name: true, email: true } },
+      where: { 
+        teacherId,
+        isActive: true
+      },
+      select: {
+        id: true,
+        name: true,
+        level: true,
+        maxStudents: true,
         _count: {
-          select: {
-            studentClasses: true
-          }
+          select: { studentClasses: true }
         }
       },
       orderBy: { createdAt: 'desc' }
@@ -94,25 +35,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(classes)
   } catch (error) {
     console.error("Error fetching classes:", error)
-    
-    // Check if it's a connection error
-    if (error instanceof Error && error.message.includes('Engine is not yet connected')) {
-      return NextResponse.json(
-        { error: "Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại." },
-        { status: 500 }
-      )
-    }
-    
     return NextResponse.json(
-      { error: "Có lỗi xảy ra khi tải danh sách lớp học" },
+      { error: "Internal server error" },
       { status: 500 }
     )
-  } finally {
-    try {
-      await prisma.$disconnect()
-    } catch (e) {
-      console.error("Error disconnecting from database:", e)
-    }
   }
 }
 

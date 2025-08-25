@@ -209,7 +209,7 @@ export default function TestListPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => router.push(`/teacher/gan-de-thi?testId=${test.id}`)}
+                      onClick={() => router.push(`/teacher/giao-de-thi?testId=${test.id}`)}
                       className="text-green-600 hover:text-green-700"
                     >
                       <Users className="w-4 h-4" />

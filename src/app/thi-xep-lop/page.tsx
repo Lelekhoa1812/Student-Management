@@ -62,6 +62,7 @@ export default function ExamPlacementPage() {
   const router = useRouter()
   const [examResult, setExamResult] = useState<ExamResult | null>(null)
   const [student, setStudent] = useState<Student | null>(null)
+  const [testAssignment, setTestAssignment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedClassDetails, setSelectedClassDetails] = useState<ClassDetails | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -105,6 +106,17 @@ export default function ExamPlacementPage() {
           console.log("🔍 Debug - First student data:", students[0])
           console.log("🔍 Debug - Student classes:", students[0].studentClasses)
           setStudent(students[0])
+        }
+      }
+
+      // Fetch test assignment for student
+      if (session?.user?.role === "student") {
+        const testResponse = await fetch('/api/tests/student/assignment')
+        if (testResponse.ok) {
+          const testData = await testResponse.json()
+          if (testData.assignment) {
+            setTestAssignment(testData.assignment)
+          }
         }
       }
     } catch (error) {
@@ -193,15 +205,38 @@ export default function ExamPlacementPage() {
                   <p className="text-gray-600 mb-4">
                     Kết quả thi xếp lớp của bạn chưa được cập nhật.
                   </p>
-                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                    <div className="flex items-start space-x-2">
-                      <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                      <div className="text-orange-800 text-sm">
-                        <p className="font-medium mb-1">Lưu ý:</p>
-                        <p>Nếu bạn chưa thực hiện bài thi xếp lớp, vui lòng liên hệ với nhân viên để được sắp xếp lịch thi phù hợp.</p>
+                  {testAssignment ? (
+                    // Student has been assigned a test but hasn't taken it
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-blue-800 text-sm">
+                          <p className="font-medium mb-1">Thông báo:</p>
+                          <p>Bạn đã được giao đề thi: <strong>{testAssignment.test.title}</strong></p>
+                          <p className="mt-2">Thời gian làm bài: {testAssignment.test.duration} phút</p>
+                          <div className="mt-3">
+                            <Button
+                              onClick={() => router.push('/lam-bai-thi')}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Làm bài thi ngay
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    // Student has no test assigned
+                    <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-orange-800 text-sm">
+                          <p className="font-medium mb-1">Lưu ý:</p>
+                          <p>Bạn chưa được giao đề thi nào. Vui lòng liên hệ với giáo viên để được sắp xếp lịch thi phù hợp.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

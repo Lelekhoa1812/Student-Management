@@ -172,7 +172,7 @@ export default function ViewTestPage({ params }: { params: Promise<{ id: string 
                 Chỉnh sửa
               </Button>
               <Button
-                onClick={() => router.push(`/teacher/gan-de-thi`)}
+                onClick={() => router.push(`/teacher/giao-de-thi`)}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Users className="w-4 h-4 mr-2" />

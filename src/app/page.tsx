@@ -293,7 +293,7 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/teacher/gan-de-thi">
+                <Link href="/teacher/giao-de-thi">
                   <Button className="w-full">Giao đề thi</Button>
                 </Link>
               </CardContent>
@@ -310,7 +310,7 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/thong-tin-teacher">
+                <Link href="/teacher/thong-tin-teacher">
                   <Button className="w-full">Cập nhật</Button>
                 </Link>
               </CardContent>
@@ -396,7 +396,7 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/thong-tin-hoc-vien">
+              <Link href="/student/thong-tin-hoc-vien">
                 <Button className="w-full">Xem thông tin</Button>
               </Link>
             </CardContent>
@@ -413,7 +413,7 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/thi-xep-lop">
+              <Link href="/student/thi-xep-lop">
                 <Button className="w-full">Xem điểm thi</Button>
               </Link>
             </CardContent>
@@ -430,7 +430,7 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/dang-ky">
+              <Link href="/student/dang-ky">
                 <Button className="w-full">Đăng ký ngay</Button>
               </Link>
             </CardContent>

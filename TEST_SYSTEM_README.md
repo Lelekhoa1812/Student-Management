@@ -48,7 +48,7 @@ Hệ thống quản lý đề thi cho phép giáo viên tạo, quản lý và gi
   - Chỉnh sửa đề thi
 
 ### 4. Giao đề thi (Assign Test)
-- **Trang**: `/teacher/gan-de-thi`
+- **Trang**: `/teacher/giao-de-thi`
 - **Chức năng**: Giao đề thi cho học viên cụ thể
 - **Tính năng**:
   - Chọn đề thi từ danh sách

@@ -73,13 +73,13 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/teacher/xet-diem", label: "Xét điểm" },
         { href: "/teacher/tao-de-thi", label: "Tạo đề thi" },
         { href: "/teacher/danh-sach-de-thi", label: "Danh sách đề" },
-        { href: "/teacher/gan-de-thi", label: "Giao đề thi" },
-        { href: "/thong-tin-teacher", label: "Tài khoản" },
+        { href: "/teacher/giao-de-thi", label: "Giao đề thi" },
+        { href: "/teacher/thong-tin-teacher", label: "Tài khoản" },
       ]
     : [
-        { href: "/thi-xep-lop", label: "Thi xếp lớp" },
-        { href: "/dang-ky", label: "Đăng ký khóa học" },
-        { href: "/thong-tin-hoc-vien", label: "Tài khoản" },
+        { href: "/student/thi-xep-lop", label: "Thi xếp lớp" },
+        { href: "/student/dang-ky", label: "Đăng ký khóa học" },
+        { href: "/student/thong-tin-hoc-vien", label: "Tài khoản" },
       ]
 
   return (
