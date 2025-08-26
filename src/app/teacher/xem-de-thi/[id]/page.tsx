@@ -159,7 +159,7 @@ export default function ViewTestPage({ params }: { params: Promise<{ id: string 
                 Quay lại
               </Button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">{test.title}</h1>
+                <h1 className="text-3xl font-bold dark:text-white text-gray-900">{test.title}</h1>
                 <p className="text-gray-600">{test.description || "Không có mô tả"}</p>
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function ViewTestPage({ params }: { params: Promise<{ id: string 
                     </div>
 
                     <div className="mb-4">
-                      <p className="text-gray-900 font-medium">{question.questionText}</p>
+                      <p className="text-gray-900 dark:text-white font-medium">{question.questionText}</p>
                     </div>
 
                     {/* MCQ Options */}
@@ -254,7 +254,7 @@ export default function ViewTestPage({ params }: { params: Promise<{ id: string 
                       <div className="space-y-2">
                         {question.options.map((option) => (
                           <div key={option.id} className="flex items-center space-x-2">
-                            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center text-sm font-medium ${
+                            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center dark:bg-gray-700 dark:text-white text-sm font-medium ${
                               option.isCorrect 
                                 ? 'border-green-500 bg-green-100 text-green-700' 
                                 : 'border-gray-300 text-gray-500'
@@ -273,7 +273,27 @@ export default function ViewTestPage({ params }: { params: Promise<{ id: string 
                     {/* Fill in the blank content */}
                     {question.questionType === 'fill_blank' && question.fillBlankContent && (
                       <div className="bg-gray-50 p-3 rounded border">
-                        <p className="text-gray-700 text-sm">{question.fillBlankContent}</p>
+                        <div className="text-gray-700 text-sm">
+                          {(() => {
+                            const parts = (question.fillBlankContent || '').split(/<>/g)
+                            const blanks = Math.max(0, parts.length - 1)
+                            return (
+                              <span>
+                                {parts.map((p, i) => (
+                                  <span key={i}>
+                                    {p}
+                                    {i < blanks && (
+                                      <span
+                                        className="inline-block align-baseline mx-1 h-7 min-w-[96px] border border-gray-300 rounded-md bg-white"
+                                        aria-hidden="true"
+                                      />
+                                    )}
+                                  </span>
+                                ))}
+                              </span>
+                            )
+                          })()}
+                        </div>
                       </div>
                     )}
 

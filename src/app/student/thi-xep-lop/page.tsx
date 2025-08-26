@@ -91,6 +91,8 @@ export default function ExamPlacementPage() {
   const [examResult, setExamResult] = useState<ExamResult | null>(null)
   const [student, setStudent] = useState<Student | null>(null)
   const [testAssignment, setTestAssignment] = useState<TestAssignment | TestAssignment[] | null>(null)
+  const [activeAssignments, setActiveAssignments] = useState<TestAssignment[]>([])
+  const [completedAssignments, setCompletedAssignments] = useState<TestAssignment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedClassDetails, setSelectedClassDetails] = useState<ClassDetails | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -168,7 +170,7 @@ export default function ExamPlacementPage() {
         console.log("🔍 Student response not ok:", studentResponse.status)
       }
 
-      // Fetch test assignment for student
+      // Fetch test assignment for student (legacy - single active assignment)
       if (session?.user?.role === "student") {
         console.log("🔍 Fetching test assignment for student role")
         console.log("🔍 Session user ID:", session.user.id)
@@ -196,6 +198,47 @@ export default function ExamPlacementPage() {
           } catch (e) {
             console.log("🔍 Could not parse error response")
           }
+        }
+      }
+
+      // Fetch all assignments (active + completed) for richer UI states
+      if (session?.user?.role === "student") {
+        const allResp = await fetch('/api/tests/student/assignments')
+        if (allResp.ok) {
+          const data = await allResp.json()
+
+          const dedupeByTest = (arr: TestAssignment[], preferCompleted: boolean) => {
+            const map = new Map<string, TestAssignment>()
+            for (const a of arr) {
+              const key = a.test?.id
+              if (!key) continue
+              const existing = map.get(key)
+              if (!existing) {
+                map.set(key, a)
+              } else {
+                // Prefer the latest by completedAt/assignedAt
+                const existingDate = (existing.completedAt || existing.assignedAt) as unknown as string
+                const currentDate = (a.completedAt || a.assignedAt) as unknown as string
+                if (new Date(currentDate).getTime() > new Date(existingDate).getTime()) {
+                  map.set(key, a)
+                }
+              }
+            }
+            return Array.from(map.values())
+          }
+
+          const rawActive: TestAssignment[] = data.activeAssignments || []
+          const rawCompleted: TestAssignment[] = data.completedAssignments || []
+
+          // If a test id appears in both active and completed, keep it in completed only
+          const completedByTest = new Set(rawCompleted.map((a: TestAssignment) => a.test?.id))
+          const filteredActive = rawActive.filter((a: TestAssignment) => !completedByTest.has(a.test?.id))
+
+          const dedupedActive = dedupeByTest(filteredActive, false)
+          const dedupedCompleted = dedupeByTest(rawCompleted, true)
+
+          setActiveAssignments(dedupedActive)
+          setCompletedAssignments(dedupedCompleted)
         }
       }
     } catch (error) {
@@ -253,22 +296,23 @@ export default function ExamPlacementPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {testAssignment ? (
+            {activeAssignments.length > 0 || (completedAssignments.length > 0 && examResult) ? (
               // SCENARIO 2: Student has been assigned a test (regardless of exam results)
               <div className="space-y-6">
                 <div className="text-center">
                   <div className="flex justify-center mb-4">
                     <Clock className="w-16 h-16 text-blue-500" />
                   </div>
-                  <h3 className="text-xl font-semibold text-blue-600 mb-2">
-                    Bạn có đề thi cần làm
-                  </h3>
+                  {activeAssignments.length > 0 ? (
+                    <h3 className="text-xl font-semibold text-blue-600 mb-2">Bạn có đề thi cần làm</h3>
+                  ) : (
+                    <h3 className="text-xl font-semibold text-green-600 mb-2">Bạn đã hoàn thành đề thi được giao</h3>
+                  )}
                   
-                  {/* Handle multiple test assignments */}
-                  {Array.isArray(testAssignment) ? (
-                    // Multiple test assignments
+                  {/* Active assignments */}
+                  {activeAssignments.length > 0 && (
                     <div className="space-y-4">
-                      {testAssignment.map((assignment, index) => (
+                      {activeAssignments.map((assignment) => (
                         <div key={assignment.id} className="bg-blue-50 p-6 rounded-lg border border-blue-200">
                           <div className="text-lg font-semibold text-blue-700 mb-2">
                             {assignment.test.title}
@@ -290,26 +334,31 @@ export default function ExamPlacementPage() {
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    // Single test assignment
-                    <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                      <div className="text-lg font-semibold text-blue-700 mb-2">
-                        {testAssignment.test.title}
-                      </div>
-                      <div className="text-blue-600 mb-3">
-                        Thời gian làm bài: {testAssignment.test.duration} phút
-                      </div>
-                      {testAssignment.test.description && (
-                        <div className="text-sm text-blue-500 mb-4">
-                          {testAssignment.test.description}
+                  )}
+
+                  {/* Completed assignments */}
+                  {completedAssignments.length > 0 && examResult && (
+                    <div className="space-y-4 mt-6">
+                      {completedAssignments.map((assignment) => (
+                        <div key={assignment.id} className="bg-green-50 p-6 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-lg font-semibold text-green-700 mb-1">
+                                {assignment.test.title}
+                              </div>
+                              <div className="text-green-700 text-sm">
+                                Đã hoàn thành vào: {assignment.completedAt ? new Date(assignment.completedAt).toLocaleString('vi-VN') : '—'}
+                              </div>
+                              <div className="text-green-700 text-sm">
+                                Điểm: {typeof assignment.score === 'number' ? `${assignment.score}/${assignment.test.questions.reduce((s,q)=>s+q.score,0)}` : 'Chưa có'}
+                              </div>
+                            </div>
+                            <div className="text-green-600 text-sm font-medium">
+                              Đã hoàn thành
+                            </div>
+                          </div>
                         </div>
-                      )}
-                      <Button
-                        onClick={() => router.push(`/student/lam-bai-thi?testId=${testAssignment.test.id}`)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
-                      >
-                        Làm bài thi: {testAssignment.test.title}
-                      </Button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -330,6 +379,24 @@ export default function ExamPlacementPage() {
                     </div>
                     <div className="text-sm text-gray-600 mt-2">
                       Ngày thi: {new Date(examResult.examDate).toLocaleDateString('vi-VN')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : completedAssignments.length > 0 ? (
+              // SCENARIO 1b: All assigned tests submitted but no marking/result yet
+              <div className="text-center space-y-4">
+                <div className="flex justify-center mb-2">
+                  <Clock className="w-16 h-16 text-orange-500" />
+                </div>
+                <h3 className="text-xl font-semibold text-orange-600">Chưa có kết quả thi</h3>
+                <p className="text-gray-600">Kết quả thi xếp lớp của bạn chưa được cập nhật.</p>
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 max-w-xl mx-auto">
+                  <div className="flex items-start space-x-2">
+                    <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-orange-800 text-sm text-left">
+                      <p className="font-medium mb-1">Lưu ý:</p>
+                      <p>Nếu bạn chưa thực hiện bài thi xếp lớp, vui lòng liên hệ với nhân viên để được sắp xếp lịch thi phù hợp.</p>
                     </div>
                   </div>
                 </div>

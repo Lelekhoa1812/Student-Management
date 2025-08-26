@@ -379,7 +379,7 @@ export default function LamBaiThiPage() {
 
                 {question.questionType === 'fill_blank' && question.fillBlankContent && (
                   <div className="space-y-3">
-                    <div className="text-sm text-gray-800 mb-3">
+                    <div className="text-sm text-gray-800 dark:text-white mb-3">
                       {(() => {
                         // Parse <> markers into inputs
                         const parts = question.fillBlankContent.split(/<>/g)
@@ -541,7 +541,7 @@ export default function LamBaiThiPage() {
             <div className="bg-white rounded-lg p-6 max-w-md mx-4">
               <div className="flex items-center mb-4">
                 <AlertTriangle className="h-6 w-6 text-orange-500 mr-2" />
-                <h3 className="text-lg font-medium">Xác nhận nộp bài</h3>
+                <h3 className="text-lg text-red-500 font-medium">Xác nhận nộp bài</h3>
               </div>
               <p className="text-gray-600 mb-6">
                 Thời gian làm bài chưa hết. Bạn có chắc chắn muốn nộp bài ngay bây giờ?
