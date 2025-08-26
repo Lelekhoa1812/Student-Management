@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -62,8 +62,13 @@ interface StudentAnswer {
 export default function LamBaiThiPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const testIdFromQuery = searchParams?.get('testId') || ''
+  const [testIdFromQuery, setTestIdFromQuery] = useState<string>('')
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      setTestIdFromQuery(params.get('testId') || '')
+    } catch {}
+  }, [])
   const [assignment, setAssignment] = useState<TestAssignment | null>(null)
   const [answers, setAnswers] = useState<StudentAnswer[]>([])
   const [timeLeft, setTimeLeft] = useState<number>(0)
@@ -119,8 +124,9 @@ export default function LamBaiThiPage() {
             return
           }
           // If testId is provided, select the matching assignment; otherwise use first
+          type AssignmentItem = { test?: { id?: string } } & Record<string, unknown>
           const byTestId = testIdFromQuery
-            ? data.assignment.find((a: any) => a?.test?.id === testIdFromQuery)
+            ? (data.assignment as AssignmentItem[]).find((a) => a?.test?.id === testIdFromQuery)
             : undefined
           chosenAssignment = byTestId || data.assignment[0]
           console.log('🔍 Selected assignment:', chosenAssignment)
