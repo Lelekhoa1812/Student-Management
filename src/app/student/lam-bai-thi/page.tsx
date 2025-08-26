@@ -91,7 +91,7 @@ export default function LamBaiThiPage() {
         setTimeLeft(prev => {
           if (prev <= 1) {
             // Auto-submit when time runs out
-            handleSubmitTest()
+            handleSubmitTest({ force: true })
             return 0
           }
           return prev - 1
@@ -204,8 +204,8 @@ export default function LamBaiThiPage() {
     )
   }
 
-  const handleSubmitTest = async () => {
-    if (timeLeft > 0 && !showSubmitModal) {
+  const handleSubmitTest = async (opts?: { force?: boolean }) => {
+    if (!opts?.force && timeLeft > 0 && !showSubmitModal) {
       setShowSubmitModal(true)
       return
     }
@@ -225,7 +225,7 @@ export default function LamBaiThiPage() {
 
       if (response.ok) {
         toast.success('Nộp bài thành công!')
-        router.push('/thi-xep-lop')
+        router.push('/student/thi-xep-lop')
       } else {
         const error = await response.json()
         toast.error(error.error || 'Không thể nộp bài')
@@ -288,7 +288,7 @@ export default function LamBaiThiPage() {
             <div className="mb-6">
               <Button
                 variant="outline"
-                onClick={() => router.push('/thi-xep-lop')}
+                onClick={() => router.push('/student/thi-xep-lop')}
                 className="mb-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -317,7 +317,7 @@ export default function LamBaiThiPage() {
         <div className="mb-6">
           <Button
             variant="outline"
-            onClick={() => router.push('/thi-xep-lop')}
+            onClick={() => router.push('/student/thi-xep-lop')}
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -535,7 +535,7 @@ export default function LamBaiThiPage() {
         {/* Submit Button */}
         <div className="mt-8 text-center">
           <Button
-            onClick={handleSubmitTest}
+            onClick={() => handleSubmitTest()}
             disabled={isSubmitting}
             className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg"
           >
@@ -564,7 +564,7 @@ export default function LamBaiThiPage() {
                   Hủy
                 </Button>
                 <Button
-                  onClick={handleSubmitTest}
+                  onClick={() => handleSubmitTest()}
                   disabled={isSubmitting}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                 >
