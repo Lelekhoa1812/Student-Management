@@ -97,12 +97,17 @@ export async function POST(request: NextRequest) {
 
       totalScore += score
 
+      // Serialize mapping answers to strings as schema expects String[]
+      const mappingSerialized = Array.isArray(answer.mappingAnswers)
+        ? answer.mappingAnswers.map((p: { leftId: string; rightId: string }) => `${p.leftId}:${p.rightId}`)
+        : undefined
+
       studentAnswers.push({
         assignmentId,
         questionId: answer.questionId,
         answerText: answer.answerText,
         selectedOptions: answer.selectedOptions,
-        mappingAnswers: answer.mappingAnswers,
+        mappingAnswers: mappingSerialized,
         score,
         feedback
       })
