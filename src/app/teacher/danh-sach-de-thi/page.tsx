@@ -114,7 +114,7 @@ export default function TestListPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Danh sách đề thi</h1>
+            <h1 className="text-3xl font-bold dark:text-white text-gray-900 mb-2">Danh sách đề thi</h1>
             <p className="text-gray-600">Quản lý và xem các đề thi đã tạo</p>
           </div>
           <Button 

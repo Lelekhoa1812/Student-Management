@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -69,6 +69,13 @@ export default function LamBaiThiPage() {
   const [isFetching, setIsFetching] = useState(true)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Mapping interaction state (per question)
+  const [activeLeftSelection, setActiveLeftSelection] = useState<Record<string, string | null>>({})
+  const [activeRightSelection, setActiveRightSelection] = useState<Record<string, string | null>>({})
+  const containerRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const leftItemRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const rightItemRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
     if (session?.user?.role === "student") {
@@ -142,12 +149,50 @@ export default function LamBaiThiPage() {
     }
   }
 
-  const updateAnswer = (questionId: string, field: keyof StudentAnswer, value: string | string[]) => {
+  const updateAnswer = (questionId: string, field: keyof StudentAnswer, value: string | string[] | { leftId: string; rightId: string }[]) => {
     setAnswers(prev => prev.map(answer => 
       answer.questionId === questionId 
         ? { ...answer, [field]: value }
         : answer
     ))
+  }
+
+  const handleConnectPair = (questionId: string, leftId: string, rightId: string) => {
+    const current = answers.find(a => a.questionId === questionId)?.mappingAnswers || []
+    // Avoid duplicate pairing and one-to-one constraint
+    const filtered = current.filter(pair => pair.leftId !== leftId && pair.rightId !== rightId)
+    const newPairs = [...filtered, { leftId, rightId }]
+    updateAnswer(questionId, 'mappingAnswers', newPairs)
+    setActiveLeftSelection(prev => ({ ...prev, [questionId]: null }))
+    setActiveRightSelection(prev => ({ ...prev, [questionId]: null }))
+  }
+
+  const toggleLeftSelect = (questionId: string, leftId: string) => {
+    setActiveLeftSelection(prev => ({
+      ...prev,
+      [questionId]: prev[questionId] === leftId ? null : leftId
+    }))
+  }
+
+  const toggleRightSelect = (questionId: string, rightId: string) => {
+    const leftSelected = activeLeftSelection[questionId]
+    if (leftSelected) {
+      handleConnectPair(questionId, leftSelected, rightId)
+    } else {
+      setActiveRightSelection(prev => ({
+        ...prev,
+        [questionId]: prev[questionId] === rightId ? null : rightId
+      }))
+    }
+  }
+
+  const removePair = (questionId: string, leftId: string, rightId: string) => {
+    const current = answers.find(a => a.questionId === questionId)?.mappingAnswers || []
+    updateAnswer(
+      questionId,
+      'mappingAnswers',
+      current.filter(p => !(p.leftId === leftId && p.rightId === rightId))
+    )
   }
 
   const handleSubmitTest = async () => {
@@ -334,53 +379,142 @@ export default function LamBaiThiPage() {
 
                 {question.questionType === 'fill_blank' && question.fillBlankContent && (
                   <div className="space-y-3">
-                    <div className="text-sm text-gray-600 mb-3">
-                      {question.fillBlankContent.split('___').map((part, i, arr) => (
-                        <span key={i}>
-                          {part}
-                          {i < arr.length - 1 && (
-                            <Input
-                              className="inline-block w-32 mx-2"
-                              placeholder="Điền từ..."
-                              value={answers.find(a => a.questionId === question.id)?.answerText?.split('|')[i] || ''}
-                              onChange={(e) => {
-                                const currentAnswers = answers.find(a => a.questionId === question.id)?.answerText?.split('|') || []
-                                currentAnswers[i] = e.target.value
-                                updateAnswer(question.id, 'answerText', currentAnswers.join('|'))
-                              }}
-                            />
-                          )}
-                        </span>
-                      ))}
+                    <div className="text-sm text-gray-800 mb-3">
+                      {(() => {
+                        // Parse <> markers into inputs
+                        const parts = question.fillBlankContent.split(/<>/g)
+                        const numBlanks = Math.max(0, parts.length - 1)
+                        const currentValues = (answers.find(a => a.questionId === question.id)?.answerText || '')
+                          .split('|')
+                        return (
+                          <span>
+                            {parts.map((part, i) => (
+                              <span key={i}>
+                                {part}
+                                {i < numBlanks && (
+                                  <Input
+                                    className="inline-block w-36 mx-2 align-baseline"
+                                    placeholder="Điền từ..."
+                                    value={currentValues[i] || ''}
+                                    onChange={(e) => {
+                                      const values = (answers.find(a => a.questionId === question.id)?.answerText || '')
+                                        .split('|')
+                                      values[i] = e.target.value
+                                      // Save raw pipe-joined values; server will persist as answerText
+                                      updateAnswer(question.id, 'answerText', values.join('|'))
+                                    }}
+                                  />
+                                )}
+                              </span>
+                            ))}
+                          </span>
+                        )
+                      })()}
                     </div>
+                    <div className="text-xs text-gray-500">Mỗi chỗ trống được đánh dấu bằng “&lt;&gt;”.</div>
                   </div>
                 )}
 
                 {question.questionType === 'mapping' && question.mappingColumns && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Cột trái:</h4>
-                      <div className="space-y-2">
-                        {question.mappingColumns
-                          .filter(col => col.columnType === 'left')
-                          .map((col) => (
-                            <div key={col.id} className="p-2 border rounded bg-gray-50">
-                              {col.itemText}
-                            </div>
-                          ))}
+                  <div
+                    className="relative"
+                    ref={(el) => { containerRefs.current[question.id] = el }}
+                  >
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-medium mb-2">Cột trái:</h4>
+                        <div className="space-y-3">
+                          {question.mappingColumns
+                            .filter(col => col.columnType === 'left')
+                            .map((col) => {
+                              const isSelected = activeLeftSelection[question.id] === col.id
+                              const paired = (answers.find(a => a.questionId === question.id)?.mappingAnswers || [])
+                                .some(p => p.leftId === col.id)
+                              return (
+                                <div
+                                  key={col.id}
+                                  ref={(el) => { leftItemRefs.current[col.id] = el }}
+                                  onClick={() => toggleLeftSelect(question.id, col.id)}
+                                  className={`p-3 border rounded cursor-pointer flex items-center justify-between ${isSelected ? 'bg-orange-100 border-orange-400' : 'bg-gray-50 hover:bg-gray-100'} ${paired ? 'opacity-80' : ''}`}
+                                >
+                                  <span>{col.itemText}</span>
+                                  <span className={`h-3 w-3 rounded-full ml-2 ${isSelected ? 'bg-orange-500' : 'bg-gray-400'}`} />
+                                </div>
+                              )
+                            })}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-2">Cột phải:</h4>
+                        <div className="space-y-3">
+                          {question.mappingColumns
+                            .filter(col => col.columnType === 'right')
+                            .map((col) => {
+                              const isSelected = activeRightSelection[question.id] === col.id
+                              const paired = (answers.find(a => a.questionId === question.id)?.mappingAnswers || [])
+                                .some(p => p.rightId === col.id)
+                              return (
+                                <div
+                                  key={col.id}
+                                  ref={(el) => { rightItemRefs.current[col.id] = el }}
+                                  onClick={() => toggleRightSelect(question.id, col.id)}
+                                  className={`p-3 border rounded cursor-pointer flex items-center justify-between ${isSelected ? 'bg-orange-100 border-orange-400' : 'bg-gray-50 hover:bg-gray-100'} ${paired ? 'opacity-80' : ''}`}
+                                >
+                                  <span className={`h-3 w-3 rounded-full mr-2 ${isSelected ? 'bg-orange-500' : 'bg-gray-400'}`} />
+                                  <span>{col.itemText}</span>
+                                </div>
+                              )
+                            })}
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Cột phải:</h4>
-                      <div className="space-y-2">
-                        {question.mappingColumns
-                          .filter(col => col.columnType === 'right')
-                          .map((col) => (
-                            <div key={col.id} className="p-2 border rounded bg-gray-50">
-                              {col.itemText}
-                            </div>
-                          ))}
-                      </div>
+
+                    {/* SVG overlay for connection lines */}
+                    <svg className="pointer-events-none absolute inset-0 w-full h-full">
+                      {(() => {
+                        const pairs = answers.find(a => a.questionId === question.id)?.mappingAnswers || []
+                        const container = containerRefs.current[question.id]
+                        if (!container) return null
+                        const containerRect = container.getBoundingClientRect()
+
+                        return pairs.map((pair, idx) => {
+                          const leftEl = leftItemRefs.current[pair.leftId]
+                          const rightEl = rightItemRefs.current[pair.rightId]
+                          if (!leftEl || !rightEl) return null
+                          const lRect = leftEl.getBoundingClientRect()
+                          const rRect = rightEl.getBoundingClientRect()
+                          const x1 = (lRect.right - containerRect.left)
+                          const y1 = (lRect.top + lRect.height / 2 - containerRect.top)
+                          const x2 = (rRect.left - containerRect.left)
+                          const y2 = (rRect.top + rRect.height / 2 - containerRect.top)
+                          const midX = (x1 + x2) / 2
+                          return (
+                            <g key={idx}>
+                              <path d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`} stroke="#f97316" strokeWidth="2" fill="none" />
+                            </g>
+                          )
+                        })
+                      })()}
+                    </svg>
+
+                    {/* Current pairs and actions */}
+                    <div className="mt-3 text-sm text-gray-700">
+                      {(answers.find(a => a.questionId === question.id)?.mappingAnswers || []).length > 0 && (
+                        <div className="space-y-1">
+                          {(answers.find(a => a.questionId === question.id)?.mappingAnswers || []).map((p, i) => {
+                            const leftLabel = question.mappingColumns?.find(c => c.id === p.leftId)?.itemText
+                            const rightLabel = question.mappingColumns?.find(c => c.id === p.rightId)?.itemText
+                            return (
+                              <div key={i} className="flex items-center justify-between">
+                                <span>
+                                  {leftLabel} ↔ {rightLabel}
+                                </span>
+                                <Button variant="outline" size="sm" onClick={() => removePair(question.id, p.leftId, p.rightId)}>Hủy</Button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

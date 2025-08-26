@@ -250,6 +250,8 @@ export default function CreateExamPage() {
           questions: questions.map((q, index) => ({
             ...q,
             order: index + 1,
+            // Derive fillBlankContent from questionText by preserving text with <> markers
+            fillBlankContent: q.questionType === 'fill_blank' ? q.questionText : undefined,
             options: q.questionType === 'mcq' ? q.options : undefined,
             mappingColumns: q.questionType === 'mapping' ? q.mappingColumns : undefined
           }))
@@ -424,9 +426,38 @@ export default function CreateExamPage() {
                       <Textarea
                         value={question.questionText}
                         onChange={(e) => updateQuestion(questionIndex, 'questionText', e.target.value)}
-                        placeholder="Nhập nội dung câu hỏi"
-                        rows={2}
+                        placeholder={
+                          question.questionType === 'fill_blank'
+                            ? 'Nhập nội dung câu hỏi. Dùng ký hiệu <> để tạo chỗ trống.'
+                            : 'Nhập nội dung câu hỏi'
+                        }
+                        rows={3}
                       />
+                      {question.questionType === 'fill_blank' && (
+                        <div className="mt-2 text-sm text-gray-700">
+                          <div>
+                            {(() => {
+                              const parts = (question.questionText || '').split(/<>/g)
+                              const blanks = Math.max(0, parts.length - 1)
+                              return (
+                                <span>
+                                  {parts.map((p, i) => (
+                                    <span key={i}>
+                                      {p}
+                                      {i < blanks && (
+                                        <span className="inline-block align-baseline mx-1">
+                                          <span className="inline-block w-28 border-b border-dashed border-gray-400" />
+                                        </span>
+                                      )}
+                                    </span>
+                                  ))}
+                                </span>
+                              )
+                            })()}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">Xem trước (&lt;&gt; sẽ là ô nhập liệu của học viên)</div>
+                        </div>
+                      )}
                     </div>
 
                     {/* MCQ Options */}
@@ -474,21 +505,7 @@ export default function CreateExamPage() {
                       </div>
                     )}
 
-                    {/* Fill in the blank content */}
-                    {question.questionType === 'fill_blank' && (
-                      <div>
-                        <Label>Nội dung điền vào chỗ trống *</Label>
-                        <Textarea
-                          value={question.fillBlankContent || ''}
-                          onChange={(e) => updateQuestion(questionIndex, 'fillBlankContent', e.target.value)}
-                          placeholder="Nhập nội dung với các chỗ trống để học viên điền vào"
-                          rows={4}
-                        />
-                        <p className="text-sm text-gray-500 mt-1">
-                          Sử dụng dấu gạch dưới ___ để đánh dấu chỗ trống
-                        </p>
-                      </div>
-                    )}
+                    {/* No separate form for fill-blank; use questionText with <> markers */}
 
                     {/* Mapping columns */}
                     {question.questionType === 'mapping' && (
