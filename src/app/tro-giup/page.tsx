@@ -129,6 +129,26 @@ export default function HelpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Image
+                          src="/helper/student/thi-xep-lop/finish-test.png"
+                          alt="Thi xếp lớp - Hoàn thành đề thi"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Khi hoàn thành đề thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Đề thi sau khi nộp bài sẽ đợi để giáo viên chấm điểm</li>
+                          <li>Trong lúc đó hãy hoàn thành các đề thi còn lại của bạn</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
                           src="/helper/student/thi-xep-lop/no-result.png"
                           alt="Thi xếp lớp - Chưa có kết quả"
                           width={600}
@@ -141,8 +161,8 @@ export default function HelpPage() {
                           <strong>Khi chưa có kết quả:</strong>
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
-                          <li>Thông báo chưa có kết quả thi</li>
-                          <li>Hướng dẫn liên hệ nhân viên để được hỗ trợ</li>
+                          <li>Thông báo chưa có kết quả sau khi học viên hoàn thành hết phần thi</li>
+                          <li>Hướng dẫn liên hệ nhân viên để được hỗ trợ nếu thời gian đợi lâu</li>
                         </ul>
                       </div>
                     </div>
@@ -211,9 +231,30 @@ export default function HelpPage() {
                         </p>
                         <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
                           <li>Trắc nghiệm (chọn một hoặc nhiều hơn một đáp án đúng)</li>
-                          <li>Tự luận</li>
+                          <li>Tự luận (ghi câu trả lời vào ô trống)</li>
                           <li>Điền vào chỗ trống</li>
                           <li>Nối cột</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/lam-bai-thi/mapping.png"
+                          alt="Dạng đề mapping"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Hướng dẫn đối với dạng đề nối cột (mapping)</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Click phương án của cột bên trái trước</li>
+                          <li>Kiểm tra đổi màu đáp án đã chọn</li>
+                          <li>Click vào phương án tương ứng bên cột phải</li>
                         </ul>
                       </div>
                     </div>
@@ -235,7 +276,27 @@ export default function HelpPage() {
                           <li>Bạn sắp hết thời gian làm bài khi đồng hồ chuyển màu đỏ</li>
                           <li>Nhanh chóng đưa ra kết quả trước khi đếm ngược kết thúc</li>
                           <li>Vui lòng dành ra tối thiểu 1 phút kiểm tra lại đáp án</li>
-                          <li>Bạn có thể nộp bài sớm hơn thời gian quy định</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/student/lam-bai-thi/early-submit.png"
+                          alt="Nộp bài sớm"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Nộp bài sớm</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Bạn có thể nộp bài sớm nếu cần thiết / chưa hết giờ thi</li>
+                          <li>Tuy nhiên hãy kiểm tra kỹ đáp án trước khi nộp bài</li>
+                          <li>Một khi đã nộp, bạn không thể sửa đáp án của mình nữa</li>
                         </ul>
                       </div>
                     </div>

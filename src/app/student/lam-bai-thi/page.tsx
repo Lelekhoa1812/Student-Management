@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -62,6 +62,8 @@ interface StudentAnswer {
 export default function LamBaiThiPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const testIdFromQuery = searchParams?.get('testId') || ''
   const [assignment, setAssignment] = useState<TestAssignment | null>(null)
   const [answers, setAnswers] = useState<StudentAnswer[]>([])
   const [timeLeft, setTimeLeft] = useState<number>(0)
@@ -109,27 +111,30 @@ export default function LamBaiThiPage() {
         console.log('🔍 Assignment:', data.assignment)
         
         // Handle both single assignment and array of assignments
-        let assignment = data.assignment
+        let chosenAssignment = data.assignment
         if (Array.isArray(data.assignment)) {
           if (data.assignment.length === 0) {
             console.log('❌ No assignments found')
             toast.error('Bạn chưa được giao đề thi nào')
             return
           }
-          // Use the first assignment if multiple exist
-          assignment = data.assignment[0]
-          console.log('🔍 Using first assignment from array:', assignment)
+          // If testId is provided, select the matching assignment; otherwise use first
+          const byTestId = testIdFromQuery
+            ? data.assignment.find((a: any) => a?.test?.id === testIdFromQuery)
+            : undefined
+          chosenAssignment = byTestId || data.assignment[0]
+          console.log('🔍 Selected assignment:', chosenAssignment)
         }
         
-        console.log('🔍 Final assignment:', assignment)
-        console.log('🔍 Assignment test:', assignment?.test)
+        console.log('🔍 Final assignment:', chosenAssignment)
+        console.log('🔍 Assignment test:', chosenAssignment?.test)
         
-        if (assignment && assignment.test) {
-          setAssignment(assignment)
-          setTimeLeft(assignment.test.duration * 60) // Convert minutes to seconds
+        if (chosenAssignment && chosenAssignment.test) {
+          setAssignment(chosenAssignment)
+          setTimeLeft(chosenAssignment.test.duration * 60) // Convert minutes to seconds
           
           // Initialize answers array
-          const initialAnswers = assignment.test.questions.map((q: Question) => ({
+          const initialAnswers = chosenAssignment.test.questions.map((q: Question) => ({
             questionId: q.id,
             answerText: '',
             selectedOptions: [],
@@ -137,8 +142,12 @@ export default function LamBaiThiPage() {
           }))
           setAnswers(initialAnswers)
         } else {
-          console.error('Assignment or test data is missing:', assignment)
+          console.error('Assignment or test data is missing:', chosenAssignment)
           toast.error('Dữ liệu đề thi không hợp lệ')
+          // If a specific testId was requested but not found, go back to listing
+          if (testIdFromQuery) {
+            router.push('/thi-xep-lop')
+          }
         }
       }
     } catch (error) {
@@ -435,7 +444,7 @@ export default function LamBaiThiPage() {
                                   key={col.id}
                                   ref={(el) => { leftItemRefs.current[col.id] = el }}
                                   onClick={() => toggleLeftSelect(question.id, col.id)}
-                                  className={`p-3 border rounded cursor-pointer flex items-center justify-between ${isSelected ? 'bg-orange-100 border-orange-400' : 'bg-gray-50 hover:bg-gray-100'} ${paired ? 'opacity-80' : ''}`}
+                                  className={`p-3 border rounded cursor-pointer flex items-center hover:text-orange-700 justify-between ${isSelected ? 'bg-orange-100 border-orange-400 text-orange-700' : 'bg-gray-50 hover:bg-gray-100'} ${paired ? 'opacity-80' : ''}`}
                                 >
                                   <span>{col.itemText}</span>
                                   <span className={`h-3 w-3 rounded-full ml-2 ${isSelected ? 'bg-orange-500' : 'bg-gray-400'}`} />
@@ -458,7 +467,7 @@ export default function LamBaiThiPage() {
                                   key={col.id}
                                   ref={(el) => { rightItemRefs.current[col.id] = el }}
                                   onClick={() => toggleRightSelect(question.id, col.id)}
-                                  className={`p-3 border rounded cursor-pointer flex items-center justify-between ${isSelected ? 'bg-orange-100 border-orange-400' : 'bg-gray-50 hover:bg-gray-100'} ${paired ? 'opacity-80' : ''}`}
+                                  className={`p-3 border rounded cursor-pointer flex items-center  hover:text-orange-700 justify-between ${isSelected ? 'bg-orange-100 border-orange-400 text-orange-700' : 'bg-gray-50 hover:bg-gray-100'} ${paired ? 'opacity-80' : ''}`}
                                 >
                                   <span className={`h-3 w-3 rounded-full mr-2 ${isSelected ? 'bg-orange-500' : 'bg-gray-400'}`} />
                                   <span>{col.itemText}</span>
