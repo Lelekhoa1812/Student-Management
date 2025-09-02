@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
+    const { searchParams: _searchParams } = new URL(request.url)
     const staffEmail = session.user.email
     if (!staffEmail) {
       return NextResponse.json({ error: "Staff email not found" }, { status: 400 })

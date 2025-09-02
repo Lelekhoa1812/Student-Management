@@ -1391,6 +1391,76 @@ export default function HelpPage() {
                     </div>
                   </div>
 
+                  {/* Chấm thi */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    💯 Xét điểm thi
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/xet-diem/view.png"
+                          alt="Xem danh sách đề đã nộp"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Danh sách chấm thi:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem các đề thi đã hoàn tất của học viên.</li>
+                          <li>Có thể truy vấn theo lớp học của cá nhân hoặc toàn hệ thống.</li>
+                          <li>Xem thông tin học viên, lớp và cấu trúc chấm điểm.</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/xet-diem/edit1.png"
+                          alt="Chấm điểm"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Cách thức chấm thi 1:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Xem câu hỏi và đáp án học sinh đã chọn.</li>
+                          <li>Đối chiếu với kết quả thực tế và chấm điểm.</li>
+                          <li>Có thể chấm và ghi phản hồi cho từng câu.</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/teacher/xet-diem/edit2.png"
+                          alt="Chấm điểm"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Cách thức chấm thi 2:</strong>
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                          <li>Có 4 dạng câu hỏi là trắc nghiệm, tự luận, điền vào chỗ trống và nối cột.</li>
+                          <li>Điểm chấm có thể thấp hơn điểm tổng của câu hỏi nếu không đúng toàn phần.</li>
+                          <li>Lưu ý nhớ thực hiện lưu chấm điểm để lưu lại kết quả.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Lớp học */}
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
