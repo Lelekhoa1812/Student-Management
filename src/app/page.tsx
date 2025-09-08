@@ -69,6 +69,7 @@ export default function HomePage() {
   const isStaff = session.user?.role === "staff"
   const isManager = session.user?.role === "manager"
   const isTeacher = session.user?.role === "teacher"
+  const isCashier = session.user?.role === "cashier"
 
   // Redirect based on user role
   if (isStaff) {
@@ -312,6 +313,114 @@ export default function HomePage() {
               <CardContent>
                 <Link href="/teacher/thong-tin-teacher">
                   <Button className="w-full">Cập nhật</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <CompanyImage position="bottom" />
+      </div>
+    )
+  }
+
+  // Cashier dashboard
+  if (isCashier) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-green-600 mb-2">
+              Hệ thống Quản lý Học viên
+            </h1>
+            <p className="text-lg text-gray-600">
+              Xin chào, {session.user?.name}! (Thu ngân)
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-orange-600" />
+                  Quản lý ghi danh
+                </CardTitle>
+                <CardDescription>
+                  Quản lý đăng ký và thanh toán
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/quan-ly-ghi-danh">
+                  <Button className="w-full">Quản lý</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-green-600" />
+                  Hẹn lịch nhắc
+                </CardTitle>
+                <CardDescription>
+                  Quản lý lời nhắc và theo dõi học viên
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/hen-lich-nhac">
+                  <Button className="w-full">Quản lý</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Phản hồi khách hàng
+                </CardTitle>
+                <CardDescription>
+                  Xem và xử lý phản hồi từ khách hàng
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/feedback-khach-hang">
+                  <Button className="w-full">Xem phản hồi</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  Doanh thu lớp học
+                </CardTitle>
+                <CardDescription>
+                  Doanh thu và thanh toán theo lớp học
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/doanh-thu-lop-hoc">
+                  <Button className="w-full">Xem doanh thu</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-yellow-600" />
+                  Tài khoản
+                </CardTitle>
+                <CardDescription>
+                  Xem và cập nhật thông tin thu ngân
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/thong-tin-cashier">
+                  <Button className="w-full">Xem thông tin</Button>
                 </Link>
               </CardContent>
             </Card>

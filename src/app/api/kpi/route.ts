@@ -15,7 +15,15 @@ export async function GET() {
       }
     })
 
-    const kpiData = await Promise.all(
+    // Get all cashier members
+    const cashierMembers = await prisma.cashier.findMany({
+      select: {
+        id: true,
+        name: true,
+      }
+    })
+
+    const staffKpiData = await Promise.all(
       staffMembers.map(async (staff) => {
         // Count payments for today
         const todayCount = await prisma.payment.count({
@@ -88,6 +96,82 @@ export async function GET() {
         }
       })
     )
+
+    const cashierKpiData = await Promise.all(
+      cashierMembers.map(async (cashier) => {
+        // Count payments for today
+        const todayCount = await prisma.payment.count({
+          where: {
+            cashier_assigned: cashier.id,
+            datetime: {
+              gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
+            }
+          }
+        })
+
+        // Count payments for last 7 days
+        const weekCount = await prisma.payment.count({
+          where: {
+            cashier_assigned: cashier.id,
+            datetime: {
+              gte: weekAgo
+            }
+          }
+        })
+
+        // Count payments for last 30 days
+        const monthCount = await prisma.payment.count({
+          where: {
+            cashier_assigned: cashier.id,
+            datetime: {
+              gte: monthAgo
+            }
+          }
+        })
+
+        // Count reminders for today
+        const todayReminderCount = await prisma.reminder.count({
+          where: {
+            cashierId: cashier.id,
+            createdAt: {
+              gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
+            }
+          }
+        })
+
+        // Count reminders for last 7 days
+        const weekReminderCount = await prisma.reminder.count({
+          where: {
+            cashierId: cashier.id,
+            createdAt: {
+              gte: weekAgo
+            }
+          }
+        })
+
+        // Count reminders for last 30 days
+        const monthReminderCount = await prisma.reminder.count({
+          where: {
+            cashierId: cashier.id,
+            createdAt: {
+              gte: monthAgo
+            }
+          }
+        })
+
+        return {
+          staffName: cashier.name,
+          todayCount,
+          weekCount,
+          monthCount,
+          todayReminderCount,
+          weekReminderCount,
+          monthReminderCount
+        }
+      })
+    )
+
+    const kpiData = [...staffKpiData, ...cashierKpiData]
 
     return NextResponse.json(kpiData)
   } catch (error) {

@@ -28,6 +28,7 @@ model Account {
   staff   Staff?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   manager Manager? @relation(fields: [userId], references: [id], onDelete: Cascade)
   teacher Teacher? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cashier Cashier? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
@@ -39,6 +40,7 @@ model Session {
   staff        Staff?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   manager      Manager? @relation(fields: [userId], references: [id], onDelete: Cascade)
   teacher      Teacher? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cashier      Cashier? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -113,6 +115,20 @@ model Manager {
   sessions    Session[]
 }
 
+model Cashier {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String   @unique
+  phoneNumber String
+  password    String
+  role        String   @default("cashier")
+  createdAt   DateTime @default(now())
+  payments    Payment[]
+  accounts    Account[]
+  sessions    Session[]
+  reminders   Reminder[]
+}
+
 model Exam {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   studentId      String   @db.ObjectId
@@ -168,8 +184,10 @@ model Payment {
   student        Student  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   datetime       DateTime @default(now())
   payment_method String
-  staff_assigned String   @db.ObjectId
-  staff          Staff    @relation(fields: [staff_assigned], references: [id])
+  staff_assigned String?  @db.ObjectId
+  staff          Staff?   @relation(fields: [staff_assigned], references: [id])
+  cashier_assigned String? @db.ObjectId
+  cashier        Cashier? @relation(fields: [cashier_assigned], references: [id])
   have_paid      Boolean  @default(false)
   discount_percentage Float  @default(0)
   discount_reason     String?
@@ -192,8 +210,10 @@ model StudentClass {
 
 model Reminder {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  staffId   String   @db.ObjectId
-  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId   String?  @db.ObjectId
+  staff     Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  cashierId String?  @db.ObjectId
+  cashier   Cashier? @relation(fields: [cashierId], references: [id], onDelete: Cascade)
   type      String   // "payment" or "examination"
   platform  String   // "call", "email", "sms"
   studentId String   @db.ObjectId

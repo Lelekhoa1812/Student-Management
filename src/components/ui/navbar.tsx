@@ -49,6 +49,7 @@ export function Navbar({ className }: NavbarProps) {
   const isStaff = session?.user?.role === "staff"
   const isManager = session?.user?.role === "manager"
   const isTeacher = session?.user?.role === "teacher"
+  const isCashier = session?.user?.role === "cashier"
 
   const navigationLinks = 
     isStaff ? 
@@ -64,8 +65,7 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/quan-ly-hoc-vien", label: "Quản lý học viên" },
         { href: "/quan-ly-lop-hoc", label: "Quản lý lớp học" },
         { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
-        { href: "/kpi-dashboard", label: "Bảng giám sát KPI" },
-        { href: "/thong-tin-manager", label: "Tài khoản" },
+        { href: "/kpi-dashboard", label: "Bảng giám sát KPI" }
       ]
     : isTeacher
     ? [
@@ -73,13 +73,19 @@ export function Navbar({ className }: NavbarProps) {
         { href: "/teacher/xet-diem", label: "Xét điểm" },
         { href: "/teacher/tao-de-thi", label: "Tạo đề thi" },
         { href: "/teacher/danh-sach-de-thi", label: "Danh sách đề" },
-        { href: "/teacher/giao-de-thi", label: "Giao đề thi" },
-        { href: "/teacher/thong-tin-teacher", label: "Tài khoản" },
+        { href: "/teacher/giao-de-thi", label: "Giao đề thi" }
+      ]
+    : isCashier
+    ? [
+        { href: "/quan-ly-ghi-danh", label: "Quản lý ghi danh" },
+        { href: "/hen-lich-nhac", label: "Hẹn lịch nhắc" },
+        { href: "/feedback-khach-hang", label: "Phản hồi khách hàng" },
+        { href: "/doanh-thu-lop-hoc", label: "Doanh thu lớp học" }
       ]
     : [
         { href: "/student/thi-xep-lop", label: "Thi xếp lớp" },
         { href: "/student/dang-ky", label: "Đăng ký khóa học" },
-        { href: "/student/thong-tin-hoc-vien", label: "Tài khoản" },
+        { href: "/student/thong-tin-hoc-vien", label: "Tài khoản" }
       ]
 
   return (

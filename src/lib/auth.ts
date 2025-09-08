@@ -120,6 +120,30 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
+          // Check in Cashier collection if not found in Manager
+          const cashier = await prisma.cashier.findUnique({
+            where: { email: credentials.email }
+          })
+
+          if (cashier) {
+            const isPasswordValid = await bcrypt.compare(
+              credentials.password,
+              cashier.password
+            )
+
+            if (isPasswordValid) {
+              console.log("✅ Cashier login successful:", cashier.email)
+              return {
+                id: cashier.id,
+                email: cashier.email,
+                name: cashier.name,
+                role: cashier.role,
+              }
+            } else {
+              console.log("❌ Invalid password for cashier:", cashier.email)
+            }
+          }
+
           console.log("❌ User not found:", credentials.email)
           return null
         } catch (error) {
@@ -188,6 +212,20 @@ export const authOptions: NextAuthOptions = {
             user.id = manager.id
             user.role = manager.role
             user.name = manager.name
+            return true
+          }
+
+          // Check if user exists in Cashier collection
+          const cashier = await prisma.cashier.findUnique({
+            where: { email: profile.email }
+          })
+
+          if (cashier) {
+            console.log("✅ Google OAuth: Existing cashier found:", cashier.name)
+            // Update the user object with database info
+            user.id = cashier.id
+            user.role = cashier.role
+            user.name = cashier.name
             return true
           }
 
@@ -260,6 +298,19 @@ export const authOptions: NextAuthOptions = {
             token.email = manager.email
             token.name = manager.name
             console.log("✅ JWT: Manager data set for:", manager.email, "role:", manager.role)
+            return token
+          }
+
+          const cashier = await prisma.cashier.findUnique({
+            where: { email: profile.email }
+          })
+
+          if (cashier) {
+            token.uid = cashier.id
+            token.role = cashier.role
+            token.email = cashier.email
+            token.name = cashier.name
+            console.log("✅ JWT: Cashier data set for:", cashier.email, "role:", cashier.role)
             return token
           }
         } catch (error) {

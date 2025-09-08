@@ -347,6 +347,43 @@ async function main() {
   }
   console.log(`✅ Created ${createdStaff.length} staff members (including admin)`)
 
+  // Create 3 cashier accounts
+  console.log('Creating cashier accounts...')
+  const cashierMembers = [
+    {
+      name: 'Nguyễn Thị Thu Ngân',
+      email: 'nguyenthithungan@example.com',
+      phoneNumber: '0906666666',
+      password: hashedPassword,
+    },
+    {
+      name: 'Trần Văn Thu Ngân',
+      email: 'tranvanthungan@example.com',
+      phoneNumber: '0907777777',
+      password: hashedPassword,
+    },
+    {
+      name: 'Lê Thị Thu Ngân',
+      email: 'lethithungan@example.com',
+      phoneNumber: '0908888888',
+      password: hashedPassword,
+    }
+  ]
+
+  const createdCashiers = []
+  for (const cashier of cashierMembers) {
+    try {
+      const createdCashierMember = await prisma.cashier.create({
+        data: cashier,
+      })
+      createdCashiers.push(createdCashierMember)
+    } catch (error) {
+      // Skip if cashier already exists
+      console.log(`Cashier ${cashier.email} already exists, skipping...`)
+    }
+  }
+  console.log(`✅ Created ${createdCashiers.length} cashier members`)
+
   // Create 6 classes associated with existing levels
   console.log('Creating classes...')
   const classes = [
@@ -418,11 +455,19 @@ async function main() {
   console.log('Assigning students to classes...')
   const studentClassAssignments = []
   
+  // Get all existing classes if none were created
+  let allClasses = createdClasses
+  if (allClasses.length === 0) {
+    allClasses = await prisma.class.findMany({
+      where: { isActive: true }
+    })
+  }
+  
   // Distribute students across classes
   for (let i = 0; i < createdStudents.length; i++) {
     const student = createdStudents[i]
-    const classIndex = i % createdClasses.length
-    const classData = createdClasses[classIndex]
+    const classIndex = i % allClasses.length
+    const classData = allClasses[classIndex]
     
     try {
       const assignment = await prisma.studentClass.create({

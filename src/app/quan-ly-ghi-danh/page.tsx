@@ -588,7 +588,7 @@ export default function RegistrationManagementPage() {
                                 )}
                               </Button>
                             )}
-                            {session.user?.role === "staff" && (
+                            {session.user?.role === "staff" || session.user?.role === "cashier" && (
                               <Button
                                 size="sm"
                                 variant="outline"

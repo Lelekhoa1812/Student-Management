@@ -112,6 +112,34 @@ export default function StudentRegistrationPage() {
             <CardDescription>
               Vui lòng điền đầy đủ thông tin để tạo tài khoản
             </CardDescription>
+            
+            {/* Should not be shown */}
+            {/* <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800 mb-2">Bạn muốn tạo tài khoản khác?</p>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/tao-tai-khoan-staff">
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Tạo tài khoản Staff
+                  </Button>
+                </Link>
+                <Link href="/tao-tai-khoan-cashier">
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Tạo tài khoản Thu ngân
+                  </Button>
+                </Link>
+                <Link href="/tao-tai-khoan-teacher">
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Tạo tài khoản Giáo viên
+                  </Button>
+                </Link>
+                <Link href="/tao-tai-khoan-manager">
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Tạo tài khoản Manager
+                  </Button>
+                </Link>
+              </div>
+            </div> */}
+
           </CardHeader>
           <CardContent>
             {error && (
