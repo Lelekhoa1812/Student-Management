@@ -33,11 +33,21 @@ interface ClassDetails {
   unpaidStudents: StudentPayment[]
 }
 
-export default function ClassEarningsDetailPage({ params }: { params: { classId: string } }) {
+export default function ClassEarningsDetailPage({ params }: { params: Promise<{ classId: string }> }) {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [classDetails, setClassDetails] = useState<ClassDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [classId, setClassId] = useState<string | null>(null)
+
+  // Handle async params
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params
+      setClassId(resolvedParams.classId)
+    }
+    getParams()
+  }, [params])
 
   useEffect(() => {
     if (status === "loading") return
@@ -52,12 +62,15 @@ export default function ClassEarningsDetailPage({ params }: { params: { classId:
       return
     }
 
-    fetchClassDetails()
-  }, [session, status, router, params.classId])
+    if (classId) {
+      fetchClassDetails()
+    }
+  }, [session, status, router, classId])
 
   const fetchClassDetails = async () => {
+    if (!classId) return
     try {
-      const response = await fetch(`/api/class-earnings/${params.classId}`)
+      const response = await fetch(`/api/class-earnings/${classId}`)
       if (response.ok) {
         const data = await response.json()
         setClassDetails(data)

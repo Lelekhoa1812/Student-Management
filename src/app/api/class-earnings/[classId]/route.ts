@@ -3,10 +3,10 @@ import { prisma } from "@/lib/db"
 
 export async function GET(
   request: Request,
-  { params }: { params: { classId: string } }
+  { params }: { params: Promise<{ classId: string }> }
 ) {
   try {
-    const classId = params.classId
+    const { classId } = await params
 
     // Get class details with students and payments
     const classData = await prisma.class.findUnique({
@@ -36,7 +36,18 @@ export async function GET(
     }
 
     // Create a map of student payments
-    const studentPaymentMap = new Map<string, any>()
+    const studentPaymentMap = new Map<string, {
+      studentId: string;
+      studentName: string;
+      studentEmail: string;
+      studentPhone: string;
+      paymentAmount: number;
+      hasPaid: boolean;
+      paymentDate: Date;
+      paymentMethod: string;
+      discountPercentage: number;
+      discountReason: string | null;
+    }>()
     
     classData.payments.forEach(payment => {
       const key = payment.user_id
@@ -57,8 +68,30 @@ export async function GET(
     })
 
     // Separate paid and unpaid students
-    const paidStudents: any[] = []
-    const unpaidStudents: any[] = []
+    const paidStudents: Array<{
+      studentId: string;
+      studentName: string;
+      studentEmail: string;
+      studentPhone: string;
+      paymentAmount: number;
+      hasPaid: boolean;
+      paymentDate: Date;
+      paymentMethod: string;
+      discountPercentage: number;
+      discountReason: string | null;
+    }> = []
+    const unpaidStudents: Array<{
+      studentId: string;
+      studentName: string;
+      studentEmail: string;
+      studentPhone: string;
+      paymentAmount: number;
+      hasPaid: boolean;
+      paymentDate: Date;
+      paymentMethod: string;
+      discountPercentage: number;
+      discountReason: string | null;
+    }> = []
 
     studentPaymentMap.forEach((studentPayment) => {
       if (studentPayment.hasPaid) {

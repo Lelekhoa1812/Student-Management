@@ -865,7 +865,7 @@ export default function HelpPage() {
                               <li>2. Chọn loại nhắc nhở (thanh toán hoặc thi cử)</li>
                               <li>3. Chọn phương thức liên lạc (gọi điện, email, SMS)</li>
                               <li>4. Nhập nội dung nhắc nhở</li>
-                              <li>5. Nhấn "Tạo nhắc nhở"</li>
+                              <li>5. Nhấn &quot;Tạo nhắc nhở&quot;</li>
                             </ol>
                           </div>
                         </div>
@@ -891,9 +891,9 @@ export default function HelpPage() {
                             </p>
                             <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                               <li>1. Tìm nhắc nhở cần chỉnh sửa trong danh sách</li>
-                              <li>2. Nhấn nút "Chỉnh sửa" (biểu tượng bút chì)</li>
+                              <li>2. Nhấn nút &quot;Chỉnh sửa&quot; (biểu tượng bút chì)</li>
                               <li>3. Cập nhật thông tin cần thiết</li>
-                              <li>4. Nhấn "Lưu thay đổi"</li>
+                              <li>4. Nhấn &quot;Lưu thay đổi&quot;</li>
                             </ol>
                           </div>
                         </div>
@@ -1017,7 +1017,7 @@ export default function HelpPage() {
                               Khi chưa có phản hồi nào từ khách hàng:
                             </p>
                             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                              <li>• Hiển thị thông báo "Chưa có phản hồi nào"</li>
+                              <li>• Hiển thị thông báo &quot;Chưa có phản hồi nào&quot;</li>
                               <li>• Khuyến khích khách hàng gửi phản hồi</li>
                               <li>• Có thể tạo phản hồi mẫu để hướng dẫn</li>
                             </ul>
@@ -1111,7 +1111,7 @@ export default function HelpPage() {
                               <li>• Danh sách tất cả lớp học với thông tin doanh thu</li>
                               <li>• Hiển thị số tiền đã thu và chưa thu</li>
                               <li>• Đếm số học viên đã thanh toán và chưa thanh toán</li>
-                              <li>• Nhấn "Xem chi tiết" để xem thông tin chi tiết</li>
+                              <li>• Nhấn &quot;Xem chi tiết&quot; để xem thông tin chi tiết</li>
                             </ul>
                           </div>
                         </div>

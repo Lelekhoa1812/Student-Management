@@ -224,7 +224,7 @@ export async function PUT(request: NextRequest) {
 
     const updatedPayment = await prisma.payment.update({
       where: { id },
-      data: updateData as any,
+      data: updateData,
       include: {
         class: true,
         student: true,
