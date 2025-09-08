@@ -793,6 +793,366 @@ export default function HelpPage() {
           </div>
         )}
 
+        {userRole === "cashier" && (
+          <div className="space-y-6">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <UserCog className="h-5 w-5 text-green-600" />
+                    <span>Hướng dẫn cho Thu ngân</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Hướng dẫn sử dụng các tính năng quản lý tài chính dành cho thu ngân
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Dashboard */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      📊 Dashboard - Trang chủ thu ngân
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/helper/cashier/dashboard.png"
+                          alt="Dashboard thu ngân"
+                          width={600}
+                          height={400}
+                          className="rounded-lg border shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-700 dark:text-gray-300">
+                          Trang chủ thu ngân cung cấp quyền truy cập vào các tính năng chính:
+                        </p>
+                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                          <li>• <strong>Quản lý ghi danh:</strong> Xử lý thanh toán và đăng ký học viên</li>
+                          <li>• <strong>Hẹn lịch nhắc:</strong> Tạo và quản lý lời nhắc cho học viên</li>
+                          <li>• <strong>Phản hồi khách hàng:</strong> Xem và xử lý phản hồi từ khách hàng</li>
+                          <li>• <strong>Doanh thu lớp học:</strong> Theo dõi doanh thu và thanh toán theo lớp</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hẹn lịch nhắc */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      📅 Hẹn lịch nhắc
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Tạo nhắc nhở mới
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/hen-lich-nhac/notice.png"
+                              alt="Tạo nhắc nhở"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Tạo nhắc nhở cho học viên về thanh toán hoặc lịch thi:
+                            </p>
+                            <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>1. Tìm kiếm học viên theo tên hoặc email</li>
+                              <li>2. Chọn loại nhắc nhở (thanh toán hoặc thi cử)</li>
+                              <li>3. Chọn phương thức liên lạc (gọi điện, email, SMS)</li>
+                              <li>4. Nhập nội dung nhắc nhở</li>
+                              <li>5. Nhấn "Tạo nhắc nhở"</li>
+                            </ol>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Chỉnh sửa nhắc nhở
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/hen-lich-nhac/edit.png"
+                              alt="Chỉnh sửa nhắc nhở"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Chỉnh sửa thông tin nhắc nhở đã tạo:
+                            </p>
+                            <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>1. Tìm nhắc nhở cần chỉnh sửa trong danh sách</li>
+                              <li>2. Nhấn nút "Chỉnh sửa" (biểu tượng bút chì)</li>
+                              <li>3. Cập nhật thông tin cần thiết</li>
+                              <li>4. Nhấn "Lưu thay đổi"</li>
+                            </ol>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Xem nhắc nhở đã hoàn thành
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/hen-lich-nhac/done.png"
+                              alt="Nhắc nhở hoàn thành"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Theo dõi trạng thái nhắc nhở:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• Nhắc nhở đã hoàn thành sẽ được đánh dấu</li>
+                              <li>• Có thể xem lịch sử tất cả nhắc nhở</li>
+                              <li>• Lọc theo trạng thái và thời gian</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quản lý ghi danh */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      💳 Quản lý ghi danh
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Xử lý thanh toán đã hoàn thành
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/quan-ly-ghi-danh/paid.png"
+                              alt="Thanh toán đã hoàn thành"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Quản lý các thanh toán đã hoàn thành:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• Xem danh sách tất cả thanh toán đã thanh toán</li>
+                              <li>• Xuất hóa đơn PDF cho học viên</li>
+                              <li>• Cập nhật thông tin thanh toán nếu cần</li>
+                              <li>• Theo dõi lịch sử thanh toán</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Xử lý thanh toán chưa hoàn thành
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/quan-ly-ghi-danh/unpaid.png"
+                              alt="Thanh toán chưa hoàn thành"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Xử lý các thanh toán chưa hoàn thành:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• Đánh dấu thanh toán đã hoàn thành</li>
+                              <li>• Cập nhật phương thức thanh toán</li>
+                              <li>• Áp dụng giảm giá nếu có</li>
+                              <li>• Ghi chú lý do giảm giá</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phản hồi khách hàng */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      💬 Phản hồi khách hàng
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Xem phản hồi khi không có dữ liệu
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/feedback-khach-hang/no-data.png"
+                              alt="Không có phản hồi"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Khi chưa có phản hồi nào từ khách hàng:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• Hiển thị thông báo "Chưa có phản hồi nào"</li>
+                              <li>• Khuyến khích khách hàng gửi phản hồi</li>
+                              <li>• Có thể tạo phản hồi mẫu để hướng dẫn</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Xem và xử lý phản hồi
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/feedback-khach-hang/obtain-feedback.png"
+                              alt="Xem phản hồi khách hàng"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Quản lý phản hồi từ khách hàng:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• Xem danh sách tất cả phản hồi</li>
+                              <li>• Lọc theo loại phản hồi (lỗi, đề xuất, khiếu nại)</li>
+                              <li>• Xem chi tiết từng phản hồi</li>
+                              <li>• Xóa phản hồi không cần thiết</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Doanh thu lớp học */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      📈 Doanh thu lớp học
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Tổng quan doanh thu
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/doanh-thu-lop-hoc/charts.png"
+                              alt="Biểu đồ doanh thu"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Xem tổng quan doanh thu với biểu đồ:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• Biểu đồ cột so sánh doanh thu đã thu vs chưa thu</li>
+                              <li>• Biểu đồ tròn tỷ lệ thu/chi</li>
+                              <li>• Thống kê tổng doanh thu và số tiền chưa thu</li>
+                              <li>• Đếm số học viên đã thanh toán và chưa thanh toán</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Chi tiết từng lớp học
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/doanh-thu-lop-hoc/per-class.png"
+                              alt="Doanh thu theo lớp"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Xem doanh thu chi tiết từng lớp:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• Danh sách tất cả lớp học với thông tin doanh thu</li>
+                              <li>• Hiển thị số tiền đã thu và chưa thu</li>
+                              <li>• Đếm số học viên đã thanh toán và chưa thanh toán</li>
+                              <li>• Nhấn "Xem chi tiết" để xem thông tin chi tiết</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          Chi tiết học viên trong lớp
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Image
+                              src="/helper/cashier/doanh-thu-lop-hoc/class-details.png"
+                              alt="Chi tiết lớp học"
+                              width={600}
+                              height={400}
+                              className="rounded-lg border shadow-sm"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-700 dark:text-gray-300">
+                              Xem chi tiết học viên trong từng lớp:
+                            </p>
+                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li>• <strong>Bên trái (màu xanh):</strong> Học viên đã thanh toán</li>
+                              <li>• <strong>Bên phải (màu đỏ):</strong> Học viên chưa thanh toán</li>
+                              <li>• Hiển thị thông tin chi tiết từng học viên</li>
+                              <li>• Xem phương thức thanh toán và ngày thanh toán</li>
+                              <li>• Thông tin giảm giá nếu có</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
         {userRole === "manager" && (
           <div className="space-y-6">
             <div className="grid gap-6">
