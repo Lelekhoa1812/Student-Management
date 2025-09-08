@@ -9,27 +9,41 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session || session.user?.role !== "staff") {
+    if (!session || (session.user?.role !== "staff" && session.user?.role !== "cashier")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { searchParams: _searchParams } = new URL(request.url)
-    const staffEmail = session.user.email
-    if (!staffEmail) {
-      return NextResponse.json({ error: "Staff email not found" }, { status: 400 })
+    const userEmail = session.user.email
+    if (!userEmail) {
+      return NextResponse.json({ error: "User email not found" }, { status: 400 })
     }
 
-    // Get staff ID
-    const staff = await prisma.staff.findUnique({
-      where: { email: staffEmail }
-    })
+    // Get user ID based on role
+    let userId: string | null = null
+    if (session.user.role === "staff") {
+      const staff = await prisma.staff.findUnique({
+        where: { email: userEmail }
+      })
+      userId = staff?.id || null
+    } else if (session.user.role === "cashier") {
+      const cashier = await prisma.cashier.findUnique({
+        where: { email: userEmail }
+      })
+      userId = cashier?.id || null
+    }
 
-    if (!staff) {
-      return NextResponse.json({ error: "Staff not found" }, { status: 404 })
+    if (!userId) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     const reminders = await prisma.reminder.findMany({
-      where: { staffId: staff.id },
+      where: { 
+        OR: [
+          { staffId: userId },
+          { cashierId: userId }
+        ]
+      },
       include: {
         student: {
           select: {
@@ -54,7 +68,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session || session.user?.role !== "staff") {
+    if (!session || (session.user?.role !== "staff" && session.user?.role !== "cashier")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -65,16 +79,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const staffEmail = session.user.email
-    if (!staffEmail) {
-      return NextResponse.json({ error: "Staff email not found" }, { status: 400 })
+    const userEmail = session.user.email
+    if (!userEmail) {
+      return NextResponse.json({ error: "User email not found" }, { status: 400 })
     }
-    const staff = await prisma.staff.findUnique({
-      where: { email: staffEmail }
-    })
 
-    if (!staff) {
-      return NextResponse.json({ error: "Staff not found" }, { status: 404 })
+    // Get user ID based on role
+    let userId: string | null = null
+    let isStaff = false
+    if (session.user.role === "staff") {
+      const staff = await prisma.staff.findUnique({
+        where: { email: userEmail }
+      })
+      userId = staff?.id || null
+      isStaff = true
+    } else if (session.user.role === "cashier") {
+      const cashier = await prisma.cashier.findUnique({
+        where: { email: userEmail }
+      })
+      userId = cashier?.id || null
+      isStaff = false
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Verify student exists
@@ -88,7 +116,8 @@ export async function POST(request: NextRequest) {
 
     const reminder = await prisma.reminder.create({
       data: {
-        staffId: staff.id,
+        staffId: isStaff ? userId : null,
+        cashierId: !isStaff ? userId : null,
         type,
         platform,
         studentId,

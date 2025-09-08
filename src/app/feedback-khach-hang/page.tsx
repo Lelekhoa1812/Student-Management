@@ -28,16 +28,16 @@ export default function FeedbackManagementPage() {
   const [loading, setLoading] = useState(true)
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null)
 
-  // Redirect if not staff
+  // Redirect if not staff or cashier
   useEffect(() => {
-    if (session && session.user?.role !== "staff") {
+    if (session && session.user?.role !== "staff" && session.user?.role !== "cashier") {
       router.push("/")
     }
   }, [session, router])
 
   // Fetch feedback data
   useEffect(() => {
-    if (session?.user?.role === "staff") {
+    if (session?.user?.role === "staff" || session?.user?.role === "cashier") {
       fetchFeedback()
     }
   }, [session])
@@ -134,7 +134,7 @@ export default function FeedbackManagementPage() {
     return new Date(dateString).toLocaleString("vi-VN")
   }
 
-  if (session?.user?.role !== "staff") {
+  if (session?.user?.role !== "staff" && session?.user?.role !== "cashier") {
     return null
   }
 

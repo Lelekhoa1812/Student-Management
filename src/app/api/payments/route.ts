@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
         include: {
           class: true,
           student: true,
-          staff: true
+          staff: true,
+          cashier: true
         }
       })
 
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, have_paid, payment_method, staff_assigned, payment_amount, discount_percentage, discount_reason } = body
+    const { id, have_paid, payment_method, staff_assigned, cashier_assigned, payment_amount, discount_percentage, discount_reason } = body
 
     if (!id) {
       return NextResponse.json(
@@ -156,7 +157,8 @@ export async function PUT(request: NextRequest) {
       have_paid?: boolean
       datetime?: Date
       payment_method?: string
-      staff_assigned?: string
+      staff_assigned?: string | null
+      cashier_assigned?: string | null
       payment_amount?: number
       discount_percentage?: number
       discount_reason?: string | null
@@ -175,6 +177,14 @@ export async function PUT(request: NextRequest) {
     
     if (staff_assigned !== undefined) {
       updateData.staff_assigned = staff_assigned
+      // Clear cashier_assigned when staff is assigned
+      updateData.cashier_assigned = null
+    }
+    
+    if (cashier_assigned !== undefined) {
+      updateData.cashier_assigned = cashier_assigned
+      // Clear staff_assigned when cashier is assigned
+      updateData.staff_assigned = null
     }
 
     if (payment_amount !== undefined) {
@@ -214,7 +224,7 @@ export async function PUT(request: NextRequest) {
 
     const updatedPayment = await prisma.payment.update({
       where: { id },
-      data: updateData,
+      data: updateData as any,
       include: {
         class: true,
         student: true,

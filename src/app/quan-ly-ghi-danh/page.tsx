@@ -49,7 +49,11 @@ interface Payment {
   staff: {
     id: string
     name: string
-  }
+  } | null
+  cashier: {
+    id: string
+    name: string
+  } | null
 }
 
 export default function RegistrationManagementPage() {
@@ -81,7 +85,7 @@ export default function RegistrationManagementPage() {
       return
     }
 
-    if (session.user?.role !== "staff" && session.user?.role !== "manager") {
+    if (session.user?.role !== "staff" && session.user?.role !== "manager" && session.user?.role !== "cashier") {
       router.push("/")
       return
     }
@@ -156,7 +160,10 @@ export default function RegistrationManagementPage() {
           id: editingPayment,
           have_paid: editForm.have_paid,
           payment_method: editForm.payment_method,
-          staff_assigned: session.user.id,
+          ...(session.user.role === "cashier" 
+            ? { cashier_assigned: session.user.id }
+            : { staff_assigned: session.user.id }
+          ),
           payment_amount: editForm.payment_amount ? parseFloat(editForm.payment_amount) : undefined,
           discount_percentage: editForm.discount_percentage ? parseFloat(editForm.discount_percentage) : undefined,
           discount_reason: editForm.discount_reason || undefined
@@ -165,7 +172,16 @@ export default function RegistrationManagementPage() {
 
       if (response.ok) {
         setSuccess("Cập nhật thanh toán thành công!")
-        await fetchPayments()
+        // Fetch the updated payment with cashier information
+        const updatedPaymentResponse = await fetch(`/api/payments?id=${editingPayment}`)
+        if (updatedPaymentResponse.ok) {
+          const updatedPayment = await updatedPaymentResponse.json()
+          // Update the specific payment in the state
+          setPayments(prev => prev.map(p => p.id === editingPayment ? updatedPayment : p))
+        } else {
+          // Fallback to full refresh
+          await fetchPayments()
+        }
         setEditingPayment(null)
         setEditForm((prev) => ({ ...prev, have_paid: false, payment_method: "" }))
       } else {
@@ -225,7 +241,7 @@ export default function RegistrationManagementPage() {
         className: payment.class.name,
         amount: payment.payment_amount,
         paymentMethod: payment.payment_method,
-        staffName: payment.staff.name,
+        staffName: payment.staff?.name || payment.cashier?.name || 'Không xác định',
         isPaid: payment.have_paid,
         paymentDate: payment.have_paid ? formatDate(payment.datetime) : formatDate(new Date().toISOString())
       }
@@ -255,7 +271,7 @@ export default function RegistrationManagementPage() {
     )
   }
 
-  if (!session || (session.user?.role !== "staff" && session.user?.role !== "manager")) {
+  if (!session || (session.user?.role !== "staff" && session.user?.role !== "manager" && session.user?.role !== "cashier")) {
     return null
   }
 
@@ -436,7 +452,9 @@ export default function RegistrationManagementPage() {
                         </div>
                         {payment.have_paid && (
                           <div className="text-sm text-gray-600 dark:text-gray-400">
-                            Nhân viên: {payment.staff.name}
+                            {payment.staff ? `Nhân viên: ${payment.staff.name}` : 
+                             payment.cashier ? `Thu ngân: ${payment.cashier.name}` : 
+                             'Người xử lý: Không xác định'}
                           </div>
                         )}
                       </div>

@@ -42,7 +42,11 @@ interface Payment {
   staff: {
     id: string
     name: string
-  }
+  } | null
+  cashier: {
+    id: string
+    name: string
+  } | null
 }
 
 interface Student {
@@ -181,7 +185,7 @@ export default function CourseRegistrationPage() {
         className: payment.class.name,
         amount: payment.payment_amount,
         paymentMethod: payment.payment_method,
-        staffName: payment.staff.name,
+        staffName: payment.staff?.name || payment.cashier?.name || 'Không xác định',
         isPaid: payment.have_paid,
         paymentDate: payment.have_paid ? formatDate(payment.datetime) : formatDate(new Date().toISOString())
       }
@@ -360,7 +364,9 @@ export default function CourseRegistrationPage() {
                     {/* Staff Info */}
                     {payment.have_paid && (
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-medium">Nhân viên:</span> {payment.staff.name}
+                        <span className="font-medium">
+                          {payment.staff ? 'Nhân viên:' : payment.cashier ? 'Thu ngân:' : 'Người xử lý:'}
+                        </span> {payment.staff?.name || payment.cashier?.name || 'Không xác định'}
                       </div>
                     )}
 

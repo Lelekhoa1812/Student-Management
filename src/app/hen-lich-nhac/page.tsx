@@ -61,7 +61,7 @@ export default function ReminderPage() {
       return
     }
 
-    if (session.user?.role !== "staff") {
+    if (session.user?.role !== "staff" && session.user?.role !== "cashier") {
       router.push("/")
       return
     }
